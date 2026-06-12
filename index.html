@@ -387,6 +387,46 @@
         line-height: 1.4;
       }
 
+      .dialog-backdrop {
+        position: fixed;
+        inset: 0;
+        display: none;
+        place-items: center;
+        padding: 24px;
+        background: rgba(35, 23, 13, 0.42);
+        z-index: 40;
+      }
+
+      .dialog-backdrop.visible {
+        display: grid;
+      }
+
+      .dialog {
+        width: min(460px, 100%);
+        padding: 22px;
+        border: 1px solid rgba(52, 38, 24, 0.14);
+        background: rgba(255, 251, 245, 0.98);
+        box-shadow: 0 24px 60px rgba(35, 23, 13, 0.24);
+      }
+
+      .dialog h2 {
+        margin: 0 0 10px;
+        font-size: 1.15rem;
+      }
+
+      .dialog p {
+        margin: 0;
+        color: var(--muted);
+        line-height: 1.5;
+      }
+
+      .dialog-actions {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+        margin-top: 18px;
+      }
+
       @media (max-width: 1100px) {
         .shell {
           grid-template-columns: 1fr;
@@ -445,7 +485,7 @@
             </label>
           </div>
           <button id="resizeButton" class="primary">Apply Canvas Size</button>
-          <div class="hint">Changing size resets the drawing surface to white.</div>
+          <div class="hint">Changing size preserves the current pattern and fills any new area with white.</div>
         </section>
 
         <section class="group">
@@ -524,6 +564,10 @@
 
         <section class="group">
           <div class="group-title">Actions</div>
+          <label>
+            Project Name
+            <input id="projectNameInput" type="text" value="halftone-project" placeholder="halftone-project" />
+          </label>
           <div class="button-row">
             <button id="clearButton" class="secondary">Clear</button>
             <button id="downloadFrontButton" class="primary">Download Front</button>
@@ -532,7 +576,12 @@
             <button id="downloadBackButton" class="secondary">Download Back</button>
             <button id="downloadBothButton" class="secondary">Download Both</button>
           </div>
+          <div class="button-row">
+            <button id="saveProjectButton" class="secondary">Save Project</button>
+            <button id="loadProjectButton" class="secondary">Load Project</button>
+          </div>
           <button id="copyButton" class="secondary">Copy Active SVG</button>
+          <input id="loadProjectInput" type="file" accept=".json,application/json" hidden />
         </section>
       </aside>
 
@@ -576,6 +625,20 @@
       </section>
     </main>
 
+    <div id="imageImportDialog" class="dialog-backdrop" hidden>
+      <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="imageImportDialogTitle">
+        <h2 id="imageImportDialogTitle">Replace Reference Image?</h2>
+        <p id="imageImportDialogMessage">
+          The new image has a different size. You can keep the current pattern, delete it, or cancel the import.
+        </p>
+        <div class="dialog-actions">
+          <button id="imageImportKeepButton" class="primary" type="button">Keep Pattern</button>
+          <button id="imageImportDeleteButton" class="secondary" type="button">Delete Pattern</button>
+          <button id="imageImportCancelButton" class="secondary" type="button">Cancel</button>
+        </div>
+      </div>
+    </div>
+
     <script>
       const paintCanvas = document.getElementById("paintCanvas");
       const paintCtx = paintCanvas.getContext("2d", { willReadFrequently: true });
@@ -606,6 +669,7 @@
       const widthInput = document.getElementById("widthInput");
       const heightInput = document.getElementById("heightInput");
       const resizeButton = document.getElementById("resizeButton");
+      const projectNameInput = document.getElementById("projectNameInput");
 
       const frontLayerButton = document.getElementById("frontLayerButton");
       const backLayerButton = document.getElementById("backLayerButton");
@@ -637,7 +701,15 @@
       const downloadFrontButton = document.getElementById("downloadFrontButton");
       const downloadBackButton = document.getElementById("downloadBackButton");
       const downloadBothButton = document.getElementById("downloadBothButton");
+      const saveProjectButton = document.getElementById("saveProjectButton");
+      const loadProjectButton = document.getElementById("loadProjectButton");
+      const loadProjectInput = document.getElementById("loadProjectInput");
       const copyButton = document.getElementById("copyButton");
+      const imageImportDialog = document.getElementById("imageImportDialog");
+      const imageImportDialogMessage = document.getElementById("imageImportDialogMessage");
+      const imageImportKeepButton = document.getElementById("imageImportKeepButton");
+      const imageImportDeleteButton = document.getElementById("imageImportDeleteButton");
+      const imageImportCancelButton = document.getElementById("imageImportCancelButton");
 
       const state = {
         activeLayer: "front",
@@ -649,6 +721,16 @@
         showOverlay: false,
         brushSize: Number(brushSizeInput.value),
         brushHardness: Number(brushHardnessInput.value) / 100,
+        toolSettings: {
+          paint: {
+            size: Number(brushSizeInput.value),
+            hardness: Number(brushHardnessInput.value) / 100,
+          },
+          erase: {
+            size: Number(brushSizeInput.value),
+            hardness: Number(brushHardnessInput.value) / 100,
+          },
+        },
         gridMode: "aligned",
         spacing: Number(spacingInput.value),
         minDot: Number(minDotInput.value),
@@ -667,6 +749,7 @@
         referenceImageWidth: 0,
         referenceImageHeight: 0,
         referenceImageOpacity: Number(imageOpacityInput.value) / 100,
+        projectName: projectNameInput.value.trim() || "halftone-project",
         brushAdjustStartX: 0,
         brushAdjustStartY: 0,
         brushAdjustAnchorX: 0,
@@ -682,6 +765,7 @@
         history: [],
         redoHistory: [],
         maxHistory: 40,
+        resizeDebounceId: 0,
       };
 
       function clampBrushSize(value) {
@@ -698,11 +782,25 @@
 
       function setBrushSize(value) {
         state.brushSize = Math.round(clampBrushSize(value));
+        state.toolSettings[state.mode].size = state.brushSize;
         updateLabels();
       }
 
       function setBrushHardness(value) {
         state.brushHardness = clampBrushHardness(value);
+        state.toolSettings[state.mode].hardness = state.brushHardness;
+        updateLabels();
+      }
+
+      function switchMode(nextMode) {
+        if (nextMode !== "paint" && nextMode !== "erase") {
+          return;
+        }
+        state.mode = nextMode;
+        const nextSettings = state.toolSettings[nextMode];
+        state.brushSize = Math.round(clampBrushSize(nextSettings.size));
+        state.brushHardness = clampBrushHardness(nextSettings.hardness);
+        updateToggleButtons();
         updateLabels();
       }
 
@@ -823,12 +921,23 @@
         state.redoHistory = [];
         state.viewOffsetX = 0;
         state.viewOffsetY = 0;
-        paintCanvas.width = width;
-        paintCanvas.height = height;
         layerCanvases.front.width = width;
         layerCanvases.front.height = height;
         layerCanvases.back.width = width;
         layerCanvases.back.height = height;
+        for (const ctx of Object.values(layerContexts)) {
+          ctx.fillStyle = "#ffffff";
+          ctx.fillRect(0, 0, width, height);
+        }
+        updateFrameDimensions(width, height);
+        redrawOverlay();
+        centerViewport();
+        scheduleRender();
+      }
+
+      function updateFrameDimensions(width, height) {
+        paintCanvas.width = width;
+        paintCanvas.height = height;
         paintCanvas.style.width = `${width}px`;
         paintCanvas.style.height = `${height}px`;
         frontSvgPreview.style.width = `${width}px`;
@@ -839,15 +948,51 @@
         referenceImage.style.height = `${height}px`;
         cursorRing.style.width = `${state.brushSize}px`;
         cursorRing.style.height = `${state.brushSize}px`;
-        for (const ctx of Object.values(layerContexts)) {
-          ctx.fillStyle = "#ffffff";
-          ctx.fillRect(0, 0, width, height);
-        }
-        redrawOverlay();
         canvasStatus.textContent = `${width} × ${height} px`;
         widthInput.value = width;
         heightInput.value = height;
-        updateViewportTransform();
+      }
+
+      function resizeCanvasPreserveContent(width, height) {
+        const frontSnapshot = document.createElement("canvas");
+        frontSnapshot.width = layerCanvases.front.width;
+        frontSnapshot.height = layerCanvases.front.height;
+        frontSnapshot.getContext("2d").drawImage(layerCanvases.front, 0, 0);
+
+        const backSnapshot = document.createElement("canvas");
+        backSnapshot.width = layerCanvases.back.width;
+        backSnapshot.height = layerCanvases.back.height;
+        backSnapshot.getContext("2d").drawImage(layerCanvases.back, 0, 0);
+
+        state.history = [];
+        state.redoHistory = [];
+        state.viewOffsetX = 0;
+        state.viewOffsetY = 0;
+
+        const nextDocWidth = Math.max(width, layerCanvases.front.width);
+        const nextDocHeight = Math.max(height, layerCanvases.front.height);
+
+        if (
+          nextDocWidth !== layerCanvases.front.width ||
+          nextDocHeight !== layerCanvases.front.height
+        ) {
+          layerCanvases.front.width = nextDocWidth;
+          layerCanvases.front.height = nextDocHeight;
+          layerCanvases.back.width = nextDocWidth;
+          layerCanvases.back.height = nextDocHeight;
+
+          for (const ctx of Object.values(layerContexts)) {
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(0, 0, nextDocWidth, nextDocHeight);
+          }
+
+          layerContexts.front.drawImage(frontSnapshot, 0, 0);
+          layerContexts.back.drawImage(backSnapshot, 0, 0);
+        }
+
+        updateFrameDimensions(width, height);
+        redrawOverlay();
+        centerViewport();
         scheduleRender();
       }
 
@@ -880,10 +1025,9 @@
         if (!state.showOverlay) {
           return;
         }
-        const activeCanvas = getActiveLayerCanvas();
         const activeCtx = getActiveLayerContext();
-        const width = activeCanvas.width;
-        const height = activeCanvas.height;
+        const width = paintCanvas.width;
+        const height = paintCanvas.height;
         const sourceData = activeCtx.getImageData(0, 0, width, height);
         const overlayData = paintCtx.createImageData(width, height);
 
@@ -1197,10 +1341,9 @@
       }
 
       function buildLayerSvg(layerName) {
-        const layerCanvas = layerCanvases[layerName];
         const layerCtx = layerContexts[layerName];
-        const width = layerCanvas.width;
-        const height = layerCanvas.height;
+        const width = paintCanvas.width;
+        const height = paintCanvas.height;
         const imageData = layerCtx.getImageData(0, 0, width, height);
         const spacing = state.spacing;
         const minimumGap = 4;
@@ -1271,28 +1414,47 @@
       function applyCanvasSize() {
         const width = Math.max(64, Math.min(2400, Number(widthInput.value) || 640));
         const height = Math.max(64, Math.min(2400, Number(heightInput.value) || 640));
-        resetCanvas(width, height);
+        if (width === paintCanvas.width && height === paintCanvas.height) {
+          widthInput.value = width;
+          heightInput.value = height;
+          return;
+        }
+        resizeCanvasPreserveContent(width, height);
       }
 
-      function fitCanvasToReferenceImage() {
+      function scheduleCanvasSizeApply() {
+        if (state.resizeDebounceId) {
+          window.clearTimeout(state.resizeDebounceId);
+        }
+        state.resizeDebounceId = window.setTimeout(() => {
+          state.resizeDebounceId = 0;
+          applyCanvasSize();
+        }, 250);
+      }
+
+      async function fitCanvasToReferenceImage() {
         if (!state.referenceImageWidth || !state.referenceImageHeight) {
           return;
         }
-        const hasPattern = layerHasPattern("front") || layerHasPattern("back");
-        if (
-          hasPattern &&
-          state.referenceImageWidth !== paintCanvas.width ||
-          hasPattern &&
-          state.referenceImageHeight !== paintCanvas.height
-        ) {
-          const shouldResize = window.confirm(
-            "The image doesn't have the same size as the canvas and the pattern is going to be deleted.\n\nDo you want to process or cancel the image import?"
-          );
-          if (!shouldResize) {
-            return;
-          }
+        const sameSize =
+          state.referenceImageWidth === paintCanvas.width &&
+          state.referenceImageHeight === paintCanvas.height;
+        if (sameSize) {
+          return;
         }
-        resetCanvas(state.referenceImageWidth, state.referenceImageHeight);
+        if (!hasAnyPattern()) {
+          resizeCanvasPreserveContent(state.referenceImageWidth, state.referenceImageHeight);
+          return;
+        }
+        const choice = await askImageImportAction(state.referenceImageWidth, state.referenceImageHeight);
+        if (choice === "cancel") {
+          return;
+        }
+        if (choice === "delete") {
+          resetCanvas(state.referenceImageWidth, state.referenceImageHeight);
+          return;
+        }
+        resizeCanvasPreserveContent(state.referenceImageWidth, state.referenceImageHeight);
       }
 
       function layerHasPattern(layerName) {
@@ -1307,32 +1469,94 @@
         return false;
       }
 
-      function loadReferenceFile(file) {
+      function hasAnyPattern() {
+        return layerHasPattern("front") || layerHasPattern("back");
+      }
+
+      function closeImageImportDialog() {
+        imageImportDialog.hidden = true;
+        imageImportDialog.classList.remove("visible");
+      }
+
+      function askImageImportAction(width, height) {
+        return new Promise((resolve) => {
+          imageImportDialogMessage.textContent =
+            `The new image is ${width} × ${height} px and does not match the current canvas size of ` +
+            `${paintCanvas.width} × ${paintCanvas.height} px. You can keep the current pattern, ` +
+            `delete it, or cancel the import.`;
+
+          imageImportDialog.hidden = false;
+          imageImportDialog.classList.add("visible");
+
+          const cleanup = () => {
+            closeImageImportDialog();
+            imageImportKeepButton.removeEventListener("click", handleKeep);
+            imageImportDeleteButton.removeEventListener("click", handleDelete);
+            imageImportCancelButton.removeEventListener("click", handleCancel);
+            imageImportDialog.removeEventListener("click", handleBackdrop);
+            window.removeEventListener("keydown", handleKeydown);
+          };
+
+          const finish = (choice) => {
+            cleanup();
+            resolve(choice);
+          };
+
+          const handleKeep = () => finish("keep");
+          const handleDelete = () => finish("delete");
+          const handleCancel = () => finish("cancel");
+          const handleBackdrop = (event) => {
+            if (event.target === imageImportDialog) {
+              finish("cancel");
+            }
+          };
+          const handleKeydown = (event) => {
+            if (event.key === "Escape") {
+              event.preventDefault();
+              finish("cancel");
+            }
+          };
+
+          imageImportKeepButton.addEventListener("click", handleKeep);
+          imageImportDeleteButton.addEventListener("click", handleDelete);
+          imageImportCancelButton.addEventListener("click", handleCancel);
+          imageImportDialog.addEventListener("click", handleBackdrop);
+          window.addEventListener("keydown", handleKeydown);
+        });
+      }
+
+      async function loadReferenceFile(file) {
         if (!file) {
           return;
         }
 
         const blobUrl = URL.createObjectURL(file);
         const image = new Image();
-        image.onload = () => {
-          const hasPattern = layerHasPattern("front") || layerHasPattern("back");
+        image.onload = async () => {
+          const hasPattern = hasAnyPattern();
           const sameSize =
             image.naturalWidth === paintCanvas.width &&
             image.naturalHeight === paintCanvas.height;
 
           if (hasPattern && !sameSize) {
-            const shouldProcess = window.confirm(
-              "The image doesn't have the same size as the canvas and the pattern is going to be deleted.\n\nDo you want to process or cancel the image import?"
-            );
-            if (!shouldProcess) {
+            const choice = await askImageImportAction(image.naturalWidth, image.naturalHeight);
+            if (choice === "cancel") {
               URL.revokeObjectURL(blobUrl);
+              referenceImageInput.value = "";
               return;
             }
+            setReferenceImage(blobUrl, image.naturalWidth, image.naturalHeight);
+            if (choice === "delete") {
+              resetCanvas(image.naturalWidth, image.naturalHeight);
+            } else {
+              resizeCanvasPreserveContent(image.naturalWidth, image.naturalHeight);
+            }
+            return;
           }
 
           setReferenceImage(blobUrl, image.naturalWidth, image.naturalHeight);
           if (!sameSize) {
-            resetCanvas(image.naturalWidth, image.naturalHeight);
+            resizeCanvasPreserveContent(image.naturalWidth, image.naturalHeight);
           }
         };
         image.onerror = () => {
@@ -1351,6 +1575,198 @@
         URL.revokeObjectURL(url);
       }
 
+      function downloadTextFile(contents, filename, type) {
+        const blob = new Blob([contents], { type });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = filename;
+        link.click();
+        URL.revokeObjectURL(url);
+      }
+
+      function sanitizeProjectName(value) {
+        const cleaned = value
+          .trim()
+          .replace(/[<>:"/\\|?*\u0000-\u001f]+/g, "-")
+          .replace(/\s+/g, "-")
+          .replace(/-+/g, "-")
+          .replace(/^-|-$/g, "");
+        return cleaned || "halftone-project";
+      }
+
+      function getProjectSnapshot() {
+        return {
+          version: 1,
+          savedAt: new Date().toISOString(),
+          projectName: sanitizeProjectName(state.projectName),
+          frame: {
+            width: paintCanvas.width,
+            height: paintCanvas.height,
+          },
+          document: {
+            width: layerCanvases.front.width,
+            height: layerCanvases.front.height,
+          },
+          layers: {
+            front: layerCanvases.front.toDataURL("image/png"),
+            back: layerCanvases.back.toDataURL("image/png"),
+          },
+          settings: {
+            activeLayer: state.activeLayer,
+            mode: state.mode,
+            showOverlay: state.showOverlay,
+            gridMode: state.gridMode,
+            spacing: state.spacing,
+            minDot: state.minDot,
+            dotScale: state.dotScale,
+            strokeWidth: state.strokeWidth,
+            strokeTaper: state.strokeTaper,
+            dotColor: state.dotColor,
+            zoom: state.zoom,
+            referenceImageOpacity: state.referenceImageOpacity,
+            toolSettings: {
+              paint: { ...state.toolSettings.paint },
+              erase: { ...state.toolSettings.erase },
+            },
+          },
+        };
+      }
+
+      function saveProjectFile() {
+        state.projectName = sanitizeProjectName(projectNameInput.value);
+        projectNameInput.value = state.projectName;
+        const snapshot = getProjectSnapshot();
+        const fileName = `${state.projectName}.json`;
+        downloadTextFile(JSON.stringify(snapshot, null, 2), fileName, "application/json;charset=utf-8");
+      }
+
+      function loadImageToCanvas(canvas, dataUrl) {
+        return new Promise((resolve, reject) => {
+          const image = new Image();
+          image.onload = () => {
+            const ctx = canvas.getContext("2d", { willReadFrequently: true });
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(image, 0, 0);
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const { data } = imageData;
+            for (let index = 0; index < data.length; index += 4) {
+              const channel = Math.round((data[index] + data[index + 1] + data[index + 2]) / 3);
+              data[index] = channel;
+              data[index + 1] = channel;
+              data[index + 2] = channel;
+              data[index + 3] = 255;
+            }
+            ctx.putImageData(imageData, 0, 0);
+            resolve();
+          };
+          image.onerror = () => reject(new Error("Could not read layer image."));
+          image.src = dataUrl;
+        });
+      }
+
+      async function applyProjectSnapshot(project) {
+        if (!project || project.version !== 1 || !project.frame || !project.document || !project.layers) {
+          throw new Error("Unsupported project file.");
+        }
+
+        const readNumber = (value, fallback) => {
+          const parsed = Number(value);
+          return Number.isFinite(parsed) ? parsed : fallback;
+        };
+
+        const frameWidth = Math.max(64, Math.min(2400, readNumber(project.frame.width, 640)));
+        const frameHeight = Math.max(64, Math.min(2400, readNumber(project.frame.height, 640)));
+        const documentWidth = Math.max(frameWidth, readNumber(project.document.width, frameWidth));
+        const documentHeight = Math.max(frameHeight, readNumber(project.document.height, frameHeight));
+
+        layerCanvases.front.width = documentWidth;
+        layerCanvases.front.height = documentHeight;
+        layerCanvases.back.width = documentWidth;
+        layerCanvases.back.height = documentHeight;
+
+        for (const ctx of Object.values(layerContexts)) {
+          ctx.fillStyle = "#ffffff";
+          ctx.fillRect(0, 0, documentWidth, documentHeight);
+        }
+
+        await Promise.all([
+          loadImageToCanvas(layerCanvases.front, project.layers.front),
+          loadImageToCanvas(layerCanvases.back, project.layers.back),
+        ]);
+
+        clearReferenceImage();
+        updateFrameDimensions(frameWidth, frameHeight);
+
+        const settings = project.settings || {};
+        state.projectName = sanitizeProjectName(project.projectName || state.projectName);
+        state.showOverlay = Boolean(settings.showOverlay);
+        state.gridMode = settings.gridMode === "staggered" ? "staggered" : "aligned";
+        state.spacing = Math.max(4, Math.min(40, readNumber(settings.spacing, state.spacing)));
+        state.minDot = Math.max(0, Math.min(4, readNumber(settings.minDot, state.minDot)));
+        state.dotScale = Math.max(0.2, Math.min(1.6, readNumber(settings.dotScale, state.dotScale)));
+        state.strokeWidth = Math.max(0.2, Math.min(8, readNumber(settings.strokeWidth, state.strokeWidth)));
+        state.strokeTaper = Math.max(0, Math.min(1, readNumber(settings.strokeTaper, state.strokeTaper)));
+        state.dotColor = typeof settings.dotColor === "string" ? settings.dotColor : state.dotColor;
+        state.zoom = clampZoom(readNumber(settings.zoom, 1));
+        state.referenceImageOpacity = Math.max(
+          0,
+          Math.min(1, readNumber(settings.referenceImageOpacity, state.referenceImageOpacity))
+        );
+
+        const projectToolSettings = settings.toolSettings || {};
+        state.toolSettings.paint = {
+          size: clampBrushSize(readNumber(projectToolSettings.paint?.size, state.toolSettings.paint.size)),
+          hardness: clampBrushHardness(
+            readNumber(projectToolSettings.paint?.hardness, state.toolSettings.paint.hardness)
+          ),
+        };
+        state.toolSettings.erase = {
+          size: clampBrushSize(readNumber(projectToolSettings.erase?.size, state.toolSettings.erase.size)),
+          hardness: clampBrushHardness(
+            readNumber(projectToolSettings.erase?.hardness, state.toolSettings.erase.hardness)
+          ),
+        };
+
+        state.activeLayer = settings.activeLayer === "back" ? "back" : "front";
+        state.history = [];
+        state.redoHistory = [];
+        state.viewOffsetX = 0;
+        state.viewOffsetY = 0;
+
+        spacingInput.value = String(Math.round(state.spacing));
+        minDotInput.value = String(state.minDot);
+        dotScaleInput.value = String(Math.round(state.dotScale * 100));
+        strokeWidthInput.value = String(state.strokeWidth);
+        strokeTaperInput.value = String(Math.round(state.strokeTaper * 100));
+        dotColorInput.value = state.dotColor;
+        zoomInput.value = String(Math.round(state.zoom * 100));
+        imageOpacityInput.value = String(Math.round(state.referenceImageOpacity * 100));
+        projectNameInput.value = state.projectName;
+
+        switchMode(settings.mode === "erase" ? "erase" : "paint");
+        updateToggleButtons();
+        updateLabels();
+        redrawOverlay();
+        centerViewport();
+        scheduleRender();
+      }
+
+      async function loadProjectFile(file) {
+        if (!file) {
+          return;
+        }
+
+        try {
+          const project = JSON.parse(await file.text());
+          await applyProjectSnapshot(project);
+        } catch (error) {
+          window.alert("Could not load this project file.");
+        } finally {
+          loadProjectInput.value = "";
+        }
+      }
+
       frontLayerButton.addEventListener("click", () => {
         state.activeLayer = "front";
         updateToggleButtons();
@@ -1366,13 +1782,11 @@
       });
 
       paintModeButton.addEventListener("click", () => {
-        state.mode = "paint";
-        updateToggleButtons();
+        switchMode("paint");
       });
 
       eraseModeButton.addEventListener("click", () => {
-        state.mode = "erase";
-        updateToggleButtons();
+        switchMode("erase");
       });
 
       overlayToggleButton.addEventListener("click", () => {
@@ -1452,13 +1866,47 @@
       });
       fitImageButton.addEventListener("click", fitCanvasToReferenceImage);
       clearImageButton.addEventListener("click", clearReferenceImage);
+      widthInput.addEventListener("input", scheduleCanvasSizeApply);
+      heightInput.addEventListener("input", scheduleCanvasSizeApply);
+      widthInput.addEventListener("keydown", (event) => {
+        if (event.key === "ArrowUp" || event.key === "ArrowDown") {
+          const stepSize = event.shiftKey ? 10 : 1;
+          const currentValue = Number(widthInput.value) || 640;
+          const delta = event.key === "ArrowUp" ? stepSize : -stepSize;
+          const nextValue = Math.max(64, Math.min(2400, currentValue + delta));
+          window.requestAnimationFrame(() => {
+            widthInput.value = String(nextValue);
+            scheduleCanvasSizeApply();
+          });
+        }
+      });
       widthInput.addEventListener("keydown", (event) => {
         if (event.key === "Enter") {
+          if (state.resizeDebounceId) {
+            window.clearTimeout(state.resizeDebounceId);
+            state.resizeDebounceId = 0;
+          }
           applyCanvasSize();
         }
       });
       heightInput.addEventListener("keydown", (event) => {
+        if (event.key === "ArrowUp" || event.key === "ArrowDown") {
+          const stepSize = event.shiftKey ? 10 : 1;
+          const currentValue = Number(heightInput.value) || 640;
+          const delta = event.key === "ArrowUp" ? stepSize : -stepSize;
+          const nextValue = Math.max(64, Math.min(2400, currentValue + delta));
+          window.requestAnimationFrame(() => {
+            heightInput.value = String(nextValue);
+            scheduleCanvasSizeApply();
+          });
+        }
+      });
+      heightInput.addEventListener("keydown", (event) => {
         if (event.key === "Enter") {
+          if (state.resizeDebounceId) {
+            window.clearTimeout(state.resizeDebounceId);
+            state.resizeDebounceId = 0;
+          }
           applyCanvasSize();
         }
       });
@@ -1483,6 +1931,15 @@
       downloadBothButton.addEventListener("click", () => {
         downloadSvg(state.latestSvgs.front, "front");
         window.setTimeout(() => downloadSvg(state.latestSvgs.back, "back"), 50);
+      });
+
+      saveProjectButton.addEventListener("click", saveProjectFile);
+      loadProjectButton.addEventListener("click", () => {
+        loadProjectInput.click();
+      });
+      loadProjectInput.addEventListener("change", (event) => {
+        const [file] = event.target.files || [];
+        loadProjectFile(file);
       });
 
       copyButton.addEventListener("click", async () => {
@@ -1574,8 +2031,7 @@
         }
         if (event.key.toLowerCase() === "x") {
           event.preventDefault();
-          state.mode = state.mode === "paint" ? "erase" : "paint";
-          updateToggleButtons();
+          switchMode(state.mode === "paint" ? "erase" : "paint");
           return;
         }
         if (event.key === "]") {
