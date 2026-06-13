@@ -2484,6 +2484,9 @@
         history: [],
         redoHistory: [],
         maxHistory: 40,
+        pointerInsideCanvas: false,
+        pointerClientX: 0,
+        pointerClientY: 0,
         resizeDebounceId: 0,
       };
 
@@ -2545,6 +2548,12 @@
         updateToggleButtons();
         updatePanCursor();
         updateLabels();
+        if (state.pointerInsideCanvas) {
+          showCursorRing({
+            clientX: state.pointerClientX,
+            clientY: state.pointerClientY,
+          });
+        }
       }
 
       function setLayerOpacity(layerName, value) {
@@ -3183,6 +3192,7 @@
       }
 
       function pointerMove(event) {
+        state.pointerInsideCanvas = true;
         if (!state.panning) {
           updateCursorRing(event);
         }
@@ -3265,6 +3275,8 @@
       }
 
       function updateCursorRing(event) {
+        state.pointerClientX = event.clientX;
+        state.pointerClientY = event.clientY;
         if (state.adjustingBrush) {
           cursorRing.style.left = `${state.brushAdjustAnchorX}px`;
           cursorRing.style.top = `${state.brushAdjustAnchorY}px`;
@@ -3283,6 +3295,7 @@
         if (state.panKeyDown || state.panning || state.mode === "move" || state.mode === "zoom" || state.movingPattern) {
           return;
         }
+        state.pointerInsideCanvas = true;
         updateCursorRing(event);
         cursorRing.style.opacity = "1";
         if (state.adjustingBrush) {
@@ -3296,6 +3309,16 @@
         }
         cursorRing.style.opacity = "0";
         cursorReadout.classList.remove("visible");
+      }
+
+      function handleCanvasPointerEnter(event) {
+        state.pointerInsideCanvas = true;
+        showCursorRing(event);
+      }
+
+      function handleCanvasPointerLeave() {
+        state.pointerInsideCanvas = false;
+        hideCursorRing();
       }
 
       function sampleDarkness(imageData, width, x, y, radius) {
@@ -4148,8 +4171,8 @@
       paintCanvas.addEventListener("pointerup", pointerUp);
       paintCanvas.addEventListener("pointerleave", pointerUp);
       paintCanvas.addEventListener("pointercancel", pointerUp);
-      paintCanvas.addEventListener("pointerenter", showCursorRing);
-      paintCanvas.addEventListener("pointerleave", hideCursorRing);
+      paintCanvas.addEventListener("pointerenter", handleCanvasPointerEnter);
+      paintCanvas.addEventListener("pointerleave", handleCanvasPointerLeave);
       paintCanvas.addEventListener("contextmenu", (event) => {
         if (event.altKey) {
           event.preventDefault();
