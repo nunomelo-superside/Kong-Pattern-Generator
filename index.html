@@ -3,18 +3,34 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Funnel+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
     <title>Halftone Pattern Generator</title>
     <style>
       :root {
-        --bg: #f4efe7;
-        --panel: rgba(255, 251, 245, 0.9);
-        --panel-border: rgba(52, 38, 24, 0.16);
-        --text: #23170d;
-        --muted: #7a6859;
-        --accent: #c85c35;
-        --accent-strong: #9d3f1d;
-        --canvas-bg: #ffffff;
-        --shadow: 0 18px 60px rgba(72, 48, 25, 0.12);
+        --bg: #0f2818;
+        --bg-deep: #001408;
+        --panel: #000000;
+        --panel-border: #313919;
+        --surface: rgba(255, 255, 255, 0.1);
+        --surface-strong: rgba(86, 167, 120, 0.15);
+        --text: #ffffff;
+        --text-muted: rgba(231, 237, 229, 0.8);
+        --text-dim: rgba(255, 255, 255, 0.5);
+        --accent: #ccff00;
+        --accent-text: #000000;
+        --danger: #c52d2d;
+        --canvas-bg: #001408;
+        --canvas-shadow:
+          0 246px 69px rgba(0, 0, 0, 0),
+          0 157px 63px rgba(0, 0, 0, 0.02),
+          0 88px 53px rgba(0, 0, 0, 0.08),
+          0 39px 39px rgba(0, 0, 0, 0.13),
+          0 10px 22px rgba(0, 0, 0, 0.15);
       }
 
       * {
@@ -23,217 +39,758 @@
 
       body {
         margin: 0;
-        font-family: "Avenir Next", "Segoe UI", sans-serif;
+        min-height: 100vh;
+        overflow: hidden;
+        font-family: "Funnel Sans", "Avenir Next", "Segoe UI", sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        text-rendering: optimizeLegibility;
         color: var(--text);
         background:
-          radial-gradient(circle at top left, rgba(200, 92, 53, 0.2), transparent 32%),
-          radial-gradient(circle at bottom right, rgba(68, 112, 97, 0.18), transparent 28%),
-          linear-gradient(180deg, #f7f1e8 0%, #efe5d9 100%);
-        min-height: 100vh;
+          linear-gradient(90deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.08) 100%),
+          linear-gradient(90deg, var(--bg) 0%, var(--bg) 100%);
       }
 
-      .shell {
-        width: calc(100% - 24px);
-        height: calc(100vh - 24px);
-        margin: 12px auto;
-        display: grid;
-        grid-template-columns: 300px minmax(0, 1fr);
-        gap: 8px;
-      }
-
-      .panel {
-        background: var(--panel);
-        border: 1px solid rgba(52, 38, 24, 0.08);
-        border-radius: 0;
-        box-shadow: none;
-        backdrop-filter: blur(10px);
-      }
-
-      .controls {
-        padding: 20px;
-        display: flex;
-        flex-direction: column;
-        gap: 18px;
-        height: 100%;
-        overflow-y: auto;
-      }
-
-      h1 {
-        margin: 0;
-        font-size: 1.7rem;
-        line-height: 1.05;
-      }
-
-      .lede {
-        margin: 0;
-        color: var(--muted);
-        line-height: 1.45;
-      }
-
-      .group {
-        display: grid;
-        gap: 10px;
-        padding-top: 14px;
-        border-top: 1px solid rgba(52, 38, 24, 0.1);
-      }
-
-      .group-title {
-        font-size: 0.82rem;
-        font-weight: 700;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        color: var(--muted);
-      }
-
-      .row {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 10px;
-      }
-
-      label {
-        display: grid;
-        gap: 6px;
-        font-size: 0.92rem;
-      }
-
-      .range-label {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 12px;
-      }
-
-      input[type="number"],
-      input[type="range"],
-      input[type="color"],
-      input[type="file"],
       button,
+      input,
       textarea {
-        width: 100%;
-      }
-
-      input[type="number"],
-      input[type="color"],
-      input[type="file"],
-      textarea {
-        border: 1px solid rgba(52, 38, 24, 0.16);
-        border-radius: 14px;
-        padding: 12px 14px;
-        background: rgba(255, 255, 255, 0.84);
-        color: var(--text);
         font: inherit;
-      }
-
-      input[type="range"] {
-        accent-color: var(--accent);
-      }
-
-      textarea {
-        resize: vertical;
-        min-height: 180px;
-        font-family: "SFMono-Regular", "Menlo", monospace;
-        font-size: 0.78rem;
-        line-height: 1.45;
       }
 
       button {
         border: 0;
-        border-radius: 999px;
-        padding: 12px 16px;
-        font: inherit;
-        font-weight: 700;
+        background: none;
+        color: inherit;
         cursor: pointer;
-        transition: transform 120ms ease, background 120ms ease, opacity 120ms ease;
       }
 
-      button:hover {
-        transform: translateY(-1px);
+      .shell {
+        display: grid;
+        grid-template-columns: 300px minmax(0, 1fr);
+        width: 100vw;
+        height: 100vh;
       }
 
-      .primary {
-        background: var(--accent);
-        color: #fff8f1;
+      .sidebar {
+        width: 300px;
+        min-width: 300px;
+        max-width: 300px;
+        background: var(--panel);
+        border-right: 1px solid var(--panel-border);
+        overflow-y: auto;
+        overflow-x: hidden;
       }
 
-      .primary:hover {
-        background: var(--accent-strong);
+      .sidebar-header {
+        padding: 24px;
+        border-bottom: 1px solid var(--panel-border);
       }
 
-      .secondary {
-        background: rgba(52, 38, 24, 0.08);
+      .brand-row {
+        display: flex;
+        align-items: flex-end;
+        gap: 8px;
+      }
+
+      .brand-logo {
+        display: inline-flex;
+        align-items: center;
+        color: var(--accent);
+        line-height: 1;
+      }
+
+      .brand-mark {
+        width: 95px;
+        height: 30px;
+        display: block;
+      }
+
+      .brand-version {
+        margin-left: auto;
+        color: #bac1b8;
+        font-size: 12px;
+        font-weight: 500;
+        line-height: 20px;
+        text-align: right;
+      }
+
+      .sidebar-section {
+        padding: 24px 18px;
+        border-bottom: 1px solid var(--panel-border);
+        display: grid;
+        gap: 24px;
+      }
+
+      .sidebar-section.actions-section {
+        min-height: 0;
+        flex: 1 0 auto;
+        align-content: end;
+      }
+
+      .section-title {
+        padding: 0 6px;
+        color: var(--text-muted);
+        font-size: 14px;
+        font-weight: 500;
+        letter-spacing: 1.4px;
+        line-height: 18px;
+        text-transform: uppercase;
+      }
+
+      strong {
+        font-weight: 500;
+      }
+
+      .stack {
+        display: grid;
+        gap: 16px;
+      }
+
+      .canvas-size-row {
+        display: grid;
+        grid-template-columns: minmax(0, auto) minmax(0, 1fr) minmax(0, 1fr);
+        align-items: center;
+        gap: 16px;
+        width: 100%;
+      }
+
+      .canvas-size-row > * {
+        min-width: 0;
+      }
+
+      .field-label {
+        padding: 0 6px;
+        color: var(--text);
+        font-size: 15px;
+        line-height: 30px;
+        white-space: nowrap;
+        max-width: 100%;
+      }
+
+      .project-row,
+      .layer-subrow,
+      .field-pill,
+      .compact-control,
+      .floating-toolbar,
+      .tool-cluster,
+      .tool-segment,
+      .style-button,
+      .layer-row {
+        border-radius: 4px;
+      }
+
+      .project-row,
+      .field-pill,
+      .layer-subrow,
+      .style-button {
+        background: var(--surface-strong);
+      }
+
+      .project-row {
+        height: 40px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 8px;
+      }
+
+      .project-name-input {
+        flex: 1 1 auto;
+        min-width: 0;
+        border: 0;
+        outline: none;
+        background: transparent;
+        color: var(--text);
+        font-size: 15px;
+        line-height: 30px;
+      }
+
+      .project-name-input::placeholder {
+        color: var(--text);
+        opacity: 0.5;
+      }
+
+      .icon-button,
+      .icon-button-sm {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        color: inherit;
+      }
+
+      .icon-button {
+        width: 24px;
+        height: 24px;
+      }
+
+      .icon-button-sm {
+        width: 16px;
+        height: 16px;
+      }
+
+      .field-pill {
+        min-width: 0;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        height: 32px;
+        padding: 12px 8px;
+        overflow: hidden;
+      }
+
+      .field-code {
+        opacity: 0.5;
+        color: var(--text);
+        font-size: 15px;
+        line-height: 30px;
+      }
+
+      .field-number {
+        flex: 1 1 auto;
+        min-width: 0;
+        border: 0;
+        outline: none;
+        background: transparent;
+        color: var(--text);
+        font-size: 15px;
+        line-height: 30px;
+      }
+
+      .layer-list {
+        display: grid;
+        gap: 4px;
+      }
+
+      .layer-card {
+        display: grid;
+        gap: 4px;
+      }
+
+      .layer-card.is-hidden-in-layers {
+        display: none;
+      }
+
+      .layer-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        width: 100%;
+        min-height: 40px;
+        padding: 6px;
+        border-radius: 2px;
+        text-align: left;
         color: var(--text);
       }
 
-      .toggle-row,
-      .button-row {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 10px;
+      .layer-row.active {
+        background: var(--accent);
+        color: var(--accent-text);
       }
 
-      .toggle.active {
-        background: var(--text);
-        color: #fff8f1;
+      .layer-state-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 16px;
+        height: 16px;
+        flex: 0 0 16px;
+      }
+
+      .layer-state-icon svg {
+        width: 16px;
+        height: 16px;
+      }
+
+      .layer-row:not(.active) .layer-state-icon {
+        visibility: hidden;
+      }
+
+      .layer-name {
+        flex: 1 1 auto;
+        min-width: 0;
+        font-size: 15px;
+        line-height: 30px;
+      }
+
+      .layer-row.is-hidden-layer .layer-name {
+        opacity: 0.5;
+      }
+
+      .layer-row.is-hidden-layer:not(.active) .layer-state-icon {
+        opacity: 0.5;
+      }
+
+      .layer-visibility-button {
+        margin-left: auto;
+      }
+
+      .layer-expand-button {
+        display: none !important;
+      }
+
+      .layer-children {
+        display: none !important;
+      }
+
+      .layer-children.open {
+        display: none !important;
+      }
+
+      .layer-subrow {
+        min-height: 32px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px;
+        margin-left: 34px;
+        width: calc(100% - 34px);
+        min-width: 0;
+      }
+
+      .layer-subrow.is-placeholder .subrow-text {
+        opacity: 0.5;
+      }
+
+      .subrow-text {
+        flex: 1 1 auto;
+        min-width: 0;
+        font-size: 14px;
+        line-height: 30px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .compact-control {
+        background: var(--surface);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        width: calc(100% - 34px);
+        min-width: 0;
+        padding: 8px;
+        margin-left: 34px;
+        overflow: hidden;
+      }
+
+      .compact-control .range-value {
+        min-width: 36px;
+        font-size: 14px;
+        line-height: 30px;
+      }
+
+      .image-stack {
+        display: grid;
+        gap: 8px;
+        width: 100%;
+      }
+
+      .image-file-row {
+        min-height: 40px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        width: 100%;
+        padding: 8px;
+        border-radius: 4px;
+        background: #0d1912;
+      }
+
+      .image-file-main {
+        flex: 1 1 auto;
+        min-width: 0;
+        display: flex;
+        align-items: center;
+        padding: 0;
+        text-align: left;
+        color: inherit;
+      }
+
+      .image-file-label {
+        flex: 1 1 auto;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-size: 14px;
+        line-height: 30px;
+      }
+
+      .image-file-row.is-empty .image-file-label {
+        opacity: 0.5;
+      }
+
+      .image-action-button {
+        flex: 0 0 auto;
+      }
+
+      .accent-icon-button {
+        color: var(--accent);
+      }
+
+      .image-action-button.is-danger {
+        color: var(--danger);
+      }
+
+      .image-opacity-row {
+        min-height: 31px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        width: 100%;
+        padding: 8px;
+        border-radius: 4px;
+      }
+
+      .image-opacity-row.is-disabled {
+        opacity: 0.5;
+      }
+
+      .image-opacity-readout {
+        width: 60px;
+        min-width: 60px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+
+      .image-opacity-readout .range-value {
+        width: 35px;
+        min-width: 35px;
+        text-align: right;
+        font-size: 14px;
+        line-height: 30px;
+      }
+
+      .image-opacity-row .range-track {
+        flex: 1 1 auto;
+      }
+
+      .image-opacity-row button[disabled],
+      .image-opacity-row input[disabled] {
+        cursor: default;
+      }
+
+      .range-track {
+        position: relative;
+        flex: 1 1 auto;
+        min-width: 0;
+        height: 10px;
+      }
+
+      .range-track::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 50%;
+        width: 100%;
+        height: 2px;
+        transform: translateY(-50%);
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 4px;
+      }
+
+      .range-track::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 50%;
+        width: var(--range-fill, 0%);
+        height: 2px;
+        transform: translateY(-50%);
+        background: rgba(255, 255, 255, 1);
+        border-radius: 4px;
+      }
+
+      .range-track input[type="range"] {
+        position: absolute;
+        left: -7px;
+        top: 50%;
+        width: calc(100% + 14px);
+        height: 24px;
+        margin: 0;
+        background: transparent;
+        border: 0;
+        outline: none;
+        box-shadow: none;
+        accent-color: transparent;
+        transform: translateY(-50%);
+        -webkit-appearance: none;
+        appearance: none;
+      }
+
+      input[type="range"]::-webkit-slider-runnable-track {
+        -webkit-appearance: none;
+        height: 10px;
+        background: transparent;
+        border: 0;
+        box-shadow: none;
+      }
+
+      input[type="range"]::-moz-range-track {
+        height: 10px;
+        background: transparent;
+        border: 0;
+        box-shadow: none;
+      }
+
+      input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 24px;
+        height: 24px;
+        margin-top: -7px;
+        border: 7px solid transparent;
+        box-sizing: border-box;
+        border-radius: 50%;
+        background: #ffffff;
+        background-clip: padding-box;
+        cursor: pointer;
+      }
+
+      input[type="range"]::-moz-range-thumb {
+        width: 24px;
+        height: 24px;
+        border: 7px solid transparent;
+        box-sizing: border-box;
+        border-radius: 50%;
+        background: #ffffff;
+        background-clip: padding-box;
+        cursor: pointer;
+      }
+
+      .style-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+
+      .style-button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 40px;
+        min-height: 40px;
+        padding: 8px 12px;
+        background: #2d2e2c;
+        border-radius: 999px;
+        color: var(--text);
+      }
+
+      .style-button.active {
+        background: var(--accent);
+        color: var(--accent-text);
+      }
+
+      .style-button .sidebar-pattern-icon {
+        width: auto;
+        height: 24px;
+      }
+
+      .style-button .sidebar-pattern-icon svg {
+        width: auto;
+        height: 24px;
+        stroke: currentColor;
+        stroke-width: 1;
+      }
+
+      [data-tooltip] {
+        position: relative;
+      }
+
+      [data-tooltip]::after {
+        content: attr(data-tooltip);
+        position: absolute;
+        left: 50%;
+        bottom: calc(100% + 10px);
+        transform: translateX(-50%) translateY(4px);
+        padding: 6px 8px;
+        border-radius: 6px;
+        background: rgba(0, 0, 0, 0.88);
+        color: #ffffff;
+        font-size: 12px;
+        line-height: 1.2;
+        white-space: nowrap;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 120ms ease, transform 120ms ease;
+        transition-delay: 0s;
+        z-index: 20;
+      }
+
+      [data-tooltip]::before {
+        content: "";
+        position: absolute;
+        left: 50%;
+        bottom: calc(100% + 6px);
+        width: 8px;
+        height: 8px;
+        background: rgba(0, 0, 0, 0.88);
+        transform: translateX(-50%) rotate(45deg) translateY(0);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 120ms ease, transform 120ms ease;
+        transition-delay: 0s;
+        z-index: 19;
+      }
+
+      .sidebar [data-tooltip]::after {
+        background: rgba(255, 255, 255, 0.96);
+        color: #0d1912;
+      }
+
+      .sidebar [data-tooltip]::before {
+        background: rgba(255, 255, 255, 0.96);
+      }
+
+      [data-tooltip][data-tooltip-align="left"]::after {
+        left: 0;
+        transform: translateX(0) translateY(4px);
+      }
+
+      [data-tooltip][data-tooltip-align="left"]::before {
+        left: 12px;
+        transform: translateX(0) rotate(45deg) translateY(0);
+      }
+
+      [data-tooltip][data-tooltip-align="right"]::after {
+        left: auto;
+        right: 0;
+        transform: translateX(0) translateY(4px);
+      }
+
+      [data-tooltip][data-tooltip-align="right"]::before {
+        left: auto;
+        right: 12px;
+        transform: translateX(0) rotate(45deg) translateY(0);
+      }
+
+      [data-tooltip]:hover::after,
+      [data-tooltip]:hover::before,
+      [data-tooltip]:focus-visible::after,
+      [data-tooltip]:focus-visible::before {
+        opacity: 1;
+        transition-delay: 1s;
+      }
+
+      [data-tooltip]:hover::after,
+      [data-tooltip]:focus-visible::after {
+        transform: translateX(-50%) translateY(0);
+      }
+
+      [data-tooltip]:hover::before,
+      [data-tooltip]:focus-visible::before {
+        transform: translateX(-50%) rotate(45deg) translateY(0);
+      }
+
+      [data-tooltip][data-tooltip-align="left"]:hover::after,
+      [data-tooltip][data-tooltip-align="left"]:focus-visible::after,
+      [data-tooltip][data-tooltip-align="right"]:hover::after,
+      [data-tooltip][data-tooltip-align="right"]:focus-visible::after {
+        transform: translateX(0) translateY(0);
+      }
+
+      [data-tooltip][data-tooltip-align="left"]:hover::before,
+      [data-tooltip][data-tooltip-align="left"]:focus-visible::before,
+      [data-tooltip][data-tooltip-align="right"]:hover::before,
+      [data-tooltip][data-tooltip-align="right"]:focus-visible::before {
+        transform: translateX(0) rotate(45deg) translateY(0);
+      }
+
+      .actions-list {
+        display: grid;
+        gap: 8px;
+      }
+
+      .action-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 0 6px;
+      }
+
+      .action-label {
+        flex: 1 1 auto;
+        min-width: 0;
+        font-size: 16px;
+        line-height: 30px;
       }
 
       .workspace {
-        padding: 0;
-        display: grid;
-        grid-template-rows: 1fr;
-        height: 100%;
-        background: rgba(35, 23, 13, 0.12);
+        position: relative;
+        min-width: 0;
+        min-height: 0;
         overflow: hidden;
+        background:
+          linear-gradient(90deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.08) 100%),
+          linear-gradient(90deg, var(--bg) 0%, var(--bg) 100%);
       }
 
-      .stage-grid {
-        display: grid;
-        grid-template-columns: minmax(0, 1fr);
-        gap: 0;
-        min-height: 0;
-      }
-
-      .stage {
-        padding: 0;
-        display: grid;
-        grid-template-rows: min-content min-content 1fr min-content;
-        gap: 0;
-        min-height: 0;
+      .canvas-stage {
+        position: relative;
+        width: 100%;
+        height: 100%;
       }
 
       .stage-header {
+        position: absolute;
+        top: 24px;
+        right: 24px;
+        z-index: 8;
         display: flex;
-        justify-content: space-between;
         align-items: center;
-        gap: 12px;
-        padding: 12px 18px 2px;
+        gap: 10px;
+        padding: 8px 10px;
+        border-radius: 8px;
+        background: rgba(0, 0, 0, 0.24);
+        backdrop-filter: blur(10px);
       }
 
-      .stage-title {
-        font-size: 1rem;
-        font-weight: 700;
+      .stage-header .fit-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        border-radius: 4px;
+        background: rgba(255, 255, 255, 0.1);
       }
 
-      .stage-note {
-        color: var(--muted);
-        font-size: 0.88rem;
+      .stage-header .zoom-cluster {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .stage-header .zoom-value {
+        min-width: 40px;
+        color: var(--text);
+        font-size: 14px;
+        line-height: 20px;
+        text-align: right;
+      }
+
+      .stage-header .zoom-slider {
+        width: 124px;
       }
 
       .overlay-wrap {
-        min-height: 0;
-        height: 100%;
-        display: block;
+        position: absolute;
+        inset: 0;
         overflow: hidden;
-        padding: 0;
         cursor: default;
         overscroll-behavior: contain;
-        position: relative;
       }
 
       .overlay-stage {
         position: relative;
         display: inline-grid;
         place-items: center;
+        overflow: hidden;
+        background: var(--canvas-bg);
+        box-shadow: var(--canvas-shadow);
       }
 
       .reference-image {
@@ -245,16 +802,6 @@
         pointer-events: none;
         user-select: none;
         z-index: 1;
-      }
-
-      canvas {
-        display: block;
-      }
-
-      .overlay-stage {
-        border-radius: 12px;
-        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
-        overflow: hidden;
       }
 
       .svg-preview {
@@ -287,6 +834,7 @@
       }
 
       canvas {
+        display: block;
         position: relative;
         z-index: 3;
         touch-action: none;
@@ -320,8 +868,8 @@
         min-width: 112px;
         padding: 8px 10px;
         border-radius: 8px;
-        background: rgba(35, 23, 13, 0.92);
-        color: #fff8f1;
+        background: rgba(0, 0, 0, 0.88);
+        color: #fff;
         font-size: 0.68rem;
         line-height: 1.2;
         letter-spacing: 0.05em;
@@ -334,6 +882,11 @@
         white-space: nowrap;
       }
 
+      .cursor-readout.visible {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
       .overlay-wrap.pan-ready {
         cursor: grab;
       }
@@ -342,49 +895,264 @@
         cursor: grabbing;
       }
 
-      .cursor-readout.visible {
-        opacity: 1;
-        transform: translateY(0);
-      }
-
-      .cursor-readout strong {
-        font-weight: 700;
-      }
-
       .status-bar {
+        position: absolute;
+        left: 24px;
+        right: 24px;
+        bottom: 24px;
+        z-index: 7;
         display: flex;
+        align-items: center;
         justify-content: space-between;
         gap: 12px;
-        flex-wrap: wrap;
-        color: var(--muted);
-        font-size: 0.88rem;
-        padding: 6px 18px 10px;
+        color: rgba(255, 255, 255, 0.72);
+        font-size: 14px;
+        line-height: 18px;
       }
 
-      .canvas-toolbar {
+      .floating-controls {
+        position: absolute;
+        left: 50%;
+        bottom: 24px;
+        z-index: 8;
+        display: grid;
+        gap: 8px;
+        transform: translateX(-50%);
+        justify-items: center;
+      }
+
+      .floating-toolbar {
         display: flex;
-        justify-content: flex-end;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        width: max-content;
+        height: 43px;
+        padding: 6px;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 8px;
+      }
+
+      .color-swatch {
+        width: 28px;
+        height: 28px;
+        border: 1.4px solid rgba(0, 0, 0, 0.5);
+        border-radius: 999px;
+        background: var(--accent);
+      }
+
+      .floating-segment {
+        display: flex;
+        align-items: center;
+        gap: 2px;
+        width: 186px;
+        height: 31px;
+        flex: 0 0 186px;
+      }
+
+      .floating-pill {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        height: 31px;
+        min-height: 31px;
+        padding: 0 8px;
+        background: rgba(255, 255, 255, 0.1);
+      }
+
+      .floating-pill.leading {
+        width: 68px;
+        flex: 0 0 68px;
+        border-radius: 4px 0 0 4px;
+      }
+
+      .floating-pill.trailing {
+        width: 116px;
+        flex: 0 0 116px;
+        border-radius: 0 4px 4px 0;
+      }
+
+      .floating-pill.value-pill {
+        min-width: 68px;
+      }
+
+      .floating-pill.short-pill {
+        min-width: 68px;
+      }
+
+      .floating-pill .pill-value {
+        display: inline-block;
+        width: 35px;
+        font-size: 14px;
+        line-height: 30px;
+        text-align: right;
+      }
+
+      .floating-pill .slider-shell {
+        width: 100px;
+        height: 10px;
+        display: flex;
+        align-items: center;
+      }
+
+      .floating-toggle-button {
+        width: 31px;
+        height: 31px;
+        flex: 0 0 31px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 4px;
+        background: rgba(255, 255, 255, 0.1);
+        color: rgba(255, 255, 255, 0.9);
+      }
+
+      .floating-toggle-button.active {
+        background: var(--accent);
+        color: var(--accent-text);
+      }
+
+      .tool-cluster {
+        display: flex;
         align-items: center;
         gap: 12px;
-        padding: 0 18px 4px;
-        color: var(--muted);
-        font-size: 0.88rem;
+        height: 52px;
+        padding: 6px;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        justify-self: center;
+        width: max-content;
+        border-radius: 8px;
       }
 
-      .canvas-toolbar label {
+      .tool-segment {
         display: flex;
         align-items: center;
-        gap: 12px;
+        gap: 4px;
       }
 
-      .canvas-toolbar input[type="range"] {
-        width: 180px;
+      .tool-divider {
+        width: 1px;
+        height: 40px;
+        background: rgba(255, 255, 255, 0.14);
       }
 
-      .hint {
-        color: var(--muted);
-        font-size: 0.85rem;
-        line-height: 1.4;
+      .tool-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        border-radius: 4px;
+        color: rgba(255, 255, 255, 0.5);
+      }
+
+      .tool-button.active {
+        background: var(--accent);
+        color: var(--accent-text);
+      }
+
+      .tool-button.is-available {
+        color: rgba(255, 255, 255, 0.9);
+      }
+
+      .tool-button.is-disabled {
+        color: rgba(255, 255, 255, 0.5);
+      }
+
+      .tool-color {
+        position: relative;
+        width: 28px;
+        height: 28px;
+        flex: 0 0 28px;
+      }
+
+      .tool-color-input {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        opacity: 0;
+        cursor: pointer;
+      }
+
+      .tool-color-swatch {
+        position: absolute;
+        inset: 0;
+        border: 1.4px solid rgba(0, 0, 0, 0.5);
+        border-radius: 999px;
+        background: var(--accent);
+        pointer-events: none;
+      }
+
+      .sidebar-icon,
+      .toolbar-icon,
+      .secondary-toolbar-icon,
+      .secondary-toolbar-toggle-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex: 0 0 auto;
+      }
+
+      .sidebar-icon {
+        width: 16px;
+        height: 16px;
+      }
+
+      .toolbar-icon,
+      .secondary-toolbar-toggle-icon {
+        width: 24px;
+        height: 24px;
+      }
+
+      .secondary-toolbar-icon {
+        width: 12px;
+        height: 12px;
+      }
+
+      .sidebar-icon svg,
+      .toolbar-icon svg,
+      .secondary-toolbar-icon svg,
+      .secondary-toolbar-toggle-icon svg {
+        width: 100%;
+        height: 100%;
+        stroke: currentColor;
+        fill: none;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+
+      .brand-mark svg {
+        width: 100%;
+        height: 100%;
+      }
+
+      .icon-sprite {
+        position: absolute;
+        width: 0;
+        height: 0;
+        overflow: hidden;
+        pointer-events: none;
+      }
+
+      .is-hidden {
+        display: none !important;
+      }
+
+      .hidden-control {
+        position: absolute !important;
+        width: 1px !important;
+        height: 1px !important;
+        padding: 0 !important;
+        margin: -1px !important;
+        overflow: hidden !important;
+        clip: rect(0, 0, 0, 0) !important;
+        white-space: nowrap !important;
+        border: 0 !important;
       }
 
       .dialog-backdrop {
@@ -393,7 +1161,7 @@
         display: none;
         place-items: center;
         padding: 24px;
-        background: rgba(35, 23, 13, 0.42);
+        background: rgba(0, 0, 0, 0.42);
         z-index: 40;
       }
 
@@ -404,9 +1172,10 @@
       .dialog {
         width: min(460px, 100%);
         padding: 22px;
-        border: 1px solid rgba(52, 38, 24, 0.14);
-        background: rgba(255, 251, 245, 0.98);
-        box-shadow: 0 24px 60px rgba(35, 23, 13, 0.24);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: #102115;
+        color: var(--text);
+        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.24);
       }
 
       .dialog h2 {
@@ -416,7 +1185,7 @@
 
       .dialog p {
         margin: 0;
-        color: var(--muted);
+        color: rgba(255, 255, 255, 0.72);
         line-height: 1.5;
       }
 
@@ -427,183 +1196,477 @@
         margin-top: 18px;
       }
 
-      @media (max-width: 1100px) {
-        .shell {
-          grid-template-columns: 1fr;
+      .dialog-actions button {
+        min-height: 40px;
+        padding: 10px 12px;
+        border-radius: 4px;
+      }
+
+      .dialog-actions .primary {
+        background: var(--accent);
+        color: var(--accent-text);
+      }
+
+      .dialog-actions .secondary {
+        background: rgba(255, 255, 255, 0.12);
+        color: var(--text);
+      }
+
+      @media (max-width: 1200px) {
+        .floating-controls {
+          bottom: 20px;
+          transform: translateX(-50%) scale(0.96);
+          transform-origin: bottom center;
+        }
+      }
+
+      @media (max-width: 980px) {
+        body {
+          overflow: auto;
         }
 
-        .workspace {
+        .shell {
+          grid-template-columns: 1fr;
+          height: auto;
+          min-height: 100vh;
+        }
+
+        .sidebar {
+          width: 100%;
+          min-width: 0;
+          max-width: none;
           height: auto;
         }
 
-        .stage-grid {
-          grid-template-columns: 1fr;
+        .workspace {
+          min-height: 72vh;
+        }
+
+        .stage-header {
+          top: 12px;
+          right: 12px;
+        }
+
+        .status-bar {
+          left: 12px;
+          right: 12px;
+          bottom: 12px;
+          font-size: 12px;
         }
       }
     </style>
   </head>
   <body>
+    <svg class="icon-sprite" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+      <symbol id="i-file-down" viewBox="0 0 24 24">
+        <path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/>
+        <path d="M14 2v5a1 1 0 0 0 1 1h5"/>
+        <path d="M12 18v-6"/>
+        <path d="m9 15 3 3 3-3"/>
+      </symbol>
+      <symbol id="i-frame" viewBox="0 0 24 24">
+        <line x1="22" x2="2" y1="6" y2="6"/>
+        <line x1="22" x2="2" y1="18" y2="18"/>
+        <line x1="6" x2="6" y1="2" y2="22"/>
+        <line x1="18" x2="18" y1="2" y2="22"/>
+      </symbol>
+      <symbol id="i-layer-dot" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="3.25" fill="currentColor" stroke="none"/>
+      </symbol>
+      <symbol id="i-chevron-down" viewBox="0 0 24 24">
+        <path d="m6 9 6 6 6-6"/>
+      </symbol>
+      <symbol id="i-chevron-up" viewBox="0 0 24 24">
+        <path d="m18 15-6-6-6 6"/>
+      </symbol>
+      <symbol id="i-eye" viewBox="0 0 24 24">
+        <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/>
+        <circle cx="12" cy="12" r="3"/>
+      </symbol>
+      <symbol id="i-eye-off" viewBox="0 0 24 24">
+        <path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49"/>
+        <path d="M14.084 14.158a3 3 0 0 1-4.242-4.242"/>
+        <path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143"/>
+        <path d="m2 2 20 20"/>
+      </symbol>
+      <symbol id="i-image" viewBox="0 0 24 24">
+        <rect width="18" height="18" x="3" y="3" rx="2" ry="2"/>
+        <circle cx="9" cy="9" r="2"/>
+        <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+      </symbol>
+      <symbol id="i-image-plus" viewBox="0 0 24 24">
+        <path d="M16 5h6"/>
+        <path d="M19 2v6"/>
+        <path d="M21 11.5V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7.5"/>
+        <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+        <circle cx="9" cy="9" r="2"/>
+      </symbol>
+      <symbol id="i-trash" viewBox="0 0 24 24">
+        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>
+        <path d="M3 6h18"/>
+        <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+      </symbol>
+      <symbol id="i-upload" viewBox="0 0 24 24">
+        <path d="M12 3v12"/>
+        <path d="m17 8-5-5-5 5"/>
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+      </symbol>
+      <symbol id="i-copy" viewBox="0 0 24 24">
+        <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
+        <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
+      </symbol>
+      <symbol id="i-download" viewBox="0 0 24 24">
+        <path d="M12 15V3"/>
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+        <path d="m7 10 5 5 5-5"/>
+      </symbol>
+      <symbol id="i-move-diagonal" viewBox="0 0 24 24">
+        <path d="M11 19H5v-6"/>
+        <path d="M13 5h6v6"/>
+        <path d="M19 5 5 19"/>
+      </symbol>
+      <symbol id="i-circle-dot-dashed" viewBox="0 0 24 24">
+        <path d="M10.1 2.18a9.93 9.93 0 0 1 3.8 0"/>
+        <path d="M17.6 3.71a9.95 9.95 0 0 1 2.69 2.7"/>
+        <path d="M21.82 10.1a9.93 9.93 0 0 1 0 3.8"/>
+        <path d="M20.29 17.6a9.95 9.95 0 0 1-2.7 2.69"/>
+        <path d="M13.9 21.82a9.94 9.94 0 0 1-3.8 0"/>
+        <path d="M6.4 20.29a9.95 9.95 0 0 1-2.69-2.7"/>
+        <path d="M2.18 13.9a9.93 9.93 0 0 1 0-3.8"/>
+        <path d="M3.71 6.4a9.95 9.95 0 0 1 2.7-2.69"/>
+        <circle cx="12" cy="12" r="1"/>
+      </symbol>
+      <symbol id="i-brush" viewBox="0 0 24 24">
+        <path d="m11 10 3 3"/>
+        <path d="M6.5 21A3.5 3.5 0 1 0 3 17.5a2.62 2.62 0 0 1-.708 1.792A1 1 0 0 0 3 21z"/>
+        <path d="M9.969 17.031 21.378 5.624a1 1 0 0 0-3.002-3.002L6.967 14.031"/>
+      </symbol>
+      <symbol id="i-eraser" viewBox="0 0 24 24">
+        <path d="M21 21H8a2 2 0 0 1-1.42-.587l-3.994-3.999a2 2 0 0 1 0-2.828l10-10a2 2 0 0 1 2.829 0l5.999 6a2 2 0 0 1 0 2.828L12.834 21"/>
+        <path d="m5.082 11.09 8.828 8.828"/>
+      </symbol>
+      <symbol id="i-line-squiggle" viewBox="0 0 24 24">
+        <path d="M6.99998 3.49998C12 1.49998 14 5.99998 9.99998 7.49998C1.49998 9.99998 1.99998 15 4.99998 16C9.99998 18 14 5.99998 19 8.99998C21.8088 10.6853 21.6196 14.7373 20.1167 17.6993M20.1167 17.6993C18.9442 20.01 16.9721 21.6573 15 21C10.2681 18.6341 14.9402 10.8945 20.1167 17.6993ZM20.1167 17.6993C20.41 18.0849 20.705 18.5173 21 19" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </symbol>
+      <symbol id="i-rotate-ccw" viewBox="0 0 24 24">
+        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+        <path d="M3 3v5h5"/>
+      </symbol>
+      <symbol id="i-rotate-cw" viewBox="0 0 24 24">
+        <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/>
+        <path d="M21 3v5h-5"/>
+      </symbol>
+      <symbol id="i-opacity" viewBox="0 0 16 16">
+        <path fill="none" d="M12.6667 2H3.33333C2.59695 2 2 2.59695 2 3.33333V12.6667C2 13.403 2.59695 14 3.33333 14H12.6667C13.403 14 14 13.403 14 12.6667V3.33333C14 2.59695 13.403 2 12.6667 2Z"/>
+        <path fill="none" d="M11.3333 6H11.34M8.66667 8.66667H8.67333M8.66667 11.3333H8.67333M6 11.3333H6.00667M11.3333 8.66667H11.34M11.3333 11.3333H11.34"/>
+      </symbol>
+      <symbol id="i-fit-screen" viewBox="0 0 24 24">
+        <path d="M8 3H3v5"/>
+        <path d="M16 3h5v5"/>
+        <path d="M8 21H3v-5"/>
+        <path d="M16 21h5v-5"/>
+      </symbol>
+    </svg>
     <main class="shell">
-      <aside class="panel controls">
-        <div>
-          <h1>Halftone SVG Generator</h1>
-          <p class="lede">
-            Paint a grayscale weight map and the live preview turns it into SVG dots. Darker paint creates larger dots.
-          </p>
+      <aside class="sidebar">
+        <div class="sidebar-header">
+          <div class="brand-row">
+            <div class="brand-logo" aria-label="Kong">
+              <span class="brand-mark" aria-hidden="true">
+                <svg viewBox="0 0 95 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M11.0244 24.7102L10.1998 25.7529L12.0654 28.6571L11.8709 30H19.7857L20.3336 28.6571L17.1502 24.7102H11.0244Z" fill="currentColor"/>
+                  <path d="M15.353 7.03667L12.4901 12.0289L26.454 28.4906L26.0567 30H32.462L33.6208 24.6447L18.6789 7.03394L15.353 7.03667Z" fill="currentColor"/>
+                  <path d="M17.2543 3.2836L15.8927 5.78109H19.2707L25.0677 12.654L28.5142 9.83441V8.04385L27.3169 6.36794L28.2018 5.45082L21.287 0L17.2543 3.2836Z" fill="currentColor"/>
+                  <path d="M6.86015 17.1959H4.97254L0.00012207 23.4847V30H5.33418L6.27661 28.7799L10.3915 23.471H16.3447L18.1775 20.6733L11.723 13.0416L6.86015 17.1959Z" fill="currentColor"/>
+                  <path fill-rule="evenodd" clip-rule="evenodd" d="M57.8422 20.5403H62.4863V13.4448H57.8422V20.5403ZM58.0049 23.3785C56.7122 23.3785 56.0408 23.169 55.4876 22.5937C54.6564 21.7617 54.334 20.6052 54.334 17.0205C54.334 13.4359 54.6564 12.2794 55.4876 11.4238C56.0201 10.8691 56.7122 10.6597 58.0049 10.6597H62.3236C63.6162 10.6597 64.2877 10.8691 64.8408 11.4238C65.672 12.2794 65.9945 13.4123 65.9945 17.0205C65.9945 20.6288 65.672 21.7617 64.8408 22.5937C64.2877 23.1719 63.6162 23.3785 62.3236 23.3785H58.0049Z" fill="currentColor"/>
+                  <path fill-rule="evenodd" clip-rule="evenodd" d="M76.4964 14.6685C76.4964 14.7128 76.4964 14.757 76.4964 14.8042V23.3749H80.0282V14.3882C80.0282 12.5236 79.8212 11.8539 79.2887 11.3465C78.8036 10.8626 78.1085 10.6443 77.0229 10.6443L73.917 10.6531L72.1362 12.2552V10.6531H70.9442H68.6162V23.3719H72.1481V13.4382H76.4904V14.6626L76.4964 14.6685Z" fill="currentColor"/>
+                  <path fill-rule="evenodd" clip-rule="evenodd" d="M48.8078 7.1543H53.0141L46.9739 14.7779L53.2685 23.3751H48.8078L44.0188 16.6218L42.8829 16.6159V23.3751H39.0967V7.1543H42.8829V13.4414H44.0188L48.8078 7.1543Z" fill="currentColor"/>
+                  <path fill-rule="evenodd" clip-rule="evenodd" d="M90.872 10.6568V12.2588L89.0913 10.6568L86.4409 10.6479C85.1719 10.6479 84.4265 10.8663 83.8497 11.418C83.0866 12.1998 82.7168 13.911 82.7168 17.0442C82.7168 20.1775 83.0185 21.8178 83.7551 22.579C84.3319 23.1307 85.0181 23.3756 86.3818 23.3756H90.8632L90.8691 25.1959L84.6484 25.2077L84.6543 25.9542L86.2605 27.7303H91.1235C92.4161 27.7303 93.1556 27.5001 93.6171 27.0163C94.1939 26.4174 94.4246 26.0456 94.4246 23.8594V10.6598H90.8691L90.872 10.6568ZM90.8957 20.5256H86.2516V13.4419H90.8927V20.5256H90.8957Z" fill="currentColor"/>
+                </svg>
+              </span>
+            </div>
+            <div class="brand-version">Texture Creator v1.0</div>
+          </div>
         </div>
 
-        <section class="group">
-          <div class="group-title">Reference Image</div>
-          <label>
-            Upload Image
-            <input id="referenceImageInput" type="file" accept="image/*" />
-          </label>
-          <label>
-            <span class="range-label">
-              <span>Image Opacity</span>
-              <strong id="imageOpacityValue">65%</strong>
-            </span>
-            <input id="imageOpacityInput" type="range" min="0" max="100" step="1" value="65" />
-          </label>
-          <div class="button-row">
-            <button id="fitImageButton" class="secondary">Fit Canvas To Image</button>
-            <button id="clearImageButton" class="secondary">Remove Image</button>
+        <section class="sidebar-section">
+          <div class="section-title">Project Info</div>
+          <div class="stack">
+            <div class="project-row">
+              <input id="projectNameInput" class="project-name-input" type="text" value="" placeholder="Untitled project" />
+              <button id="saveProjectButton" class="icon-button-sm accent-icon-button" type="button" aria-label="Save project">
+                <span class="sidebar-icon">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-file-down"/></svg>
+                </span>
+              </button>
+            </div>
+
+            <div class="canvas-size-row">
+              <div class="field-label">Canvas size</div>
+              <div class="field-pill">
+                <span class="field-code">W</span>
+                <input id="widthInput" class="field-number" type="number" min="64" max="2400" step="1" value="640" />
+              </div>
+              <div class="field-pill">
+                <span class="field-code">H</span>
+                <input id="heightInput" class="field-number" type="number" min="64" max="2400" step="1" value="640" />
+              </div>
+            </div>
           </div>
-          <div class="hint">The image is only a drawing guide. It is not included in the SVG export.</div>
         </section>
 
-        <section class="group">
-          <div class="group-title">Canvas Size</div>
-          <div class="row">
-            <label>
-              Width (px)
-              <input id="widthInput" type="number" min="64" max="2400" step="1" value="640" />
-            </label>
-            <label>
-              Height (px)
-              <input id="heightInput" type="number" min="64" max="2400" step="1" value="640" />
-            </label>
+        <section class="sidebar-section">
+          <div class="section-title">Layers</div>
+          <div class="layer-list">
+            <div class="layer-card">
+              <div id="frontLayerButton" class="layer-row active" role="button" tabindex="0">
+                <span class="layer-state-icon">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-layer-dot"/></svg>
+                </span>
+                <span class="layer-name">Top layer</span>
+                <button id="frontLayerExpandButton" class="icon-button-sm layer-expand-button" type="button" aria-label="Expand top layer" tabindex="-1">
+                  <span class="sidebar-icon">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chevron-down"/></svg>
+                  </span>
+                </button>
+                <button id="frontLayerVisibilityButton" class="icon-button-sm layer-visibility-button" type="button" aria-label="Toggle top layer visibility">
+                  <span class="sidebar-icon">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><use id="frontLayerVisibilityIcon" href="#i-eye"/></svg>
+                  </span>
+                </button>
+              </div>
+              <div id="frontLayerChildren" class="layer-children">
+                <div class="compact-control">
+                  <span class="sidebar-icon" data-tooltip="Top layer opacity" aria-label="Top layer opacity" tabindex="0">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-opacity"/></svg>
+                  </span>
+                  <span id="frontOpacityValue" class="range-value">100%</span>
+                  <div class="range-track">
+                    <input id="frontOpacityInput" type="range" min="0" max="100" step="1" value="100" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="layer-card">
+              <div id="backLayerButton" class="layer-row" role="button" tabindex="0">
+                <span class="layer-state-icon">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-layer-dot"/></svg>
+                </span>
+                <span class="layer-name">Bottom layer</span>
+                <button id="backLayerExpandButton" class="icon-button-sm layer-expand-button" type="button" aria-label="Expand bottom layer" tabindex="-1">
+                  <span class="sidebar-icon">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chevron-up"/></svg>
+                  </span>
+                </button>
+                <button id="backLayerVisibilityButton" class="icon-button-sm layer-visibility-button" type="button" aria-label="Toggle bottom layer visibility">
+                  <span class="sidebar-icon">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><use id="backLayerVisibilityIcon" href="#i-eye"/></svg>
+                  </span>
+                </button>
+              </div>
+              <div id="backLayerChildren" class="layer-children open">
+                <div class="compact-control">
+                  <span class="sidebar-icon" data-tooltip="Bottom layer opacity" aria-label="Bottom layer opacity" tabindex="0">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-opacity"/></svg>
+                  </span>
+                  <span id="backOpacityValue" class="range-value">100%</span>
+                  <div class="range-track">
+                    <input id="backOpacityInput" type="range" min="0" max="100" step="1" value="100" />
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-          <button id="resizeButton" class="primary">Apply Canvas Size</button>
-          <div class="hint">Changing size preserves the current pattern and fills any new area with white.</div>
         </section>
 
-        <section class="group">
-          <div class="group-title">Brush</div>
-          <div class="toggle-row">
-            <button id="frontLayerButton" class="secondary toggle active">Front Layer</button>
-            <button id="backLayerButton" class="secondary toggle">Back Layer</button>
+        <section class="sidebar-section">
+          <div class="section-title">Image</div>
+          <div class="image-stack">
+            <div id="imageControlRow" class="image-file-row is-empty">
+              <button id="chooseImageButton" class="image-file-main" type="button" aria-label="Choose image">
+                <span id="imageNameLabel" class="image-file-label">Choose image...</span>
+              </button>
+              <button id="replaceImageButton" class="icon-button-sm image-action-button accent-icon-button" type="button" aria-label="Upload or replace image">
+                <span class="sidebar-icon">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-image-plus"/></svg>
+                </span>
+              </button>
+              <button id="clearImageButton" class="icon-button-sm image-action-button is-danger" type="button" aria-label="Remove image" hidden>
+                <span class="sidebar-icon">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-trash"/></svg>
+                </span>
+              </button>
+            </div>
+
+            <div id="imageOpacityRow" class="image-opacity-row is-disabled">
+              <div class="image-opacity-readout">
+                <span class="sidebar-icon" data-tooltip="Image opacity" data-tooltip-align="left" aria-label="Image opacity" tabindex="0">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-opacity"/></svg>
+                </span>
+                <span id="imageOpacityValue" class="range-value">65%</span>
+              </div>
+              <div class="range-track">
+                <input id="imageOpacityInput" type="range" min="0" max="100" step="1" value="65" disabled />
+              </div>
+              <button id="imageLayerVisibilityButton" class="icon-button-sm" type="button" aria-label="Toggle image visibility" disabled>
+                <span class="sidebar-icon">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><use id="imageLayerVisibilityIcon" href="#i-eye"/></svg>
+                </span>
+              </button>
+            </div>
           </div>
-          <div class="toggle-row">
-            <button id="paintModeButton" class="secondary toggle active">Paint</button>
-            <button id="eraseModeButton" class="secondary toggle">Erase</button>
-          </div>
-          <label>
-            <span class="range-label">
-              <span>Brush Size</span>
-              <strong id="brushSizeValue">20 px</strong>
-            </span>
-            <input id="brushSizeInput" type="range" min="2" max="180" step="1" value="20" />
-          </label>
-          <label>
-            <span class="range-label">
-              <span>Brush Hardness</span>
-              <strong id="brushStrengthValue">5%</strong>
-            </span>
-            <input id="brushStrengthInput" type="range" min="1" max="100" step="1" value="5" />
-          </label>
-          <button id="overlayToggleButton" class="secondary toggle">Show Brush Strokes</button>
         </section>
 
-        <section class="group">
-          <div class="group-title">Halftone</div>
-          <div class="toggle-row">
-            <button id="alignedGridButton" class="secondary toggle active">Aligned Grid</button>
-            <button id="staggeredGridButton" class="secondary toggle">Staggered Grid</button>
+        <section class="sidebar-section">
+          <div class="section-title">Pattern Style</div>
+          <div class="style-grid">
+            <button id="staggeredGridButton" class="style-button active" type="button">
+              <span class="sidebar-pattern-icon staggered-icon">
+                <svg viewBox="0 0 78 22" aria-hidden="true">
+                  <path d="M55 11H63M59 7V15" />
+                  <path d="M45 11H53M49 7V15" />
+                  <path d="M40 18H48M44 14V22" />
+                  <path d="M40 4H48M44 0V8" />
+                  <path d="M60 18H68M64 14V22" />
+                  <path d="M60 4H68M64 0V8" />
+                  <path d="M50 18H58M54 14V22" />
+                  <path d="M50 4H58M54 0V8" />
+                  <path d="M65 11H73M69 7V15" />
+                  <path d="M70 18H78M74 14V22" />
+                  <path d="M70 4H78M74 0V8" />
+                  <path d="M15 11H23M19 7V15" />
+                  <path d="M5 11H13M9 7V15" />
+                  <path d="M0 18H8M4 14V22" />
+                  <path d="M0 4H8M4 0V8" />
+                  <path d="M20 18H28M24 14V22" />
+                  <path d="M20 4H28M24 0V8" />
+                  <path d="M10 18H18M14 14V22" />
+                  <path d="M10 4H18M14 0V8" />
+                  <path d="M35 11H43M39 7V15" />
+                  <path d="M25 11H33M29 7V15" />
+                  <path d="M30 18H38M34 14V22" />
+                  <path d="M30 4H38M34 0V8" />
+                </svg>
+              </span>
+            </button>
+            <button id="alignedGridButton" class="style-button" type="button">
+              <span class="sidebar-pattern-icon grid-icon">
+                <svg viewBox="0 0 78 20" aria-hidden="true">
+                  <path d="M0 4.5H8M4 0.5V8.5" />
+                  <path d="M10 4.5H18M14 0.5V8.5" />
+                  <path d="M20 4.5H28M24 0.5V8.5" />
+                  <path d="M0 15.5H8M4 11.5V19.5" />
+                  <path d="M10 15.5H18M14 11.5V19.5" />
+                  <path d="M20 15.5H28M24 11.5V19.5" />
+                  <path d="M30 4.5H38M34 0.5V8.5" />
+                  <path d="M40 4.5H48M44 0.5V8.5" />
+                  <path d="M50 4.5H58M54 0.5V8.5" />
+                  <path d="M30 15.5H38M34 11.5V19.5" />
+                  <path d="M40 15.5H48M44 11.5V19.5" />
+                  <path d="M50 15.5H58M54 11.5V19.5" />
+                  <path d="M60 4.5H68M64 0.5V8.5" />
+                  <path d="M70 4.5H78M74 0.5V8.5" />
+                  <path d="M60 15.5H68M64 11.5V19.5" />
+                  <path d="M70 15.5H78M74 11.5V19.5" />
+                </svg>
+              </span>
+            </button>
           </div>
-          <label>
-            <span class="range-label">
-              <span>Dot Spacing</span>
-              <strong id="spacingValue">14 px</strong>
-            </span>
-            <input id="spacingInput" type="range" min="4" max="40" step="1" value="14" />
-          </label>
-          <label>
-            <span class="range-label">
-              <span>Minimum Plus Size</span>
-              <strong id="minDotValue">0.4 px</strong>
-            </span>
-            <input id="minDotInput" type="range" min="0" max="4" step="0.1" value="0.4" />
-          </label>
-          <label>
-            <span class="range-label">
-              <span>Plus Scale</span>
-              <strong id="dotScaleValue">100%</strong>
-            </span>
-            <input id="dotScaleInput" type="range" min="20" max="160" step="1" value="100" />
-          </label>
-          <label>
-            <span class="range-label">
-              <span>Stroke Size</span>
-              <strong id="strokeWidthValue">1.6 px</strong>
-            </span>
-            <input id="strokeWidthInput" type="range" min="0.2" max="8" step="0.1" value="1.6" />
-          </label>
-          <label>
-            <span class="range-label">
-              <span>Stroke Taper</span>
-              <strong id="strokeTaperValue">90%</strong>
-            </span>
-            <input id="strokeTaperInput" type="range" min="0" max="100" step="1" value="90" />
-          </label>
-          <label>
-            Dot Color
-            <input id="dotColorInput" type="color" value="#111111" />
-          </label>
         </section>
 
-        <section class="group">
-          <div class="group-title">Actions</div>
-          <label>
-            Project Name
-            <input id="projectNameInput" type="text" value="halftone-project" placeholder="halftone-project" />
-          </label>
-          <div class="button-row">
-            <button id="clearButton" class="secondary">Clear</button>
-            <button id="downloadFrontButton" class="primary">Download Front</button>
+        <section class="sidebar-section actions-section">
+          <div class="section-title">Pattern Actions</div>
+          <div class="actions-list">
+            <div class="action-row">
+              <div class="action-label">Top layer</div>
+              <button id="topCopyButton" class="icon-button-sm" type="button" aria-label="Copy top layer SVG" data-tooltip="Copy top layer" data-tooltip-align="right">
+                <span class="sidebar-icon">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-copy"/></svg>
+                </span>
+              </button>
+              <button id="downloadFrontButton" class="icon-button-sm" type="button" aria-label="Download top layer" data-tooltip="Download top layer" data-tooltip-align="right">
+                <span class="sidebar-icon">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-download"/></svg>
+                </span>
+              </button>
+              <button id="topDeleteButton" class="icon-button-sm" type="button" aria-label="Clear top layer" data-tooltip="Clear top layer" data-tooltip-align="right">
+                <span class="sidebar-icon" style="color: var(--danger);">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-trash"/></svg>
+                </span>
+              </button>
+            </div>
+            <div class="action-row">
+              <div class="action-label">Bottom layer</div>
+              <button id="bottomCopyButton" class="icon-button-sm" type="button" aria-label="Copy bottom layer SVG" data-tooltip="Copy bottom layer" data-tooltip-align="right">
+                <span class="sidebar-icon">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-copy"/></svg>
+                </span>
+              </button>
+              <button id="downloadBackButton" class="icon-button-sm" type="button" aria-label="Download bottom layer" data-tooltip="Download bottom layer" data-tooltip-align="right">
+                <span class="sidebar-icon">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-download"/></svg>
+                </span>
+              </button>
+              <button id="bottomDeleteButton" class="icon-button-sm" type="button" aria-label="Clear bottom layer" data-tooltip="Clear bottom layer" data-tooltip-align="right">
+                <span class="sidebar-icon" style="color: var(--danger);">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-trash"/></svg>
+                </span>
+              </button>
+            </div>
+            <div class="action-row">
+              <div class="action-label">Both</div>
+              <button id="downloadBothButton" class="icon-button-sm" type="button" aria-label="Download both layers" data-tooltip="Download both layers" data-tooltip-align="right">
+                <span class="sidebar-icon">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-download"/></svg>
+                </span>
+              </button>
+              <button id="clearBothButton" class="icon-button-sm" type="button" aria-label="Clear both layers" data-tooltip="Clear both layers" data-tooltip-align="right">
+                <span class="sidebar-icon" style="color: var(--danger);">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-trash"/></svg>
+                </span>
+              </button>
+            </div>
           </div>
-          <div class="button-row">
-            <button id="downloadBackButton" class="secondary">Download Back</button>
-            <button id="downloadBothButton" class="secondary">Download Both</button>
-          </div>
-          <div class="button-row">
-            <button id="saveProjectButton" class="secondary">Save Project</button>
-            <button id="loadProjectButton" class="secondary">Load Project</button>
-          </div>
-          <button id="copyButton" class="secondary">Copy Active SVG</button>
-          <input id="loadProjectInput" type="file" accept=".json,application/json" hidden />
+          <input id="loadProjectInput" class="hidden-control" type="file" accept=".json,application/json" hidden />
+          <button id="loadProjectButton" class="hidden-control" type="button" hidden aria-hidden="true">Load Project</button>
+          <button id="copyButton" class="hidden-control" type="button" hidden aria-hidden="true">Copy Active SVG</button>
+          <button id="clearButton" class="hidden-control" type="button" hidden aria-hidden="true">Clear</button>
+          <button id="resizeButton" class="hidden-control" type="button" hidden aria-hidden="true">Apply Canvas Size</button>
+          <button id="fitImageButton" class="hidden-control" type="button" hidden aria-hidden="true">Fit Canvas To Image</button>
+          <input id="spacingInput" class="hidden-control" type="range" min="4" max="40" step="1" value="14" hidden aria-hidden="true" />
+          <input id="minDotInput" class="hidden-control" type="range" min="0" max="4" step="0.1" value="0.4" hidden aria-hidden="true" />
+          <input id="dotScaleInput" class="hidden-control" type="range" min="20" max="160" step="1" value="100" hidden aria-hidden="true" />
+          <input id="strokeWidthInput" class="hidden-control" type="range" min="0.2" max="8" step="0.1" value="1.6" hidden aria-hidden="true" />
+          <input id="strokeTaperInput" class="hidden-control" type="range" min="0" max="100" step="1" value="90" hidden aria-hidden="true" />
+          <input id="dotColorInput" class="hidden-control" type="color" value="#ccff00" hidden aria-hidden="true" />
+          <span id="spacingValue" class="hidden-control" hidden aria-hidden="true">14 px</span>
+          <span id="minDotValue" class="hidden-control" hidden aria-hidden="true">0.4 px</span>
+          <span id="dotScaleValue" class="hidden-control" hidden aria-hidden="true">100%</span>
+          <span id="strokeWidthValue" class="hidden-control" hidden aria-hidden="true">1.6 px</span>
+          <span id="strokeTaperValue" class="hidden-control" hidden aria-hidden="true">90%</span>
         </section>
       </aside>
 
       <section class="workspace">
-        <div class="stage-grid">
-          <section class="panel stage">
-            <div class="stage-header">
-              <div>
-                <div class="stage-title">Canvas</div>
-                <div class="stage-note">The SVG preview sits under the input canvas so you can paint directly against the live pattern.</div>
-              </div>
-            </div>
-            <div class="canvas-toolbar">
-              <label>
-                <span>Zoom</span>
+        <div class="canvas-stage">
+          <div class="stage-header">
+            <button id="fitScreenButton" class="fit-button" type="button" aria-label="Fit screen">
+              <span class="toolbar-icon">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-fit-screen"/></svg>
+              </span>
+            </button>
+            <div class="zoom-cluster">
+              <div class="range-track zoom-slider">
                 <input id="zoomInput" type="range" min="25" max="400" step="5" value="100" />
-                <strong id="zoomValue">100%</strong>
-              </label>
+              </div>
+              <strong id="zoomValue" class="zoom-value">100%</strong>
             </div>
-            <div class="overlay-wrap">
-              <div id="zoomShell" class="zoom-shell">
-                <div class="overlay-stage">
+          </div>
+
+          <div class="overlay-wrap">
+            <div id="zoomShell" class="zoom-shell">
+              <div class="overlay-stage">
                 <img id="referenceImage" class="reference-image" alt="" hidden />
                 <div id="backSvgPreview" class="svg-preview back"></div>
                 <div id="frontSvgPreview" class="svg-preview front"></div>
@@ -613,15 +1676,86 @@
                   <div id="cursorReadout" class="cursor-readout"></div>
                 </div>
               </div>
+            </div>
+          </div>
+
+          <div class="floating-controls">
+            <div class="floating-toolbar">
+              <div class="floating-segment">
+                <div class="floating-pill leading value-pill" data-tooltip="Brush size" aria-label="Brush size">
+                  <span class="secondary-toolbar-icon">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-move-diagonal"/></svg>
+                  </span>
+                  <span id="brushSizeValue" class="pill-value">80</span>
+                </div>
+                <div class="floating-pill trailing">
+                  <div class="range-track slider-shell">
+                    <input id="brushSizeInput" type="range" min="2" max="180" step="1" value="80" />
+                  </div>
+                </div>
+              </div>
+              <div class="floating-segment">
+                <div class="floating-pill leading short-pill" data-tooltip="Brush hardness" aria-label="Brush hardness">
+                  <span class="secondary-toolbar-icon">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-circle-dot-dashed"/></svg>
+                  </span>
+                  <span id="brushStrengthValue" class="pill-value">10%</span>
+                </div>
+                <div class="floating-pill trailing">
+                  <div class="range-track slider-shell">
+                    <input id="brushStrengthInput" type="range" min="1" max="100" step="1" value="10" />
+                  </div>
+                </div>
+              </div>
+              <button id="overlayToggleVisibleButton" class="floating-toggle-button" type="button" aria-label="Show brush strokes" data-tooltip="Show brush strokes">
+                <span class="secondary-toolbar-toggle-icon">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-line-squiggle"/></svg>
+                </span>
+              </button>
+            </div>
+
+            <div class="tool-cluster">
+              <div class="tool-segment">
+                <button id="paintModeButton" class="tool-button active" type="button" aria-label="Paint">
+                  <span class="toolbar-icon">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-brush"/></svg>
+                  </span>
+                </button>
+                <button id="eraseModeButton" class="tool-button" type="button" aria-label="Erase">
+                  <span class="toolbar-icon">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-eraser"/></svg>
+                  </span>
+                </button>
+              </div>
+              <div class="tool-divider"></div>
+              <div class="tool-color" aria-label="Pattern color">
+                <input id="dotColorVisible" class="tool-color-input" type="color" value="#ccff00" aria-label="Pattern color" />
+                <div id="dotColorSwatch" class="tool-color-swatch"></div>
+              </div>
+              <div class="tool-divider"></div>
+              <div class="tool-segment">
+                <button id="undoButton" class="tool-button" type="button" aria-label="Undo">
+                  <span class="toolbar-icon">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-rotate-ccw"/></svg>
+                  </span>
+                </button>
+                <button id="redoButton" class="tool-button is-disabled" type="button" aria-label="Redo">
+                  <span class="toolbar-icon">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-rotate-cw"/></svg>
+                  </span>
+                </button>
               </div>
             </div>
-            <div class="status-bar">
-              <span id="canvasStatus">640 × 640 px</span>
-              <span id="svgStatus">Generating…</span>
-              <span>Pointer and touch supported</span>
-            </div>
-          </section>
+          </div>
+
+          <div class="status-bar">
+            <span id="canvasStatus">640 × 640 px</span>
+            <span id="markCountStatus">0 marks</span>
+          </div>
         </div>
+
+        <input id="referenceImageInput" class="hidden-control" type="file" accept="image/*" hidden />
+        <button id="overlayToggleButton" class="hidden-control" type="button" hidden aria-hidden="true">Show Brush Strokes</button>
       </section>
     </main>
 
@@ -652,7 +1786,6 @@
       };
       const frontSvgPreview = document.getElementById("frontSvgPreview");
       const backSvgPreview = document.getElementById("backSvgPreview");
-      const svgStatus = document.getElementById("svgStatus");
       const canvasStatus = document.getElementById("canvasStatus");
       const overlayWrap = document.querySelector(".overlay-wrap");
       const cursorRing = document.getElementById("cursorRing");
@@ -662,19 +1795,41 @@
       const zoomShell = document.getElementById("zoomShell");
 
       const referenceImageInput = document.getElementById("referenceImageInput");
+      const imageControlRow = document.getElementById("imageControlRow");
+      const imageOpacityRow = document.getElementById("imageOpacityRow");
       const imageOpacityInput = document.getElementById("imageOpacityInput");
       const imageOpacityValue = document.getElementById("imageOpacityValue");
       const fitImageButton = document.getElementById("fitImageButton");
       const clearImageButton = document.getElementById("clearImageButton");
+      const chooseImageButton = document.getElementById("chooseImageButton");
+      const replaceImageButton = document.getElementById("replaceImageButton");
       const widthInput = document.getElementById("widthInput");
       const heightInput = document.getElementById("heightInput");
       const resizeButton = document.getElementById("resizeButton");
       const projectNameInput = document.getElementById("projectNameInput");
+      const frontLayerExpandButton = document.getElementById("frontLayerExpandButton");
+      const frontLayerVisibilityButton = document.getElementById("frontLayerVisibilityButton");
+      const frontLayerVisibilityIcon = document.getElementById("frontLayerVisibilityIcon");
+      const imageLayerVisibilityButton = document.getElementById("imageLayerVisibilityButton");
+      const imageLayerVisibilityIcon = document.getElementById("imageLayerVisibilityIcon");
+      const imageLayerExpandButton = null;
+      const backLayerExpandButton = document.getElementById("backLayerExpandButton");
+      const backLayerVisibilityButton = document.getElementById("backLayerVisibilityButton");
+      const backLayerVisibilityIcon = document.getElementById("backLayerVisibilityIcon");
+      const frontLayerChildren = document.getElementById("frontLayerChildren");
+      const imageLayerChildren = null;
+      const backLayerChildren = document.getElementById("backLayerChildren");
+      const frontOpacityInput = document.getElementById("frontOpacityInput");
+      const frontOpacityValue = document.getElementById("frontOpacityValue");
+      const backOpacityInput = document.getElementById("backOpacityInput");
+      const backOpacityValue = document.getElementById("backOpacityValue");
+      const imageNameLabel = document.getElementById("imageNameLabel");
 
       const frontLayerButton = document.getElementById("frontLayerButton");
       const backLayerButton = document.getElementById("backLayerButton");
       const paintModeButton = document.getElementById("paintModeButton");
       const eraseModeButton = document.getElementById("eraseModeButton");
+      const overlayToggleVisibleButton = document.getElementById("overlayToggleVisibleButton");
       const overlayToggleButton = document.getElementById("overlayToggleButton");
       const brushSizeInput = document.getElementById("brushSizeInput");
       const brushHardnessInput = document.getElementById("brushStrengthInput");
@@ -696,20 +1851,32 @@
       const strokeWidthValue = document.getElementById("strokeWidthValue");
       const strokeTaperValue = document.getElementById("strokeTaperValue");
       const zoomValue = document.getElementById("zoomValue");
+      const dotColorVisible = document.getElementById("dotColorVisible");
+      const dotColorSwatch = document.getElementById("dotColorSwatch");
 
       const clearButton = document.getElementById("clearButton");
       const downloadFrontButton = document.getElementById("downloadFrontButton");
       const downloadBackButton = document.getElementById("downloadBackButton");
       const downloadBothButton = document.getElementById("downloadBothButton");
+      const topCopyButton = document.getElementById("topCopyButton");
+      const bottomCopyButton = document.getElementById("bottomCopyButton");
+      const topDeleteButton = document.getElementById("topDeleteButton");
+      const bottomDeleteButton = document.getElementById("bottomDeleteButton");
+      const clearBothButton = document.getElementById("clearBothButton");
       const saveProjectButton = document.getElementById("saveProjectButton");
       const loadProjectButton = document.getElementById("loadProjectButton");
       const loadProjectInput = document.getElementById("loadProjectInput");
       const copyButton = document.getElementById("copyButton");
+      const fitScreenButton = document.getElementById("fitScreenButton");
+      const undoButton = document.getElementById("undoButton");
+      const redoButton = document.getElementById("redoButton");
+      const markCountStatus = document.getElementById("markCountStatus");
       const imageImportDialog = document.getElementById("imageImportDialog");
       const imageImportDialogMessage = document.getElementById("imageImportDialogMessage");
       const imageImportKeepButton = document.getElementById("imageImportKeepButton");
       const imageImportDeleteButton = document.getElementById("imageImportDeleteButton");
       const imageImportCancelButton = document.getElementById("imageImportCancelButton");
+      const imageLayerRow = imageControlRow;
 
       const state = {
         activeLayer: "front",
@@ -731,7 +1898,7 @@
             hardness: Number(brushHardnessInput.value) / 100,
           },
         },
-        gridMode: "aligned",
+        gridMode: "staggered",
         spacing: Number(spacingInput.value),
         minDot: Number(minDotInput.value),
         dotScale: Number(dotScaleInput.value) / 100,
@@ -745,11 +1912,31 @@
           front: "",
           back: "",
         },
+        latestCounts: {
+          front: 0,
+          back: 0,
+        },
         referenceImageUrl: "",
         referenceImageWidth: 0,
         referenceImageHeight: 0,
+        referenceImageName: "",
         referenceImageOpacity: Number(imageOpacityInput.value) / 100,
-        projectName: projectNameInput.value.trim() || "halftone-project",
+        projectName: projectNameInput.value.trim() || "Untitled project",
+        layerVisibility: {
+          front: true,
+          image: false,
+          back: true,
+        },
+        layerOpacity: {
+          front: 1,
+          image: Number(imageOpacityInput.value) / 100,
+          back: 1,
+        },
+        layerExpanded: {
+          front: false,
+          image: false,
+          back: true,
+        },
         brushAdjustStartX: 0,
         brushAdjustStartY: 0,
         brushAdjustAnchorX: 0,
@@ -804,6 +1991,29 @@
         updateLabels();
       }
 
+      function setLayerOpacity(layerName, value) {
+        const nextOpacity = Math.max(0, Math.min(1, value));
+        state.layerOpacity[layerName] = nextOpacity;
+        if (layerName === "image") {
+          state.referenceImageOpacity = nextOpacity;
+        }
+        updateLabels();
+      }
+
+      function toggleLayerVisibility(layerName) {
+        if (layerName === "image" && !state.referenceImageUrl) {
+          return;
+        }
+        state.layerVisibility[layerName] = !state.layerVisibility[layerName];
+        updateToggleButtons();
+        updateLabels();
+      }
+
+      function toggleLayerExpanded(layerName) {
+        state.layerExpanded[layerName] = !state.layerExpanded[layerName];
+        updateToggleButtons();
+      }
+
       function setZoom(value) {
         state.zoom = clampZoom(value);
         updateLabels();
@@ -856,6 +2066,7 @@
         if (state.history.length > state.maxHistory) {
           state.history.shift();
         }
+        updateToggleButtons();
       }
 
       function undoLastAction() {
@@ -879,6 +2090,7 @@
           state.redoHistory.shift();
         }
         layerCtx.putImageData(entry.snapshot, 0, 0);
+        updateToggleButtons();
         redrawOverlay();
         scheduleRender();
       }
@@ -904,6 +2116,7 @@
           state.history.shift();
         }
         layerCtx.putImageData(entry.snapshot, 0, 0);
+        updateToggleButtons();
         redrawOverlay();
         scheduleRender();
       }
@@ -930,6 +2143,7 @@
           ctx.fillRect(0, 0, width, height);
         }
         updateFrameDimensions(width, height);
+        updateToggleButtons();
         redrawOverlay();
         centerViewport();
         scheduleRender();
@@ -991,6 +2205,7 @@
         }
 
         updateFrameDimensions(width, height);
+        updateToggleButtons();
         redrawOverlay();
         centerViewport();
         scheduleRender();
@@ -1004,8 +2219,11 @@
         state.referenceImageWidth = width;
         state.referenceImageHeight = height;
         referenceImage.src = url;
-        referenceImage.style.opacity = String(state.referenceImageOpacity);
+        referenceImage.style.opacity = String(state.layerOpacity.image);
         referenceImage.hidden = false;
+        state.layerVisibility.image = true;
+        updateToggleButtons();
+        updateLabels();
       }
 
       function clearReferenceImage() {
@@ -1015,9 +2233,13 @@
         state.referenceImageUrl = "";
         state.referenceImageWidth = 0;
         state.referenceImageHeight = 0;
+        state.referenceImageName = "";
         referenceImage.removeAttribute("src");
         referenceImage.hidden = true;
         referenceImageInput.value = "";
+        state.layerVisibility.image = false;
+        updateToggleButtons();
+        updateLabels();
       }
 
       function redrawOverlay() {
@@ -1044,14 +2266,32 @@
       }
 
       function updateToggleButtons() {
+        const hasReferenceImage = Boolean(state.referenceImageUrl);
+        const imageControlsEnabled = hasReferenceImage && state.layerVisibility.image;
         frontLayerButton.classList.toggle("active", state.activeLayer === "front");
         backLayerButton.classList.toggle("active", state.activeLayer === "back");
+        frontLayerButton.classList.toggle("is-hidden-layer", !state.layerVisibility.front);
+        backLayerButton.classList.toggle("is-hidden-layer", !state.layerVisibility.back);
+        imageControlRow.classList.toggle("is-empty", !hasReferenceImage);
+        imageOpacityRow.classList.toggle("is-disabled", !imageControlsEnabled);
+        imageLayerVisibilityButton.disabled = !hasReferenceImage;
+        imageOpacityInput.disabled = !imageControlsEnabled;
+        clearImageButton.hidden = !hasReferenceImage;
+        imageLayerRow.classList.remove("is-hidden-layer");
+        frontLayerVisibilityIcon.setAttribute("href", state.layerVisibility.front ? "#i-eye" : "#i-eye-off");
+        backLayerVisibilityIcon.setAttribute("href", state.layerVisibility.back ? "#i-eye" : "#i-eye-off");
+        imageLayerVisibilityIcon.setAttribute("href", !hasReferenceImage || state.layerVisibility.image ? "#i-eye" : "#i-eye-off");
         paintModeButton.classList.toggle("active", state.mode === "paint");
         eraseModeButton.classList.toggle("active", state.mode === "erase");
+        overlayToggleVisibleButton.classList.toggle("active", state.showOverlay);
+        overlayToggleVisibleButton.setAttribute("aria-label", state.showOverlay ? "Hide brush strokes" : "Show brush strokes");
+        overlayToggleVisibleButton.setAttribute("data-tooltip", state.showOverlay ? "Hide brush strokes" : "Show brush strokes");
         alignedGridButton.classList.toggle("active", state.gridMode === "aligned");
         staggeredGridButton.classList.toggle("active", state.gridMode === "staggered");
-        overlayToggleButton.classList.toggle("active", state.showOverlay);
-        overlayToggleButton.textContent = state.showOverlay ? "Hide Brush Strokes" : "Show Brush Strokes";
+        undoButton.classList.toggle("is-available", state.history.length > 0);
+        undoButton.classList.toggle("is-disabled", state.history.length === 0);
+        redoButton.classList.toggle("is-available", state.redoHistory.length > 0);
+        redoButton.classList.toggle("is-disabled", state.redoHistory.length === 0);
       }
 
       function updatePanCursor() {
@@ -1059,20 +2299,50 @@
         overlayWrap.classList.toggle("panning", state.panning);
       }
 
+      function updateRangeFill(input) {
+        const min = Number(input.min || 0);
+        const max = Number(input.max || 100);
+        const value = Number(input.value || min);
+        const span = Math.max(1, max - min);
+        const percent = ((value - min) / span) * 100;
+        input.parentElement?.style.setProperty("--range-fill", `${percent}%`);
+      }
+
       function updateLabels() {
         brushSizeInput.value = String(Math.round(state.brushSize));
         brushHardnessInput.value = String(Math.round(state.brushHardness * 100));
-        brushSizeValue.textContent = `${Math.round(state.brushSize)} px`;
+        brushSizeValue.textContent = `${Math.round(state.brushSize)}`;
         brushHardnessValue.textContent = `${Math.round(state.brushHardness * 100)}%`;
         spacingValue.textContent = `${Math.round(state.spacing)} px`;
         minDotValue.textContent = `${Math.round(state.minDot)} px`;
         dotScaleValue.textContent = `${Math.round(state.dotScale * 100)}%`;
         strokeWidthValue.textContent = `${Math.round(state.strokeWidth)} px`;
         strokeTaperValue.textContent = `${Math.round(state.strokeTaper * 100)}%`;
-        imageOpacityValue.textContent = `${Math.round(state.referenceImageOpacity * 100)}%`;
+        imageOpacityValue.textContent = `${Math.round(state.layerOpacity.image * 100)}%`;
+        frontOpacityValue.textContent = `${Math.round(state.layerOpacity.front * 100)}%`;
+        backOpacityValue.textContent = `${Math.round(state.layerOpacity.back * 100)}%`;
         zoomValue.textContent = `${Math.round(state.zoom * 100)}%`;
         cursorRing.style.width = `${Math.round(state.brushSize)}px`;
         cursorRing.style.height = `${Math.round(state.brushSize)}px`;
+        dotColorVisible.value = state.dotColor;
+        dotColorSwatch.style.background = state.dotColor;
+        frontOpacityInput.value = String(Math.round(state.layerOpacity.front * 100));
+        backOpacityInput.value = String(Math.round(state.layerOpacity.back * 100));
+        imageOpacityInput.value = String(Math.round(state.layerOpacity.image * 100));
+        referenceImage.style.opacity = String(state.layerOpacity.image);
+        referenceImage.hidden = !state.referenceImageUrl || !state.layerVisibility.image;
+        frontSvgPreview.style.opacity = String(state.layerOpacity.front);
+        backSvgPreview.style.opacity = String(state.layerOpacity.back);
+        frontSvgPreview.style.display = state.layerVisibility.front ? "grid" : "none";
+        backSvgPreview.style.display = state.layerVisibility.back ? "grid" : "none";
+        if (state.showOverlay && (state.activeLayer === "front" ? state.layerVisibility.front : state.layerVisibility.back)) {
+          paintCanvas.style.opacity = String(state.activeLayer === "front" ? state.layerOpacity.front : state.layerOpacity.back);
+        } else {
+          paintCanvas.style.opacity = "0";
+        }
+        imageNameLabel.textContent = state.referenceImageName || "Choose image...";
+        markCountStatus.textContent = `Top ${state.latestCounts.front.toLocaleString()} • Bottom ${state.latestCounts.back.toLocaleString()}`;
+        document.querySelectorAll('input[type="range"]').forEach(updateRangeFill);
         updateViewportTransform();
         updateCursorPreview();
       }
@@ -1394,10 +2664,12 @@
         const back = buildLayerSvg("back");
         state.latestSvgs.front = front.svg;
         state.latestSvgs.back = back.svg;
-        frontSvgPreview.innerHTML = front.svg;
-        backSvgPreview.innerHTML = back.svg;
+        state.latestCounts.front = front.dotCount;
+        state.latestCounts.back = back.dotCount;
+        frontSvgPreview.innerHTML = front.svg.replace("<svg ", `<svg opacity="${state.layerOpacity.front.toFixed(2)}" `);
+        backSvgPreview.innerHTML = back.svg.replace("<svg ", `<svg opacity="${state.layerOpacity.back.toFixed(2)}" `);
         const active = state.activeLayer === "front" ? front : back;
-        svgStatus.textContent = `${state.activeLayer === "front" ? "Front" : "Back"} • ${active.dotCount.toLocaleString()} marks • ${active.width} × ${active.height} px`;
+        updateLabels();
       }
 
       function scheduleRender() {
@@ -1546,6 +2818,7 @@
               return;
             }
             setReferenceImage(blobUrl, image.naturalWidth, image.naturalHeight);
+            state.referenceImageName = file.name;
             if (choice === "delete") {
               resetCanvas(image.naturalWidth, image.naturalHeight);
             } else {
@@ -1555,9 +2828,11 @@
           }
 
           setReferenceImage(blobUrl, image.naturalWidth, image.naturalHeight);
+          state.referenceImageName = file.name;
           if (!sameSize) {
             resizeCanvasPreserveContent(image.naturalWidth, image.naturalHeight);
           }
+          updateLabels();
         };
         image.onerror = () => {
           URL.revokeObjectURL(blobUrl);
@@ -1575,6 +2850,40 @@
         URL.revokeObjectURL(url);
       }
 
+      function clearLayer(layerName) {
+        pushHistoryEntry(layerName);
+        const layerCtx = layerContexts[layerName];
+        layerCtx.fillStyle = "#ffffff";
+        layerCtx.fillRect(0, 0, layerCanvases[layerName].width, layerCanvases[layerName].height);
+        redrawOverlay();
+        scheduleRender();
+      }
+
+      function clearAllLayers() {
+        for (const layerName of ["front", "back"]) {
+          pushHistoryEntry(layerName);
+        }
+        for (const [layerName, layerCtx] of Object.entries(layerContexts)) {
+          layerCtx.fillStyle = "#ffffff";
+          layerCtx.fillRect(
+            0,
+            0,
+            layerCanvases[layerName].width,
+            layerCanvases[layerName].height
+          );
+        }
+        redrawOverlay();
+        scheduleRender();
+      }
+
+      async function copyLayerSvg(layerName) {
+        try {
+          await navigator.clipboard.writeText(state.latestSvgs[layerName]);
+        } catch (error) {
+          window.alert("Could not copy this SVG.");
+        }
+      }
+
       function downloadTextFile(contents, filename, type) {
         const blob = new Blob([contents], { type });
         const url = URL.createObjectURL(blob);
@@ -1585,21 +2894,25 @@
         URL.revokeObjectURL(url);
       }
 
+      function normalizeProjectName(value) {
+        return value.trim() || "Untitled project";
+      }
+
       function sanitizeProjectName(value) {
-        const cleaned = value
+        const cleaned = normalizeProjectName(value)
           .trim()
           .replace(/[<>:"/\\|?*\u0000-\u001f]+/g, "-")
           .replace(/\s+/g, "-")
           .replace(/-+/g, "-")
           .replace(/^-|-$/g, "");
-        return cleaned || "halftone-project";
+        return cleaned || "Untitled-project";
       }
 
       function getProjectSnapshot() {
         return {
           version: 1,
           savedAt: new Date().toISOString(),
-          projectName: sanitizeProjectName(state.projectName),
+          projectName: normalizeProjectName(state.projectName),
           frame: {
             width: paintCanvas.width,
             height: paintCanvas.height,
@@ -1616,6 +2929,9 @@
             activeLayer: state.activeLayer,
             mode: state.mode,
             showOverlay: state.showOverlay,
+            layerVisibility: { ...state.layerVisibility },
+            layerOpacity: { ...state.layerOpacity },
+            layerExpanded: { ...state.layerExpanded },
             gridMode: state.gridMode,
             spacing: state.spacing,
             minDot: state.minDot,
@@ -1634,10 +2950,10 @@
       }
 
       function saveProjectFile() {
-        state.projectName = sanitizeProjectName(projectNameInput.value);
-        projectNameInput.value = state.projectName;
+        state.projectName = normalizeProjectName(projectNameInput.value);
+        projectNameInput.value = projectNameInput.value.trim();
         const snapshot = getProjectSnapshot();
-        const fileName = `${state.projectName}.json`;
+        const fileName = `${sanitizeProjectName(state.projectName)}.json`;
         downloadTextFile(JSON.stringify(snapshot, null, 2), fileName, "application/json;charset=utf-8");
       }
 
@@ -1699,7 +3015,7 @@
         updateFrameDimensions(frameWidth, frameHeight);
 
         const settings = project.settings || {};
-        state.projectName = sanitizeProjectName(project.projectName || state.projectName);
+        state.projectName = normalizeProjectName(project.projectName || state.projectName);
         state.showOverlay = Boolean(settings.showOverlay);
         state.gridMode = settings.gridMode === "staggered" ? "staggered" : "aligned";
         state.spacing = Math.max(4, Math.min(40, readNumber(settings.spacing, state.spacing)));
@@ -1713,6 +3029,22 @@
           0,
           Math.min(1, readNumber(settings.referenceImageOpacity, state.referenceImageOpacity))
         );
+        state.layerVisibility = {
+          front: settings.layerVisibility?.front !== false,
+          image: settings.layerVisibility?.image === true,
+          back: settings.layerVisibility?.back !== false,
+        };
+        state.layerOpacity = {
+          front: Math.max(0, Math.min(1, readNumber(settings.layerOpacity?.front, 1))),
+          image: Math.max(0, Math.min(1, readNumber(settings.layerOpacity?.image, state.referenceImageOpacity))),
+          back: Math.max(0, Math.min(1, readNumber(settings.layerOpacity?.back, 1))),
+        };
+        state.layerExpanded = {
+          front: settings.layerExpanded?.front === true,
+          image: settings.layerExpanded?.image === true,
+          back: settings.layerExpanded?.back !== false,
+        };
+        state.referenceImageOpacity = state.layerOpacity.image;
 
         const projectToolSettings = settings.toolSettings || {};
         state.toolSettings.paint = {
@@ -1742,7 +3074,7 @@
         dotColorInput.value = state.dotColor;
         zoomInput.value = String(Math.round(state.zoom * 100));
         imageOpacityInput.value = String(Math.round(state.referenceImageOpacity * 100));
-        projectNameInput.value = state.projectName;
+        projectNameInput.value = state.projectName === "Untitled project" ? "" : state.projectName;
 
         switchMode(settings.mode === "erase" ? "erase" : "paint");
         updateToggleButtons();
@@ -1767,18 +3099,60 @@
         }
       }
 
-      frontLayerButton.addEventListener("click", () => {
-        state.activeLayer = "front";
+      function activateLayer(layerName) {
+        if (layerName !== "front" && layerName !== "back") {
+          return;
+        }
+        state.activeLayer = layerName;
         updateToggleButtons();
         redrawOverlay();
         renderSvg();
+      }
+
+      function handleLayerButtonKeydown(event, layerName) {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          activateLayer(layerName);
+        }
+      }
+
+      frontLayerButton.addEventListener("click", () => {
+        activateLayer("front");
+      });
+      frontLayerButton.addEventListener("keydown", (event) => {
+        handleLayerButtonKeydown(event, "front");
       });
 
       backLayerButton.addEventListener("click", () => {
-        state.activeLayer = "back";
-        updateToggleButtons();
-        redrawOverlay();
-        renderSvg();
+        activateLayer("back");
+      });
+      backLayerButton.addEventListener("keydown", (event) => {
+        handleLayerButtonKeydown(event, "back");
+      });
+
+      frontLayerExpandButton.addEventListener("click", (event) => {
+        event.stopPropagation();
+        toggleLayerExpanded("front");
+      });
+
+      backLayerExpandButton.addEventListener("click", (event) => {
+        event.stopPropagation();
+        toggleLayerExpanded("back");
+      });
+
+      frontLayerVisibilityButton.addEventListener("click", (event) => {
+        event.stopPropagation();
+        toggleLayerVisibility("front");
+      });
+
+      imageLayerVisibilityButton.addEventListener("click", (event) => {
+        event.stopPropagation();
+        toggleLayerVisibility("image");
+      });
+
+      backLayerVisibilityButton.addEventListener("click", (event) => {
+        event.stopPropagation();
+        toggleLayerVisibility("back");
       });
 
       paintModeButton.addEventListener("click", () => {
@@ -1790,6 +3164,12 @@
       });
 
       overlayToggleButton.addEventListener("click", () => {
+        state.showOverlay = !state.showOverlay;
+        updateToggleButtons();
+        redrawOverlay();
+      });
+
+      overlayToggleVisibleButton.addEventListener("click", () => {
         state.showOverlay = !state.showOverlay;
         updateToggleButtons();
         redrawOverlay();
@@ -1847,6 +3227,14 @@
 
       dotColorInput.addEventListener("input", () => {
         state.dotColor = dotColorInput.value;
+        updateLabels();
+        scheduleRender();
+      });
+
+      dotColorVisible.addEventListener("input", () => {
+        state.dotColor = dotColorVisible.value;
+        dotColorInput.value = state.dotColor;
+        updateLabels();
         scheduleRender();
       });
 
@@ -1854,18 +3242,34 @@
         setZoom(Number(zoomInput.value) / 100);
       });
 
+      fitScreenButton.addEventListener("click", resetView);
+      undoButton.addEventListener("click", undoLastAction);
+      redoButton.addEventListener("click", redoLastAction);
       resizeButton.addEventListener("click", applyCanvasSize);
+      chooseImageButton.addEventListener("click", () => {
+        referenceImageInput.click();
+      });
+      replaceImageButton.addEventListener("click", () => {
+        referenceImageInput.click();
+      });
       referenceImageInput.addEventListener("change", (event) => {
         const [file] = event.target.files || [];
         loadReferenceFile(file);
       });
       imageOpacityInput.addEventListener("input", () => {
-        state.referenceImageOpacity = Number(imageOpacityInput.value) / 100;
-        referenceImage.style.opacity = String(state.referenceImageOpacity);
-        updateLabels();
+        setLayerOpacity("image", Number(imageOpacityInput.value) / 100);
+      });
+      frontOpacityInput.addEventListener("input", () => {
+        setLayerOpacity("front", Number(frontOpacityInput.value) / 100);
+      });
+      backOpacityInput.addEventListener("input", () => {
+        setLayerOpacity("back", Number(backOpacityInput.value) / 100);
       });
       fitImageButton.addEventListener("click", fitCanvasToReferenceImage);
       clearImageButton.addEventListener("click", clearReferenceImage);
+      projectNameInput.addEventListener("input", () => {
+        state.projectName = normalizeProjectName(projectNameInput.value);
+      });
       widthInput.addEventListener("input", scheduleCanvasSizeApply);
       heightInput.addEventListener("input", scheduleCanvasSizeApply);
       widthInput.addEventListener("keydown", (event) => {
@@ -1912,12 +3316,19 @@
       });
 
       clearButton.addEventListener("click", () => {
-        pushHistoryEntry(state.activeLayer);
-        const activeCtx = getActiveLayerContext();
-        activeCtx.fillStyle = "#ffffff";
-        activeCtx.fillRect(0, 0, paintCanvas.width, paintCanvas.height);
-        redrawOverlay();
-        scheduleRender();
+        clearLayer(state.activeLayer);
+      });
+
+      topDeleteButton.addEventListener("click", () => {
+        clearLayer("front");
+      });
+
+      bottomDeleteButton.addEventListener("click", () => {
+        clearLayer("back");
+      });
+
+      clearBothButton.addEventListener("click", () => {
+        clearAllLayers();
       });
 
       downloadFrontButton.addEventListener("click", () => {
@@ -1931,6 +3342,14 @@
       downloadBothButton.addEventListener("click", () => {
         downloadSvg(state.latestSvgs.front, "front");
         window.setTimeout(() => downloadSvg(state.latestSvgs.back, "back"), 50);
+      });
+
+      topCopyButton.addEventListener("click", () => {
+        copyLayerSvg("front");
+      });
+
+      bottomCopyButton.addEventListener("click", () => {
+        copyLayerSvg("back");
       });
 
       saveProjectButton.addEventListener("click", saveProjectFile);
@@ -1972,7 +3391,7 @@
       paintCanvas.addEventListener(
         "wheel",
         (event) => {
-          if (!event.metaKey) {
+          if (!event.metaKey && !event.ctrlKey) {
             return;
           }
           event.preventDefault();
