@@ -92,6 +92,13 @@
         gap: 8px;
       }
 
+      .brand-actions {
+        margin-left: auto;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+      }
+
       .brand-logo {
         display: inline-flex;
         align-items: center;
@@ -150,7 +157,7 @@
         display: grid;
         grid-template-columns: minmax(0, auto) minmax(0, 1fr) minmax(0, 1fr);
         align-items: center;
-        gap: 16px;
+        gap: 8px;
         width: 100%;
       }
 
@@ -256,6 +263,14 @@
         color: var(--text);
         font-size: 15px;
         line-height: 30px;
+        -moz-appearance: textfield;
+        appearance: textfield;
+      }
+
+      .field-number::-webkit-outer-spin-button,
+      .field-number::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
       }
 
       .layer-list {
@@ -393,9 +408,11 @@
         align-items: center;
         gap: 12px;
         width: 100%;
+        min-width: 0;
         padding: 8px;
         border-radius: 4px;
         background: #0d1912;
+        overflow: hidden;
       }
 
       .image-file-main {
@@ -406,6 +423,7 @@
         padding: 0;
         text-align: left;
         color: inherit;
+        overflow: hidden;
       }
 
       .image-file-label {
@@ -424,6 +442,7 @@
 
       .image-action-button {
         flex: 0 0 auto;
+        flex-shrink: 0;
       }
 
       .accent-icon-button {
@@ -707,7 +726,7 @@
       .action-row {
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 12px;
         padding: 0 6px;
       }
 
@@ -891,7 +910,15 @@
         cursor: grab;
       }
 
+      .overlay-wrap.move-ready {
+        cursor: grab;
+      }
+
       .overlay-wrap.panning {
+        cursor: grabbing;
+      }
+
+      .overlay-wrap.moving-pattern {
         cursor: grabbing;
       }
 
@@ -910,6 +937,25 @@
         line-height: 18px;
       }
 
+      .status-meta {
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        min-width: 0;
+      }
+
+      .status-shortcut-button {
+        width: 20px;
+        height: 20px;
+        color: rgba(255, 255, 255, 0.72);
+        flex: 0 0 auto;
+      }
+
+      .status-shortcut-button:hover,
+      .status-shortcut-button:focus-visible {
+        color: rgba(255, 255, 255, 0.96);
+      }
+
       .floating-controls {
         position: absolute;
         left: 50%;
@@ -919,6 +965,107 @@
         gap: 8px;
         transform: translateX(-50%);
         justify-items: center;
+      }
+
+      .top-shelf-stack {
+        position: relative;
+        width: 100%;
+        height: 43px;
+      }
+
+      .zoom-toolbar {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        width: max-content;
+        height: 43px;
+        padding: 6px;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 8px;
+      }
+
+      .zoom-toolbar-shell {
+        position: absolute;
+        left: 50%;
+        top: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 43px;
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+        transition: opacity 250ms cubic-bezier(0.8, 0.07, 0.36, 1), transform 250ms cubic-bezier(0.8, 0.07, 0.36, 1);
+      }
+
+      .zoom-toolbar-shell.is-toolbar-hidden {
+        opacity: 0;
+        transform: translateX(-50%) translateY(20px);
+        pointer-events: none;
+      }
+
+      .zoom-toolbar-button,
+      .zoom-toolbar-icon-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        height: 31px;
+        min-height: 31px;
+        padding: 0 8px;
+        border-radius: 4px;
+        background: rgba(255, 255, 255, 0.1);
+        color: rgba(255, 255, 255, 0.9);
+      }
+
+      .zoom-toolbar-button {
+        font-size: 14px;
+        line-height: 30px;
+        white-space: nowrap;
+      }
+
+      .zoom-toolbar-button.zoom-hundred {
+        width: 127px;
+        justify-content: flex-start;
+      }
+
+      .zoom-toolbar-button.zoom-fit {
+        width: 105px;
+        justify-content: flex-start;
+      }
+
+      .zoom-toolbar-icon-group {
+        display: flex;
+        align-items: center;
+        gap: 2px;
+        width: 66px;
+        height: 31px;
+        flex: 0 0 66px;
+      }
+
+      .zoom-toolbar-icon-button {
+        width: 32px;
+        flex: 0 0 32px;
+        padding: 0;
+      }
+
+      .floating-toolbar-shell {
+        position: absolute;
+        left: 50%;
+        top: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 43px;
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+        transition: opacity 250ms cubic-bezier(0.8, 0.07, 0.36, 1), transform 250ms cubic-bezier(0.8, 0.07, 0.36, 1);
+      }
+
+      .floating-toolbar-shell.is-toolbar-hidden {
+        opacity: 0;
+        transform: translateX(-50%) translateY(20px);
+        pointer-events: none;
       }
 
       .floating-toolbar {
@@ -1016,7 +1163,7 @@
       .tool-cluster {
         display: flex;
         align-items: center;
-        gap: 12px;
+        gap: 8px;
         height: 52px;
         padding: 6px;
         background: rgba(255, 255, 255, 0.1);
@@ -1045,27 +1192,42 @@
         width: 40px;
         height: 40px;
         border-radius: 4px;
-        color: rgba(255, 255, 255, 0.5);
+        color: #ffffff;
+        opacity: 1;
       }
 
       .tool-button.active {
         background: var(--accent);
         color: var(--accent-text);
+        opacity: 1;
       }
 
       .tool-button.is-available {
-        color: rgba(255, 255, 255, 0.9);
+        color: #ffffff;
+        opacity: 1;
       }
 
       .tool-button.is-disabled {
-        color: rgba(255, 255, 255, 0.5);
+        color: #ffffff;
+        opacity: 0.5;
       }
 
       .tool-color {
         position: relative;
-        width: 28px;
-        height: 28px;
-        flex: 0 0 28px;
+        width: 40px;
+        height: 40px;
+        flex: 0 0 40px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 4px;
+      }
+
+      .tool-color-inner {
+        position: relative;
+        width: 30px;
+        height: 30px;
+        flex: 0 0 30px;
       }
 
       .tool-color-input {
@@ -1081,10 +1243,38 @@
       .tool-color-swatch {
         position: absolute;
         inset: 0;
-        border: 1.4px solid rgba(0, 0, 0, 0.5);
+        border: 2px solid rgba(0, 0, 0, 0.5);
         border-radius: 999px;
         background: var(--accent);
         pointer-events: none;
+      }
+
+      .tool-status-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        width: 76px;
+        height: 40px;
+        padding: 0 8px;
+        border-radius: 4px;
+        background: transparent;
+        color: #ffffff;
+        opacity: 1;
+        font-size: 14px;
+        line-height: 30px;
+      }
+
+      .tool-status-button.active {
+        background: var(--accent);
+        color: var(--accent-text);
+        opacity: 1;
+      }
+
+      .tool-status-value {
+        display: inline-block;
+        min-width: 40px;
+        text-align: right;
       }
 
       .sidebar-icon,
@@ -1162,6 +1352,8 @@
         place-items: center;
         padding: 24px;
         background: rgba(0, 0, 0, 0.42);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
         z-index: 40;
       }
 
@@ -1212,6 +1404,81 @@
         color: var(--text);
       }
 
+      .shortcut-dialog {
+        width: min(760px, 100%);
+      }
+
+      .shortcut-dialog p {
+        margin-top: 6px;
+      }
+
+      .shortcut-list {
+        margin-top: 18px;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 24px;
+        align-items: start;
+      }
+
+      .shortcut-column {
+        display: grid;
+        gap: 18px;
+      }
+
+      .shortcut-section {
+        display: grid;
+        gap: 10px;
+      }
+
+      .shortcut-section-title {
+        color: var(--text-muted);
+        font-size: 13px;
+        font-weight: 500;
+        letter-spacing: 1.2px;
+        line-height: 16px;
+        text-transform: uppercase;
+      }
+
+      .shortcut-row {
+        display: grid;
+        grid-template-columns: minmax(0, 170px) minmax(0, 1fr);
+        gap: 16px;
+        align-items: center;
+      }
+
+      .shortcut-keys {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+
+      .shortcut-key {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 28px;
+        padding: 0 10px;
+        border-radius: 4px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: rgba(255, 255, 255, 0.08);
+        color: var(--text);
+        font-size: 13px;
+        line-height: 18px;
+        white-space: nowrap;
+      }
+
+      .shortcut-plus {
+        color: rgba(255, 255, 255, 0.5);
+        font-size: 13px;
+        line-height: 18px;
+      }
+
+      .shortcut-desc {
+        color: rgba(255, 255, 255, 0.78);
+        font-size: 14px;
+        line-height: 20px;
+      }
+
       @media (max-width: 1200px) {
         .floating-controls {
           bottom: 20px;
@@ -1252,6 +1519,11 @@
           right: 12px;
           bottom: 12px;
           font-size: 12px;
+        }
+
+        .shortcut-list {
+          grid-template-columns: minmax(0, 1fr);
+          gap: 18px;
         }
       }
     </style>
@@ -1345,6 +1617,9 @@
         <path d="M21 21H8a2 2 0 0 1-1.42-.587l-3.994-3.999a2 2 0 0 1 0-2.828l10-10a2 2 0 0 1 2.829 0l5.999 6a2 2 0 0 1 0 2.828L12.834 21"/>
         <path d="m5.082 11.09 8.828 8.828"/>
       </symbol>
+      <symbol id="i-hand" viewBox="0 0 24 24">
+        <path d="M18 11V6C18 5.46957 17.7893 4.96086 17.4142 4.58579C17.0391 4.21071 16.5304 4 16 4C15.4695 4 14.9608 4.21071 14.5858 4.58579C14.2107 4.96086 14 5.46957 14 6M14 10V4C14 3.46957 13.7893 2.96086 13.4142 2.58579C13.0391 2.21071 12.5304 2 12 2C11.4695 2 10.9608 2.21071 10.5858 2.58579C10.2107 2.96086 10 3.46957 10 4V6M10 6V10.5M10 6C10 5.46957 9.78929 4.96086 9.41421 4.58579C9.03914 4.21071 8.53043 4 8 4C7.46957 4 6.96086 4.21071 6.58579 4.58579C6.21071 4.96086 6 5.46957 6 6V14M18 8C18 7.46957 18.2107 6.96086 18.5858 6.58579C18.9609 6.21071 19.4696 6 20 6C20.5304 6 21.0391 6.21071 21.4142 6.58579C21.7893 6.96086 22 7.46957 22 8V14C22 16.1217 21.1571 18.1566 19.6569 19.6569C18.1566 21.1571 16.1217 22 14 22H12C9.2 22 7.5 21.14 6.01 19.66L2.41 16.06C2.06594 15.6789 1.88159 15.1802 1.89513 14.6669C1.90867 14.1537 2.11905 13.6653 2.48272 13.303C2.8464 12.9406 3.3355 12.7319 3.84877 12.7202C4.36204 12.7085 4.86016 12.8946 5.24 13.24L7 15"/>
+      </symbol>
       <symbol id="i-line-squiggle" viewBox="0 0 24 24">
         <path d="M6.99998 3.49998C12 1.49998 14 5.99998 9.99998 7.49998C1.49998 9.99998 1.99998 15 4.99998 16C9.99998 18 14 5.99998 19 8.99998C21.8088 10.6853 21.6196 14.7373 20.1167 17.6993M20.1167 17.6993C18.9442 20.01 16.9721 21.6573 15 21C10.2681 18.6341 14.9402 10.8945 20.1167 17.6993ZM20.1167 17.6993C20.41 18.0849 20.705 18.5173 21 19" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
       </symbol>
@@ -1360,11 +1635,43 @@
         <path fill="none" d="M12.6667 2H3.33333C2.59695 2 2 2.59695 2 3.33333V12.6667C2 13.403 2.59695 14 3.33333 14H12.6667C13.403 14 14 13.403 14 12.6667V3.33333C14 2.59695 13.403 2 12.6667 2Z"/>
         <path fill="none" d="M11.3333 6H11.34M8.66667 8.66667H8.67333M8.66667 11.3333H8.67333M6 11.3333H6.00667M11.3333 8.66667H11.34M11.3333 11.3333H11.34"/>
       </symbol>
+      <symbol id="i-search" viewBox="0 0 24 24">
+        <circle cx="11" cy="11" r="7"/>
+        <path d="m21 21-4.3-4.3"/>
+      </symbol>
+      <symbol id="i-zoom-in" viewBox="0 0 24 24">
+        <circle cx="11" cy="11" r="7"/>
+        <path d="M21 21l-4.3-4.3"/>
+        <path d="M11 8v6"/>
+        <path d="M8 11h6"/>
+      </symbol>
+      <symbol id="i-zoom-out" viewBox="0 0 24 24">
+        <circle cx="11" cy="11" r="7"/>
+        <path d="M21 21l-4.3-4.3"/>
+        <path d="M8 11h6"/>
+      </symbol>
+      <symbol id="i-maximize" viewBox="0 0 24 24">
+        <path d="M8 3H3v5"/>
+        <path d="M16 3h5v5"/>
+        <path d="M8 21H3v-5"/>
+        <path d="M16 21h5v-5"/>
+      </symbol>
       <symbol id="i-fit-screen" viewBox="0 0 24 24">
         <path d="M8 3H3v5"/>
         <path d="M16 3h5v5"/>
         <path d="M8 21H3v-5"/>
         <path d="M16 21h5v-5"/>
+      </symbol>
+      <symbol id="i-keyboard" viewBox="0 0 24 24">
+        <rect x="2" y="5" width="20" height="14" rx="2"/>
+        <path d="M6 9h.01"/>
+        <path d="M10 9h.01"/>
+        <path d="M14 9h.01"/>
+        <path d="M18 9h.01"/>
+        <path d="M8 13h.01"/>
+        <path d="M12 13h.01"/>
+        <path d="M16 13h.01"/>
+        <path d="M7 17h10"/>
       </symbol>
     </svg>
     <main class="shell">
@@ -1385,7 +1692,9 @@
                 </svg>
               </span>
             </div>
+          <div class="brand-actions">
             <div class="brand-version">Texture Creator v1.0</div>
+            </div>
           </div>
         </div>
 
@@ -1523,52 +1832,32 @@
           <div class="style-grid">
             <button id="staggeredGridButton" class="style-button active" type="button">
               <span class="sidebar-pattern-icon staggered-icon">
-                <svg viewBox="0 0 78 22" aria-hidden="true">
-                  <path d="M55 11H63M59 7V15" />
-                  <path d="M45 11H53M49 7V15" />
-                  <path d="M40 18H48M44 14V22" />
-                  <path d="M40 4H48M44 0V8" />
-                  <path d="M60 18H68M64 14V22" />
-                  <path d="M60 4H68M64 0V8" />
-                  <path d="M50 18H58M54 14V22" />
-                  <path d="M50 4H58M54 0V8" />
-                  <path d="M65 11H73M69 7V15" />
-                  <path d="M70 18H78M74 14V22" />
-                  <path d="M70 4H78M74 0V8" />
-                  <path d="M15 11H23M19 7V15" />
-                  <path d="M5 11H13M9 7V15" />
-                  <path d="M0 18H8M4 14V22" />
+                <svg viewBox="0 0 41 24" aria-hidden="true">
+                  <path d="M0 20H8M4 16V24" />
                   <path d="M0 4H8M4 0V8" />
-                  <path d="M20 18H28M24 14V22" />
-                  <path d="M20 4H28M24 0V8" />
-                  <path d="M10 18H18M14 14V22" />
-                  <path d="M10 4H18M14 0V8" />
-                  <path d="M35 11H43M39 7V15" />
-                  <path d="M25 11H33M29 7V15" />
-                  <path d="M30 18H38M34 14V22" />
-                  <path d="M30 4H38M34 0V8" />
+                  <path d="M22 20H30M26 16V24" />
+                  <path d="M22 4H30M26 0V8" />
+                  <path d="M11 20H19M15 16V24" />
+                  <path d="M11 4H19M15 0V8" />
+                  <path d="M16.5 12H24.5M20.5 8V16" />
+                  <path d="M5.5 12H13.5M9.5 8V16" />
+                  <path d="M27.5 12H35.5M31.5 8V16" />
+                  <path d="M33 20H41M37 16V24" />
+                  <path d="M33 4H41M37 0V8" />
                 </svg>
               </span>
             </button>
             <button id="alignedGridButton" class="style-button" type="button">
               <span class="sidebar-pattern-icon grid-icon">
-                <svg viewBox="0 0 78 20" aria-hidden="true">
-                  <path d="M0 4.5H8M4 0.5V8.5" />
-                  <path d="M10 4.5H18M14 0.5V8.5" />
-                  <path d="M20 4.5H28M24 0.5V8.5" />
-                  <path d="M0 15.5H8M4 11.5V19.5" />
-                  <path d="M10 15.5H18M14 11.5V19.5" />
-                  <path d="M20 15.5H28M24 11.5V19.5" />
-                  <path d="M30 4.5H38M34 0.5V8.5" />
-                  <path d="M40 4.5H48M44 0.5V8.5" />
-                  <path d="M50 4.5H58M54 0.5V8.5" />
-                  <path d="M30 15.5H38M34 11.5V19.5" />
-                  <path d="M40 15.5H48M44 11.5V19.5" />
-                  <path d="M50 15.5H58M54 11.5V19.5" />
-                  <path d="M60 4.5H68M64 0.5V8.5" />
-                  <path d="M70 4.5H78M74 0.5V8.5" />
-                  <path d="M60 15.5H68M64 11.5V19.5" />
-                  <path d="M70 15.5H78M74 11.5V19.5" />
+                <svg viewBox="0 0 41 24" aria-hidden="true">
+                  <path d="M0 6H8M4 2V10" />
+                  <path d="M11 6H19M15 2V10" />
+                  <path d="M22 6H30M26 2V10" />
+                  <path d="M0 18H8M4 14V22" />
+                  <path d="M11 18H19M15 14V22" />
+                  <path d="M22 18H30M26 14V22" />
+                  <path d="M33 6H41M37 2V10" />
+                  <path d="M33 18H41M37 14V22" />
                 </svg>
               </span>
             </button>
@@ -1650,7 +1939,7 @@
 
       <section class="workspace">
         <div class="canvas-stage">
-          <div class="stage-header">
+          <div class="stage-header hidden-control" aria-hidden="true">
             <button id="fitScreenButton" class="fit-button" type="button" aria-label="Fit screen">
               <span class="toolbar-icon">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-fit-screen"/></svg>
@@ -1680,38 +1969,71 @@
           </div>
 
           <div class="floating-controls">
-            <div class="floating-toolbar">
-              <div class="floating-segment">
-                <div class="floating-pill leading value-pill" data-tooltip="Brush size" aria-label="Brush size">
-                  <span class="secondary-toolbar-icon">
-                    <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-move-diagonal"/></svg>
-                  </span>
-                  <span id="brushSizeValue" class="pill-value">80</span>
-                </div>
-                <div class="floating-pill trailing">
-                  <div class="range-track slider-shell">
-                    <input id="brushSizeInput" type="range" min="2" max="180" step="1" value="80" />
+            <div class="top-shelf-stack">
+              <div class="zoom-toolbar-shell is-toolbar-hidden">
+                <div class="zoom-toolbar" aria-label="Zoom controls">
+                  <button id="zoomHundredButton" class="zoom-toolbar-button zoom-hundred" type="button" aria-label="Zoom to 100%">
+                    <span class="sidebar-icon">
+                      <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-maximize"/></svg>
+                    </span>
+                    <span>Zoom to 100%</span>
+                  </button>
+                  <button id="zoomFitButton" class="zoom-toolbar-button zoom-fit" type="button" aria-label="Zoom to fit">
+                    <span class="sidebar-icon">
+                      <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-fit-screen"/></svg>
+                    </span>
+                    <span>Zoom to fit</span>
+                  </button>
+                  <div class="zoom-toolbar-icon-group">
+                    <button id="zoomOutButton" class="zoom-toolbar-icon-button" type="button" aria-label="Zoom out">
+                      <span class="sidebar-icon">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-zoom-out"/></svg>
+                      </span>
+                    </button>
+                    <button id="zoomInButton" class="zoom-toolbar-icon-button" type="button" aria-label="Zoom in">
+                      <span class="sidebar-icon">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-zoom-in"/></svg>
+                      </span>
+                    </button>
                   </div>
                 </div>
               </div>
-              <div class="floating-segment">
-                <div class="floating-pill leading short-pill" data-tooltip="Brush hardness" aria-label="Brush hardness">
-                  <span class="secondary-toolbar-icon">
-                    <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-circle-dot-dashed"/></svg>
-                  </span>
-                  <span id="brushStrengthValue" class="pill-value">10%</span>
-                </div>
-                <div class="floating-pill trailing">
-                  <div class="range-track slider-shell">
-                    <input id="brushStrengthInput" type="range" min="1" max="100" step="1" value="10" />
+
+              <div class="floating-toolbar-shell">
+                <div class="floating-toolbar">
+                  <div class="floating-segment">
+                    <div class="floating-pill leading value-pill" data-tooltip="Brush size" aria-label="Brush size">
+                      <span class="secondary-toolbar-icon">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-move-diagonal"/></svg>
+                      </span>
+                      <span id="brushSizeValue" class="pill-value">80</span>
+                    </div>
+                    <div class="floating-pill trailing">
+                      <div class="range-track slider-shell">
+                        <input id="brushSizeInput" type="range" min="2" max="180" step="1" value="80" />
+                      </div>
+                    </div>
                   </div>
+                  <div class="floating-segment">
+                    <div class="floating-pill leading short-pill" data-tooltip="Brush hardness" aria-label="Brush hardness">
+                      <span class="secondary-toolbar-icon">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-circle-dot-dashed"/></svg>
+                      </span>
+                      <span id="brushStrengthValue" class="pill-value">10%</span>
+                    </div>
+                    <div class="floating-pill trailing">
+                      <div class="range-track slider-shell">
+                        <input id="brushStrengthInput" type="range" min="1" max="100" step="1" value="10" />
+                      </div>
+                    </div>
+                  </div>
+                  <button id="overlayToggleVisibleButton" class="floating-toggle-button" type="button" aria-label="Show brush strokes" data-tooltip="Show brush strokes">
+                    <span class="secondary-toolbar-toggle-icon">
+                      <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-line-squiggle"/></svg>
+                    </span>
+                  </button>
                 </div>
               </div>
-              <button id="overlayToggleVisibleButton" class="floating-toggle-button" type="button" aria-label="Show brush strokes" data-tooltip="Show brush strokes">
-                <span class="secondary-toolbar-toggle-icon">
-                  <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-line-squiggle"/></svg>
-                </span>
-              </button>
             </div>
 
             <div class="tool-cluster">
@@ -1726,11 +2048,18 @@
                     <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-eraser"/></svg>
                   </span>
                 </button>
+                <button id="moveModeButton" class="tool-button" type="button" aria-label="Move pattern" data-tooltip="Move pattern">
+                  <span class="toolbar-icon">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-hand"/></svg>
+                  </span>
+                </button>
               </div>
               <div class="tool-divider"></div>
               <div class="tool-color" aria-label="Pattern color">
-                <input id="dotColorVisible" class="tool-color-input" type="color" value="#ccff00" aria-label="Pattern color" />
-                <div id="dotColorSwatch" class="tool-color-swatch"></div>
+                <div class="tool-color-inner">
+                  <input id="dotColorVisible" class="tool-color-input" type="color" value="#ccff00" aria-label="Pattern color" />
+                  <div id="dotColorSwatch" class="tool-color-swatch"></div>
+                </div>
               </div>
               <div class="tool-divider"></div>
               <div class="tool-segment">
@@ -1745,12 +2074,26 @@
                   </span>
                 </button>
               </div>
+              <div class="tool-divider"></div>
+              <button id="zoomModeButton" class="tool-status-button" type="button" aria-label="Zoom controls" data-tooltip="Zoom controls">
+                <span class="sidebar-icon">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-search"/></svg>
+                </span>
+                <span id="zoomStatusValue" class="tool-status-value">100%</span>
+              </button>
             </div>
           </div>
 
           <div class="status-bar">
             <span id="canvasStatus">640 × 640 px</span>
-            <span id="markCountStatus">0 marks</span>
+            <div class="status-meta">
+              <span id="markCountStatus">0 marks</span>
+              <button id="shortcutHelpButton" class="icon-button-sm status-shortcut-button" type="button" aria-label="Keyboard shortcuts" data-tooltip="Keyboard shortcuts">
+                <span class="sidebar-icon">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-keyboard"/></svg>
+                </span>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -1769,6 +2112,175 @@
           <button id="imageImportKeepButton" class="primary" type="button">Keep Pattern</button>
           <button id="imageImportDeleteButton" class="secondary" type="button">Delete Pattern</button>
           <button id="imageImportCancelButton" class="secondary" type="button">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="shortcutDialog" class="dialog-backdrop" hidden>
+      <div class="dialog shortcut-dialog" role="dialog" aria-modal="true" aria-labelledby="shortcutDialogTitle">
+        <h2 id="shortcutDialogTitle">Keyboard Shortcuts</h2>
+        <p>Quick controls currently available in the generator.</p>
+        <div class="shortcut-list">
+          <div class="shortcut-column">
+            <div class="shortcut-section">
+              <div class="shortcut-section-title">Tools</div>
+              <div class="shortcut-row">
+                <div class="shortcut-keys">
+                  <span class="shortcut-key">B</span>
+                </div>
+                <div class="shortcut-desc">Activate the brush.</div>
+              </div>
+              <div class="shortcut-row">
+                <div class="shortcut-keys">
+                  <span class="shortcut-key">E</span>
+                </div>
+                <div class="shortcut-desc">Activate the eraser.</div>
+              </div>
+              <div class="shortcut-row">
+                <div class="shortcut-keys">
+                  <span class="shortcut-key">X</span>
+                </div>
+                <div class="shortcut-desc">Toggle between paint and erase.</div>
+              </div>
+              <div class="shortcut-row">
+                <div class="shortcut-keys">
+                  <span class="shortcut-key">M</span>
+                </div>
+                <div class="shortcut-desc">Activate the move tool.</div>
+              </div>
+              <div class="shortcut-row">
+                <div class="shortcut-keys">
+                  <span class="shortcut-key">Z</span>
+                </div>
+                <div class="shortcut-desc">Activate the zoom tool.</div>
+              </div>
+              <div class="shortcut-row">
+                <div class="shortcut-keys">
+                  <span class="shortcut-key">[</span>
+                  <span class="shortcut-plus">/</span>
+                  <span class="shortcut-key">]</span>
+                </div>
+                <div class="shortcut-desc">Decrease or increase brush size.</div>
+              </div>
+              <div class="shortcut-row">
+                <div class="shortcut-keys">
+                  <span class="shortcut-key">Shift</span>
+                  <span class="shortcut-plus">+</span>
+                  <span class="shortcut-key">[</span>
+                  <span class="shortcut-plus">/</span>
+                  <span class="shortcut-key">]</span>
+                </div>
+                <div class="shortcut-desc">Decrease or increase brush hardness.</div>
+              </div>
+              <div class="shortcut-row">
+                <div class="shortcut-keys">
+                  <span class="shortcut-key">Alt</span>
+                  <span class="shortcut-plus">+</span>
+                  <span class="shortcut-key">Drag</span>
+                </div>
+                <div class="shortcut-desc">Adjust brush size left/right and hardness up/down.</div>
+              </div>
+            </div>
+
+            <div class="shortcut-section">
+              <div class="shortcut-section-title">View</div>
+              <div class="shortcut-row">
+                <div class="shortcut-keys">
+                  <span class="shortcut-key">Space</span>
+                  <span class="shortcut-plus">+</span>
+                  <span class="shortcut-key">Drag</span>
+                </div>
+                <div class="shortcut-desc">Pan the canvas view.</div>
+              </div>
+              <div class="shortcut-row">
+                <div class="shortcut-keys">
+                  <span class="shortcut-key">Cmd</span>
+                  <span class="shortcut-plus">/</span>
+                  <span class="shortcut-key">Ctrl</span>
+                  <span class="shortcut-plus">+</span>
+                  <span class="shortcut-key">Scroll</span>
+                </div>
+                <div class="shortcut-desc">Zoom in and out in 10% steps.</div>
+              </div>
+              <div class="shortcut-row">
+                <div class="shortcut-keys">
+                  <span class="shortcut-key">Shift</span>
+                  <span class="shortcut-plus">+</span>
+                  <span class="shortcut-key">1</span>
+                </div>
+                <div class="shortcut-desc">Reset to 100% zoom and recenter the view.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="shortcut-column">
+            <div class="shortcut-section">
+              <div class="shortcut-section-title">History</div>
+              <div class="shortcut-row">
+                <div class="shortcut-keys">
+                  <span class="shortcut-key">Cmd</span>
+                  <span class="shortcut-plus">/</span>
+                  <span class="shortcut-key">Ctrl</span>
+                  <span class="shortcut-plus">+</span>
+                  <span class="shortcut-key">Z</span>
+                </div>
+                <div class="shortcut-desc">Undo.</div>
+              </div>
+              <div class="shortcut-row">
+                <div class="shortcut-keys">
+                  <span class="shortcut-key">Cmd</span>
+                  <span class="shortcut-plus">/</span>
+                  <span class="shortcut-key">Ctrl</span>
+                  <span class="shortcut-plus">+</span>
+                  <span class="shortcut-key">Shift</span>
+                  <span class="shortcut-plus">+</span>
+                  <span class="shortcut-key">Z</span>
+                </div>
+                <div class="shortcut-desc">Redo.</div>
+              </div>
+              <div class="shortcut-row">
+                <div class="shortcut-keys">
+                  <span class="shortcut-key">Cmd</span>
+                  <span class="shortcut-plus">/</span>
+                  <span class="shortcut-key">Ctrl</span>
+                  <span class="shortcut-plus">+</span>
+                  <span class="shortcut-key">Y</span>
+                </div>
+                <div class="shortcut-desc">Redo.</div>
+              </div>
+            </div>
+
+            <div class="shortcut-section">
+              <div class="shortcut-section-title">Canvas Size</div>
+              <div class="shortcut-row">
+                <div class="shortcut-keys">
+                  <span class="shortcut-key">Up</span>
+                  <span class="shortcut-plus">/</span>
+                  <span class="shortcut-key">Down</span>
+                </div>
+                <div class="shortcut-desc">Change width or height by 1 in the size inputs.</div>
+              </div>
+              <div class="shortcut-row">
+                <div class="shortcut-keys">
+                  <span class="shortcut-key">Shift</span>
+                  <span class="shortcut-plus">+</span>
+                  <span class="shortcut-key">Up</span>
+                  <span class="shortcut-plus">/</span>
+                  <span class="shortcut-key">Down</span>
+                </div>
+                <div class="shortcut-desc">Change width or height by 10 in the size inputs.</div>
+              </div>
+              <div class="shortcut-row">
+                <div class="shortcut-keys">
+                  <span class="shortcut-key">Enter</span>
+                </div>
+                <div class="shortcut-desc">Apply the typed canvas size immediately.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="dialog-actions">
+          <button id="shortcutDialogCloseButton" class="primary" type="button">Close</button>
         </div>
       </div>
     </div>
@@ -1829,6 +2341,12 @@
       const backLayerButton = document.getElementById("backLayerButton");
       const paintModeButton = document.getElementById("paintModeButton");
       const eraseModeButton = document.getElementById("eraseModeButton");
+      const moveModeButton = document.getElementById("moveModeButton");
+      const zoomModeButton = document.getElementById("zoomModeButton");
+      const zoomHundredButton = document.getElementById("zoomHundredButton");
+      const zoomFitButton = document.getElementById("zoomFitButton");
+      const zoomOutButton = document.getElementById("zoomOutButton");
+      const zoomInButton = document.getElementById("zoomInButton");
       const overlayToggleVisibleButton = document.getElementById("overlayToggleVisibleButton");
       const overlayToggleButton = document.getElementById("overlayToggleButton");
       const brushSizeInput = document.getElementById("brushSizeInput");
@@ -1851,6 +2369,7 @@
       const strokeWidthValue = document.getElementById("strokeWidthValue");
       const strokeTaperValue = document.getElementById("strokeTaperValue");
       const zoomValue = document.getElementById("zoomValue");
+      const zoomStatusValue = document.getElementById("zoomStatusValue");
       const dotColorVisible = document.getElementById("dotColorVisible");
       const dotColorSwatch = document.getElementById("dotColorSwatch");
 
@@ -1867,21 +2386,29 @@
       const loadProjectButton = document.getElementById("loadProjectButton");
       const loadProjectInput = document.getElementById("loadProjectInput");
       const copyButton = document.getElementById("copyButton");
+      const shortcutHelpButton = document.getElementById("shortcutHelpButton");
       const fitScreenButton = document.getElementById("fitScreenButton");
       const undoButton = document.getElementById("undoButton");
       const redoButton = document.getElementById("redoButton");
       const markCountStatus = document.getElementById("markCountStatus");
+      const shortcutDialog = document.getElementById("shortcutDialog");
+      const shortcutDialogCloseButton = document.getElementById("shortcutDialogCloseButton");
       const imageImportDialog = document.getElementById("imageImportDialog");
       const imageImportDialogMessage = document.getElementById("imageImportDialogMessage");
       const imageImportKeepButton = document.getElementById("imageImportKeepButton");
       const imageImportDeleteButton = document.getElementById("imageImportDeleteButton");
       const imageImportCancelButton = document.getElementById("imageImportCancelButton");
       const imageLayerRow = imageControlRow;
+      const zoomToolbarShell = document.querySelector(".zoom-toolbar-shell");
+      const floatingToolbarShell = document.querySelector(".floating-toolbar-shell");
+      const floatingToolbar = document.querySelector(".floating-toolbar");
 
       const state = {
         activeLayer: "front",
         mode: "paint",
+        lastPaintEraseMode: "paint",
         drawing: false,
+        movingPattern: false,
         adjustingBrush: false,
         panKeyDown: false,
         panning: false,
@@ -1949,6 +2476,11 @@
         panStartY: 0,
         panInitialOffsetX: 0,
         panInitialOffsetY: 0,
+        patternMoveStartX: 0,
+        patternMoveStartY: 0,
+        patternMoveDeltaX: 0,
+        patternMoveDeltaY: 0,
+        patternMoveSnapshots: null,
         history: [],
         redoHistory: [],
         maxHistory: 40,
@@ -1967,6 +2499,10 @@
         return Math.max(0.25, Math.min(4, value));
       }
 
+      function snapZoomToTenth(value) {
+        return Math.round(value * 10) / 10;
+      }
+
       function setBrushSize(value) {
         state.brushSize = Math.round(clampBrushSize(value));
         state.toolSettings[state.mode].size = state.brushSize;
@@ -1980,14 +2516,34 @@
       }
 
       function switchMode(nextMode) {
-        if (nextMode !== "paint" && nextMode !== "erase") {
+        if (nextMode !== "paint" && nextMode !== "erase" && nextMode !== "move" && nextMode !== "zoom") {
           return;
         }
+        const previousMode = state.mode;
         state.mode = nextMode;
+        if (nextMode === "paint" || nextMode === "erase") {
+          state.lastPaintEraseMode = nextMode;
+        }
+        if (
+          (previousMode === "move" || previousMode === "zoom") !==
+          (nextMode === "move" || nextMode === "zoom")
+        ) {
+          setFloatingToolbarVisibility(nextMode === "move" || nextMode === "zoom");
+        }
+        if (previousMode === "zoom" || nextMode === "zoom") {
+          setZoomToolbarVisibility(nextMode !== "zoom");
+        }
+        if (nextMode === "move" || nextMode === "zoom") {
+          updateToggleButtons();
+          updatePanCursor();
+          hideCursorRing();
+          return;
+        }
         const nextSettings = state.toolSettings[nextMode];
         state.brushSize = Math.round(clampBrushSize(nextSettings.size));
         state.brushHardness = clampBrushHardness(nextSettings.hardness);
         updateToggleButtons();
+        updatePanCursor();
         updateLabels();
       }
 
@@ -2015,7 +2571,7 @@
       }
 
       function setZoom(value) {
-        state.zoom = clampZoom(value);
+        state.zoom = clampZoom(snapZoomToTenth(value));
         updateLabels();
       }
 
@@ -2041,6 +2597,19 @@
         updateLabels();
       }
 
+      function fitZoomToWorkspace() {
+        const padding = 64;
+        const availableWidth = Math.max(64, overlayWrap.clientWidth - padding);
+        const availableHeight = Math.max(64, overlayWrap.clientHeight - padding);
+        const nextZoom = Math.min(
+          availableWidth / Math.max(1, paintCanvas.width),
+          availableHeight / Math.max(1, paintCanvas.height)
+        );
+        state.zoom = clampZoom(snapZoomToTenth(nextZoom));
+        centerViewport();
+        updateLabels();
+      }
+
       function updateCursorPreview() {
         const hardnessPercent = Math.round(state.brushHardness * 100);
         const previewOpacity = Math.min(0.88, 0.18 + Math.pow(state.brushHardness, 0.5) * 0.7);
@@ -2052,16 +2621,46 @@
         cursorReadout.innerHTML = `Diameter: <strong>${Math.round(state.brushSize)} px</strong><br>Hardness: <strong>${hardnessPercent}%</strong>`;
       }
 
-      function pushHistoryEntry(layerName) {
-        const layerCanvas = layerCanvases[layerName];
-        const layerCtx = layerContexts[layerName];
-        const snapshot = layerCtx.getImageData(0, 0, layerCanvas.width, layerCanvas.height);
-        state.history.push({
-          layer: layerName,
-          width: layerCanvas.width,
-          height: layerCanvas.height,
-          snapshot,
-        });
+      function setFloatingToolbarVisibility(hidden, immediate = false) {
+        const currentHidden = floatingToolbarShell.classList.contains("is-toolbar-hidden");
+
+        if (!immediate && currentHidden === hidden) {
+          return;
+        }
+
+        if (immediate) {
+          const previousTransition = floatingToolbarShell.style.transition;
+          floatingToolbarShell.style.transition = "none";
+          floatingToolbarShell.classList.toggle("is-toolbar-hidden", hidden);
+          void floatingToolbarShell.offsetHeight;
+          floatingToolbarShell.style.transition = previousTransition;
+          return;
+        }
+
+        floatingToolbarShell.classList.toggle("is-toolbar-hidden", hidden);
+      }
+
+      function setZoomToolbarVisibility(hidden, immediate = false) {
+        const currentHidden = zoomToolbarShell.classList.contains("is-toolbar-hidden");
+
+        if (!immediate && currentHidden === hidden) {
+          return;
+        }
+
+        if (immediate) {
+          const previousTransition = zoomToolbarShell.style.transition;
+          zoomToolbarShell.style.transition = "none";
+          zoomToolbarShell.classList.toggle("is-toolbar-hidden", hidden);
+          void zoomToolbarShell.offsetHeight;
+          zoomToolbarShell.style.transition = previousTransition;
+          return;
+        }
+
+        zoomToolbarShell.classList.toggle("is-toolbar-hidden", hidden);
+      }
+
+      function pushHistoryEntries(entries) {
+        state.history.push({ entries });
         state.redoHistory = [];
         if (state.history.length > state.maxHistory) {
           state.history.shift();
@@ -2069,27 +2668,63 @@
         updateToggleButtons();
       }
 
+      function pushHistoryEntry(layerName) {
+        const layerCanvas = layerCanvases[layerName];
+        const layerCtx = layerContexts[layerName];
+        const snapshot = layerCtx.getImageData(0, 0, layerCanvas.width, layerCanvas.height);
+        pushHistoryEntries([
+          {
+            layer: layerName,
+            width: layerCanvas.width,
+            height: layerCanvas.height,
+            snapshot,
+          },
+        ]);
+      }
+
+      function pushHistoryForLayers(layerNames) {
+        const entries = layerNames.map((layerName) => {
+          const layerCanvas = layerCanvases[layerName];
+          const layerCtx = layerContexts[layerName];
+          return {
+            layer: layerName,
+            width: layerCanvas.width,
+            height: layerCanvas.height,
+            snapshot: layerCtx.getImageData(0, 0, layerCanvas.width, layerCanvas.height),
+          };
+        });
+        pushHistoryEntries(entries);
+      }
+
       function undoLastAction() {
         const entry = state.history.pop();
         if (!entry) {
           return;
         }
-        const layerCanvas = layerCanvases[entry.layer];
-        const layerCtx = layerContexts[entry.layer];
-        if (layerCanvas.width !== entry.width || layerCanvas.height !== entry.height) {
-          return;
+        const entries = Array.isArray(entry.entries)
+          ? entry.entries
+          : [entry];
+        const redoEntries = [];
+        for (const layerEntry of entries) {
+          const layerCanvas = layerCanvases[layerEntry.layer];
+          const layerCtx = layerContexts[layerEntry.layer];
+          if (layerCanvas.width !== layerEntry.width || layerCanvas.height !== layerEntry.height) {
+            return;
+          }
+          redoEntries.push({
+            layer: layerEntry.layer,
+            width: layerEntry.width,
+            height: layerEntry.height,
+            snapshot: layerCtx.getImageData(0, 0, layerCanvas.width, layerCanvas.height),
+          });
         }
-        const redoSnapshot = layerCtx.getImageData(0, 0, layerCanvas.width, layerCanvas.height);
-        state.redoHistory.push({
-          layer: entry.layer,
-          width: entry.width,
-          height: entry.height,
-          snapshot: redoSnapshot,
-        });
+        state.redoHistory.push({ entries: redoEntries });
         if (state.redoHistory.length > state.maxHistory) {
           state.redoHistory.shift();
         }
-        layerCtx.putImageData(entry.snapshot, 0, 0);
+        for (const layerEntry of entries) {
+          layerContexts[layerEntry.layer].putImageData(layerEntry.snapshot, 0, 0);
+        }
         updateToggleButtons();
         redrawOverlay();
         scheduleRender();
@@ -2100,22 +2735,30 @@
         if (!entry) {
           return;
         }
-        const layerCanvas = layerCanvases[entry.layer];
-        const layerCtx = layerContexts[entry.layer];
-        if (layerCanvas.width !== entry.width || layerCanvas.height !== entry.height) {
-          return;
+        const entries = Array.isArray(entry.entries)
+          ? entry.entries
+          : [entry];
+        const undoEntries = [];
+        for (const layerEntry of entries) {
+          const layerCanvas = layerCanvases[layerEntry.layer];
+          const layerCtx = layerContexts[layerEntry.layer];
+          if (layerCanvas.width !== layerEntry.width || layerCanvas.height !== layerEntry.height) {
+            return;
+          }
+          undoEntries.push({
+            layer: layerEntry.layer,
+            width: layerEntry.width,
+            height: layerEntry.height,
+            snapshot: layerCtx.getImageData(0, 0, layerCanvas.width, layerCanvas.height),
+          });
         }
-        const undoSnapshot = layerCtx.getImageData(0, 0, layerCanvas.width, layerCanvas.height);
-        state.history.push({
-          layer: entry.layer,
-          width: entry.width,
-          height: entry.height,
-          snapshot: undoSnapshot,
-        });
+        state.history.push({ entries: undoEntries });
         if (state.history.length > state.maxHistory) {
           state.history.shift();
         }
-        layerCtx.putImageData(entry.snapshot, 0, 0);
+        for (const layerEntry of entries) {
+          layerContexts[layerEntry.layer].putImageData(layerEntry.snapshot, 0, 0);
+        }
         updateToggleButtons();
         redrawOverlay();
         scheduleRender();
@@ -2283,6 +2926,8 @@
         imageLayerVisibilityIcon.setAttribute("href", !hasReferenceImage || state.layerVisibility.image ? "#i-eye" : "#i-eye-off");
         paintModeButton.classList.toggle("active", state.mode === "paint");
         eraseModeButton.classList.toggle("active", state.mode === "erase");
+        moveModeButton.classList.toggle("active", state.mode === "move");
+        zoomModeButton.classList.toggle("active", state.mode === "zoom");
         overlayToggleVisibleButton.classList.toggle("active", state.showOverlay);
         overlayToggleVisibleButton.setAttribute("aria-label", state.showOverlay ? "Hide brush strokes" : "Show brush strokes");
         overlayToggleVisibleButton.setAttribute("data-tooltip", state.showOverlay ? "Hide brush strokes" : "Show brush strokes");
@@ -2297,6 +2942,8 @@
       function updatePanCursor() {
         overlayWrap.classList.toggle("pan-ready", state.panKeyDown && !state.panning);
         overlayWrap.classList.toggle("panning", state.panning);
+        overlayWrap.classList.toggle("move-ready", state.mode === "move" && !state.movingPattern);
+        overlayWrap.classList.toggle("moving-pattern", state.movingPattern);
       }
 
       function updateRangeFill(input) {
@@ -2322,6 +2969,7 @@
         frontOpacityValue.textContent = `${Math.round(state.layerOpacity.front * 100)}%`;
         backOpacityValue.textContent = `${Math.round(state.layerOpacity.back * 100)}%`;
         zoomValue.textContent = `${Math.round(state.zoom * 100)}%`;
+        zoomStatusValue.textContent = `${Math.round(state.zoom * 100)}%`;
         cursorRing.style.width = `${Math.round(state.brushSize)}px`;
         cursorRing.style.height = `${Math.round(state.brushSize)}px`;
         dotColorVisible.value = state.dotColor;
@@ -2354,14 +3002,45 @@
         };
       }
 
-      function getCanvasPoint(event) {
+      function getCanvasPoint(event, shouldClamp = true) {
         const rect = paintCanvas.getBoundingClientRect();
         const scaleX = paintCanvas.width / rect.width;
         const scaleY = paintCanvas.height / rect.height;
-        return clampPointToCanvas(
-          (event.clientX - rect.left) * scaleX,
-          (event.clientY - rect.top) * scaleY
-        );
+        const x = (event.clientX - rect.left) * scaleX;
+        const y = (event.clientY - rect.top) * scaleY;
+        return shouldClamp ? clampPointToCanvas(x, y) : { x, y };
+      }
+
+      function createPatternMoveSnapshots() {
+        const snapshots = {};
+        for (const layerName of ["front", "back"]) {
+          const sourceCanvas = layerCanvases[layerName];
+          const snapshotCanvas = document.createElement("canvas");
+          snapshotCanvas.width = sourceCanvas.width;
+          snapshotCanvas.height = sourceCanvas.height;
+          snapshotCanvas.getContext("2d").drawImage(sourceCanvas, 0, 0);
+          snapshots[layerName] = snapshotCanvas;
+        }
+        return snapshots;
+      }
+
+      function restorePatternMoveSnapshots() {
+        if (!state.patternMoveSnapshots) {
+          return;
+        }
+        for (const layerName of ["front", "back"]) {
+          const layerCtx = layerContexts[layerName];
+          const layerCanvas = layerCanvases[layerName];
+          layerCtx.fillStyle = "#ffffff";
+          layerCtx.fillRect(0, 0, layerCanvas.width, layerCanvas.height);
+          layerCtx.drawImage(
+            state.patternMoveSnapshots[layerName],
+            state.patternMoveDeltaX,
+            state.patternMoveDeltaY
+          );
+        }
+        redrawOverlay();
+        scheduleRender();
       }
 
       function paintStroke(from, to) {
@@ -2478,6 +3157,19 @@
           paintCanvas.setPointerCapture(event.pointerId);
           return;
         }
+        if (state.mode === "move") {
+          state.movingPattern = true;
+          state.patternMoveStartX = getCanvasPoint(event, false).x;
+          state.patternMoveStartY = getCanvasPoint(event, false).y;
+          state.patternMoveDeltaX = 0;
+          state.patternMoveDeltaY = 0;
+          state.patternMoveSnapshots = createPatternMoveSnapshots();
+          pushHistoryForLayers(["front", "back"]);
+          hideCursorRing();
+          updatePanCursor();
+          paintCanvas.setPointerCapture(event.pointerId);
+          return;
+        }
         state.drawing = true;
         pushHistoryEntry(state.activeLayer);
         showCursorRing(event);
@@ -2510,6 +3202,14 @@
           setBrushHardness(state.brushAdjustInitialHardness + hardnessDelta);
           return;
         }
+        if (state.movingPattern) {
+          event.preventDefault();
+          const point = getCanvasPoint(event, false);
+          state.patternMoveDeltaX = Math.round(point.x - state.patternMoveStartX);
+          state.patternMoveDeltaY = Math.round(point.y - state.patternMoveStartY);
+          restorePatternMoveSnapshots();
+          return;
+        }
         if (!state.drawing) {
           return;
         }
@@ -2534,6 +3234,21 @@
           if (typeof event.pointerId === "number") {
             paintCanvas.releasePointerCapture(event.pointerId);
           }
+          return;
+        }
+        if (state.movingPattern) {
+          const hadMovement = state.patternMoveDeltaX !== 0 || state.patternMoveDeltaY !== 0;
+          state.movingPattern = false;
+          state.patternMoveSnapshots = null;
+          if (!hadMovement) {
+            state.history.pop();
+            state.redoHistory = [];
+            updateToggleButtons();
+          }
+          if (typeof event.pointerId === "number") {
+            paintCanvas.releasePointerCapture(event.pointerId);
+          }
+          updatePanCursor();
           return;
         }
         if (!state.drawing) {
@@ -2563,7 +3278,7 @@
       }
 
       function showCursorRing(event) {
-        if (state.panKeyDown || state.panning) {
+        if (state.panKeyDown || state.panning || state.mode === "move" || state.mode === "zoom" || state.movingPattern) {
           return;
         }
         updateCursorRing(event);
@@ -2574,7 +3289,7 @@
       }
 
       function hideCursorRing() {
-        if (state.adjustingBrush || state.drawing || state.panning) {
+        if (state.adjustingBrush || state.drawing || state.panning || state.movingPattern) {
           return;
         }
         cursorRing.style.opacity = "0";
@@ -2745,6 +3460,16 @@
         return layerHasPattern("front") || layerHasPattern("back");
       }
 
+      function openShortcutDialog() {
+        shortcutDialog.hidden = false;
+        shortcutDialog.classList.add("visible");
+      }
+
+      function closeShortcutDialog() {
+        shortcutDialog.hidden = true;
+        shortcutDialog.classList.remove("visible");
+      }
+
       function closeImageImportDialog() {
         imageImportDialog.hidden = true;
         imageImportDialog.classList.remove("visible");
@@ -2860,9 +3585,7 @@
       }
 
       function clearAllLayers() {
-        for (const layerName of ["front", "back"]) {
-          pushHistoryEntry(layerName);
-        }
+        pushHistoryForLayers(["front", "back"]);
         for (const [layerName, layerCtx] of Object.entries(layerContexts)) {
           layerCtx.fillStyle = "#ffffff";
           layerCtx.fillRect(
@@ -3076,7 +3799,17 @@
         imageOpacityInput.value = String(Math.round(state.referenceImageOpacity * 100));
         projectNameInput.value = state.projectName === "Untitled project" ? "" : state.projectName;
 
-        switchMode(settings.mode === "erase" ? "erase" : "paint");
+        switchMode(
+          settings.mode === "erase"
+            ? "erase"
+            : settings.mode === "move"
+              ? "move"
+              : settings.mode === "zoom"
+                ? "zoom"
+              : "paint"
+        );
+        setFloatingToolbarVisibility(state.mode === "move" || state.mode === "zoom", true);
+        setZoomToolbarVisibility(state.mode !== "zoom", true);
         updateToggleButtons();
         updateLabels();
         redrawOverlay();
@@ -3163,6 +3896,14 @@
         switchMode("erase");
       });
 
+      moveModeButton.addEventListener("click", () => {
+        switchMode("move");
+      });
+
+      zoomModeButton.addEventListener("click", () => {
+        switchMode("zoom");
+      });
+
       overlayToggleButton.addEventListener("click", () => {
         state.showOverlay = !state.showOverlay;
         updateToggleButtons();
@@ -3240,6 +3981,22 @@
 
       zoomInput.addEventListener("input", () => {
         setZoom(Number(zoomInput.value) / 100);
+      });
+
+      zoomHundredButton.addEventListener("click", () => {
+        setZoom(1);
+      });
+
+      zoomFitButton.addEventListener("click", () => {
+        fitZoomToWorkspace();
+      });
+
+      zoomOutButton.addEventListener("click", () => {
+        setZoom(state.zoom - 0.1);
+      });
+
+      zoomInButton.addEventListener("click", () => {
+        setZoom(state.zoom + 0.1);
       });
 
       fitScreenButton.addEventListener("click", resetView);
@@ -3376,6 +4133,14 @@
         }
       });
 
+      shortcutHelpButton.addEventListener("click", openShortcutDialog);
+      shortcutDialogCloseButton.addEventListener("click", closeShortcutDialog);
+      shortcutDialog.addEventListener("click", (event) => {
+        if (event.target === shortcutDialog) {
+          closeShortcutDialog();
+        }
+      });
+
       paintCanvas.addEventListener("pointerdown", pointerDown);
       paintCanvas.addEventListener("pointermove", pointerMove);
       paintCanvas.addEventListener("pointerup", pointerUp);
@@ -3402,6 +4167,11 @@
       );
 
       window.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && shortcutDialog.classList.contains("visible")) {
+          event.preventDefault();
+          closeShortcutDialog();
+          return;
+        }
         if (event.target instanceof HTMLTextAreaElement) {
           return;
         }
@@ -3448,9 +4218,38 @@
           }
           return;
         }
+        if (!event.metaKey && !event.ctrlKey && !event.altKey) {
+          const lowerKey = event.key.toLowerCase();
+          if (lowerKey === "b") {
+            event.preventDefault();
+            switchMode("paint");
+            return;
+          }
+          if (lowerKey === "e") {
+            event.preventDefault();
+            switchMode("erase");
+            return;
+          }
+          if (lowerKey === "m") {
+            event.preventDefault();
+            switchMode("move");
+            return;
+          }
+          if (lowerKey === "z" && !event.shiftKey) {
+            event.preventDefault();
+            switchMode("zoom");
+            return;
+          }
+        }
         if (event.key.toLowerCase() === "x") {
           event.preventDefault();
-          switchMode(state.mode === "paint" ? "erase" : "paint");
+          if (state.mode === "paint") {
+            switchMode("erase");
+          } else if (state.mode === "erase") {
+            switchMode("paint");
+          } else {
+            switchMode(state.lastPaintEraseMode === "paint" ? "erase" : "paint");
+          }
           return;
         }
         if (event.key === "]") {
@@ -3474,6 +4273,8 @@
 
       updateLabels();
       updateToggleButtons();
+      setFloatingToolbarVisibility(state.mode === "move" || state.mode === "zoom", true);
+      setZoomToolbarVisibility(state.mode !== "zoom", true);
       updatePanCursor();
       resetCanvas(paintCanvas.width, paintCanvas.height);
       window.requestAnimationFrame(centerViewport);
