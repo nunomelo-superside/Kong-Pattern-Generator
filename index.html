@@ -876,7 +876,7 @@
         position: absolute;
         inset: 0;
         border-radius: 50%;
-        background: radial-gradient(circle, rgba(255, 40, 40, 1) 0%, rgba(255, 40, 40, 0.98) 18%, rgba(255, 40, 40, 0.82) 42%, rgba(255, 40, 40, 0.34) 68%, rgba(255, 40, 40, 0.08) 86%, rgba(255, 40, 40, 0) 100%);
+        background: radial-gradient(circle, rgba(204, 255, 0, 1) 0%, rgba(204, 255, 0, 0.98) 18%, rgba(204, 255, 0, 0.82) 42%, rgba(204, 255, 0, 0.34) 68%, rgba(204, 255, 0, 0.08) 86%, rgba(204, 255, 0, 0) 100%);
         pointer-events: none;
       }
 
@@ -2612,12 +2612,14 @@
 
       function updateCursorPreview() {
         const hardnessPercent = Math.round(state.brushHardness * 100);
-        const previewOpacity = Math.min(0.88, 0.18 + Math.pow(state.brushHardness, 0.5) * 0.7);
+        const previewOpacity = Math.min(0.76, 0.16 + Math.pow(state.brushHardness, 0.5) * 0.6);
         const hardCore = 3 + state.brushHardness * 67;
-        const midFalloff = 12 + state.brushHardness * 62;
-        const edgeFalloff = 22 + state.brushHardness * 78;
+        const softCore = 8 + state.brushHardness * 60;
+        const midFalloff = 18 + state.brushHardness * 58;
+        const edgeFalloff = 34 + state.brushHardness * 62;
+        const outerFalloff = 58 + state.brushHardness * 32;
         cursorFill.style.opacity = String(previewOpacity);
-        cursorFill.style.background = `radial-gradient(circle, rgba(255, 25, 25, 1) 0%, rgba(255, 25, 25, 1) ${hardCore.toFixed(0)}%, rgba(255, 35, 35, 0.82) ${midFalloff.toFixed(0)}%, rgba(255, 50, 50, 0.28) ${edgeFalloff.toFixed(0)}%, rgba(255, 50, 50, 0) 100%)`;
+        cursorFill.style.background = `radial-gradient(circle, rgba(204, 255, 0, 0.98) 0%, rgba(204, 255, 0, 0.98) ${hardCore.toFixed(0)}%, rgba(204, 255, 0, 0.9) ${softCore.toFixed(0)}%, rgba(204, 255, 0, 0.72) ${midFalloff.toFixed(0)}%, rgba(204, 255, 0, 0.38) ${edgeFalloff.toFixed(0)}%, rgba(204, 255, 0, 0.14) ${outerFalloff.toFixed(0)}%, rgba(204, 255, 0, 0) 100%)`;
         cursorReadout.innerHTML = `Diameter: <strong>${Math.round(state.brushSize)} px</strong><br>Hardness: <strong>${hardnessPercent}%</strong>`;
       }
 
