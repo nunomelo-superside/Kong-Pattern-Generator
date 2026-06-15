@@ -79,6 +79,28 @@
         border-right: 1px solid var(--panel-border);
         overflow-y: auto;
         overflow-x: hidden;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(255, 255, 255, 0.14) transparent;
+      }
+
+      .sidebar::-webkit-scrollbar {
+        width: 10px;
+      }
+
+      .sidebar::-webkit-scrollbar-track {
+        background: transparent;
+      }
+
+      .sidebar::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.14);
+        border: 3px solid transparent;
+        border-radius: 999px;
+        background-clip: padding-box;
+      }
+
+      .sidebar::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.22);
+        background-clip: padding-box;
       }
 
       .sidebar-header {
@@ -586,6 +608,40 @@
         gap: 8px;
       }
 
+      .advanced-settings {
+        display: grid;
+        gap: 12px;
+      }
+
+      .advanced-setting-row {
+        display: grid;
+        gap: 6px;
+      }
+
+      .advanced-setting-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 0 6px;
+      }
+
+      .advanced-setting-label {
+        min-width: 0;
+        color: var(--text);
+        font-size: 14px;
+        line-height: 18px;
+      }
+
+      .advanced-setting-value {
+        flex: 0 0 auto;
+        color: rgba(255, 255, 255, 0.72);
+        font-size: 14px;
+        line-height: 18px;
+        text-align: right;
+        white-space: nowrap;
+      }
+
       .style-button {
         display: flex;
         align-items: center;
@@ -742,9 +798,7 @@
         min-width: 0;
         min-height: 0;
         overflow: hidden;
-        background:
-          linear-gradient(90deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.08) 100%),
-          linear-gradient(90deg, var(--bg) 0%, var(--bg) 100%);
+        background: #30352f;
       }
 
       .canvas-stage {
@@ -980,7 +1034,7 @@
         width: max-content;
         height: 43px;
         padding: 6px;
-        background: rgba(255, 255, 255, 0.1);
+        background: rgba(0, 0, 0, 0.2);
         backdrop-filter: blur(10px);
         border-radius: 8px;
       }
@@ -1014,7 +1068,7 @@
         min-height: 31px;
         padding: 0 8px;
         border-radius: 4px;
-        background: rgba(255, 255, 255, 0.1);
+        background: rgba(255, 255, 255, 0.05);
         color: rgba(255, 255, 255, 0.9);
       }
 
@@ -1076,7 +1130,7 @@
         width: max-content;
         height: 43px;
         padding: 6px;
-        background: rgba(255, 255, 255, 0.1);
+        background: rgba(0, 0, 0, 0.2);
         backdrop-filter: blur(10px);
         border-radius: 8px;
       }
@@ -1105,7 +1159,7 @@
         height: 31px;
         min-height: 31px;
         padding: 0 8px;
-        background: rgba(255, 255, 255, 0.1);
+        background: rgba(255, 255, 255, 0.05);
       }
 
       .floating-pill.leading {
@@ -1166,7 +1220,7 @@
         gap: 8px;
         height: 52px;
         padding: 6px;
-        background: rgba(255, 255, 255, 0.1);
+        background: rgba(0, 0, 0, 0.2);
         backdrop-filter: blur(10px);
         justify-self: center;
         width: max-content;
@@ -1864,6 +1918,101 @@
           </div>
         </section>
 
+        <section id="patternSettingsSection" class="sidebar-section is-hidden">
+          <div class="section-title">Pattern Settings</div>
+          <div class="advanced-settings">
+            <div class="advanced-setting-row">
+              <div class="advanced-setting-header">
+                <div class="advanced-setting-label">Spacing</div>
+                <span id="spacingValue" class="advanced-setting-value">14 px</span>
+              </div>
+              <div class="range-track">
+                <input id="spacingInput" type="range" min="4" max="40" step="1" value="14" />
+              </div>
+            </div>
+
+            <div class="advanced-setting-row">
+              <div class="advanced-setting-header">
+                <div class="advanced-setting-label">Min size</div>
+                <span id="minDotValue" class="advanced-setting-value">0.4 px</span>
+              </div>
+              <div class="range-track">
+                <input id="minDotInput" type="range" min="0" max="4" step="0.1" value="0.4" />
+              </div>
+            </div>
+
+            <div class="advanced-setting-row">
+              <div class="advanced-setting-header">
+                <div class="advanced-setting-label">Scale</div>
+                <span id="dotScaleValue" class="advanced-setting-value">100%</span>
+              </div>
+              <div class="range-track">
+                <input id="dotScaleInput" type="range" min="20" max="160" step="1" value="100" />
+              </div>
+            </div>
+
+            <div class="advanced-setting-row">
+              <div class="advanced-setting-header">
+                <div class="advanced-setting-label">Stroke width</div>
+                <span id="strokeWidthValue" class="advanced-setting-value">1.6 px</span>
+              </div>
+              <div class="range-track">
+                <input id="strokeWidthInput" type="range" min="0.2" max="8" step="0.1" value="1.6" />
+              </div>
+            </div>
+
+            <div class="advanced-setting-row">
+              <div class="advanced-setting-header">
+                <div class="advanced-setting-label">Stroke taper</div>
+                <span id="strokeTaperValue" class="advanced-setting-value">95%</span>
+              </div>
+              <div class="range-track">
+                <input id="strokeTaperInput" type="range" min="0" max="100" step="1" value="95" />
+              </div>
+            </div>
+
+            <div class="advanced-setting-row">
+              <div class="advanced-setting-header">
+                <div class="advanced-setting-label">Size curve</div>
+                <span id="sizeCurveValue" class="advanced-setting-value">1.0x</span>
+              </div>
+              <div class="range-track">
+                <input id="sizeCurveInput" type="range" min="50" max="300" step="10" value="100" />
+              </div>
+            </div>
+
+            <div class="advanced-setting-row">
+              <div class="advanced-setting-header">
+                <div class="advanced-setting-label">Size cutoff</div>
+                <span id="sizeCutoffValue" class="advanced-setting-value">0.8 px</span>
+              </div>
+              <div class="range-track">
+                <input id="sizeCutoffInput" type="range" min="0" max="400" step="10" value="80" />
+              </div>
+            </div>
+
+            <div class="advanced-setting-row">
+              <div class="advanced-setting-header">
+                <div class="advanced-setting-label">Brush flow</div>
+                <span id="brushFlowValue" class="advanced-setting-value">25%</span>
+              </div>
+              <div class="range-track">
+                <input id="brushFlowInput" type="range" min="1" max="100" step="1" value="25" />
+              </div>
+            </div>
+
+            <div class="advanced-setting-row">
+              <div class="advanced-setting-header">
+                <div class="advanced-setting-label">Flow response</div>
+                <span id="flowResponseValue" class="advanced-setting-value">2.0x</span>
+              </div>
+              <div class="range-track">
+                <input id="flowResponseInput" type="range" min="20" max="300" step="10" value="200" />
+              </div>
+            </div>
+          </div>
+        </section>
+
         <section class="sidebar-section actions-section">
           <div class="section-title">Pattern Actions</div>
           <div class="actions-list">
@@ -1923,17 +2072,7 @@
           <button id="clearButton" class="hidden-control" type="button" hidden aria-hidden="true">Clear</button>
           <button id="resizeButton" class="hidden-control" type="button" hidden aria-hidden="true">Apply Canvas Size</button>
           <button id="fitImageButton" class="hidden-control" type="button" hidden aria-hidden="true">Fit Canvas To Image</button>
-          <input id="spacingInput" class="hidden-control" type="range" min="4" max="40" step="1" value="14" hidden aria-hidden="true" />
-          <input id="minDotInput" class="hidden-control" type="range" min="0" max="4" step="0.1" value="0.4" hidden aria-hidden="true" />
-          <input id="dotScaleInput" class="hidden-control" type="range" min="20" max="160" step="1" value="100" hidden aria-hidden="true" />
-          <input id="strokeWidthInput" class="hidden-control" type="range" min="0.2" max="8" step="0.1" value="1.6" hidden aria-hidden="true" />
-          <input id="strokeTaperInput" class="hidden-control" type="range" min="0" max="100" step="1" value="90" hidden aria-hidden="true" />
           <input id="dotColorInput" class="hidden-control" type="color" value="#ccff00" hidden aria-hidden="true" />
-          <span id="spacingValue" class="hidden-control" hidden aria-hidden="true">14 px</span>
-          <span id="minDotValue" class="hidden-control" hidden aria-hidden="true">0.4 px</span>
-          <span id="dotScaleValue" class="hidden-control" hidden aria-hidden="true">100%</span>
-          <span id="strokeWidthValue" class="hidden-control" hidden aria-hidden="true">1.6 px</span>
-          <span id="strokeTaperValue" class="hidden-control" hidden aria-hidden="true">90%</span>
         </section>
       </aside>
 
@@ -2210,6 +2349,14 @@
                 </div>
                 <div class="shortcut-desc">Reset to 100% zoom and recenter the view.</div>
               </div>
+              <div class="shortcut-row">
+                <div class="shortcut-keys">
+                  <span class="shortcut-key">Shift</span>
+                  <span class="shortcut-plus">+</span>
+                  <span class="shortcut-key">S</span>
+                </div>
+                <div class="shortcut-desc">Show or hide the advanced pattern settings.</div>
+              </div>
             </div>
           </div>
 
@@ -2351,6 +2498,7 @@
       const overlayToggleButton = document.getElementById("overlayToggleButton");
       const brushSizeInput = document.getElementById("brushSizeInput");
       const brushHardnessInput = document.getElementById("brushStrengthInput");
+      const brushFlowInput = document.getElementById("brushFlowInput");
       const alignedGridButton = document.getElementById("alignedGridButton");
       const staggeredGridButton = document.getElementById("staggeredGridButton");
       const spacingInput = document.getElementById("spacingInput");
@@ -2358,16 +2506,23 @@
       const dotScaleInput = document.getElementById("dotScaleInput");
       const strokeWidthInput = document.getElementById("strokeWidthInput");
       const strokeTaperInput = document.getElementById("strokeTaperInput");
+      const sizeCurveInput = document.getElementById("sizeCurveInput");
+      const sizeCutoffInput = document.getElementById("sizeCutoffInput");
       const dotColorInput = document.getElementById("dotColorInput");
+      const flowResponseInput = document.getElementById("flowResponseInput");
       const zoomInput = document.getElementById("zoomInput");
 
       const brushSizeValue = document.getElementById("brushSizeValue");
       const brushHardnessValue = document.getElementById("brushStrengthValue");
+      const brushFlowValue = document.getElementById("brushFlowValue");
       const spacingValue = document.getElementById("spacingValue");
       const minDotValue = document.getElementById("minDotValue");
       const dotScaleValue = document.getElementById("dotScaleValue");
       const strokeWidthValue = document.getElementById("strokeWidthValue");
       const strokeTaperValue = document.getElementById("strokeTaperValue");
+      const sizeCurveValue = document.getElementById("sizeCurveValue");
+      const sizeCutoffValue = document.getElementById("sizeCutoffValue");
+      const flowResponseValue = document.getElementById("flowResponseValue");
       const zoomValue = document.getElementById("zoomValue");
       const zoomStatusValue = document.getElementById("zoomStatusValue");
       const dotColorVisible = document.getElementById("dotColorVisible");
@@ -2387,6 +2542,7 @@
       const loadProjectInput = document.getElementById("loadProjectInput");
       const copyButton = document.getElementById("copyButton");
       const shortcutHelpButton = document.getElementById("shortcutHelpButton");
+      const patternSettingsSection = document.getElementById("patternSettingsSection");
       const fitScreenButton = document.getElementById("fitScreenButton");
       const undoButton = document.getElementById("undoButton");
       const redoButton = document.getElementById("redoButton");
@@ -2415,6 +2571,7 @@
         showOverlay: false,
         brushSize: Number(brushSizeInput.value),
         brushHardness: Number(brushHardnessInput.value) / 100,
+        brushFlow: Number(brushFlowInput.value) / 100,
         toolSettings: {
           paint: {
             size: Number(brushSizeInput.value),
@@ -2431,7 +2588,10 @@
         dotScale: Number(dotScaleInput.value) / 100,
         strokeWidth: Number(strokeWidthInput.value),
         strokeTaper: Number(strokeTaperInput.value) / 100,
+        sizeCurve: Number(sizeCurveInput.value) / 100,
+        sizeCutoff: Number(sizeCutoffInput.value) / 100,
         dotColor: dotColorInput.value,
+        flowResponse: Number(flowResponseInput.value) / 100,
         zoom: Number(zoomInput.value) / 100,
         lastPoint: null,
         pendingRender: false,
@@ -2498,6 +2658,14 @@
         return Math.max(0.01, Math.min(1, value));
       }
 
+      function clampBrushFlow(value) {
+        return Math.max(0.01, Math.min(1, value));
+      }
+
+      function clampFlowResponse(value) {
+        return Math.max(0.2, Math.min(3, value));
+      }
+
       function clampZoom(value) {
         return Math.max(0.25, Math.min(4, value));
       }
@@ -2515,6 +2683,16 @@
       function setBrushHardness(value) {
         state.brushHardness = clampBrushHardness(value);
         state.toolSettings[state.mode].hardness = state.brushHardness;
+        updateLabels();
+      }
+
+      function setBrushFlow(value) {
+        state.brushFlow = clampBrushFlow(value);
+        updateLabels();
+      }
+
+      function setFlowResponse(value) {
+        state.flowResponse = clampFlowResponse(value);
         updateLabels();
       }
 
@@ -2910,8 +3088,8 @@
         for (let index = 0; index < sourceData.data.length; index += 4) {
           const value = sourceData.data[index];
           const darkness = 255 - value;
-          overlayData.data[index] = 0;
-          overlayData.data[index + 1] = 0;
+          overlayData.data[index] = 204;
+          overlayData.data[index + 1] = 255;
           overlayData.data[index + 2] = 0;
           overlayData.data[index + 3] = Math.round(darkness * 0.45);
         }
@@ -2969,13 +3147,21 @@
       function updateLabels() {
         brushSizeInput.value = String(Math.round(state.brushSize));
         brushHardnessInput.value = String(Math.round(state.brushHardness * 100));
+        brushFlowInput.value = String(Math.round(state.brushFlow * 100));
+        sizeCurveInput.value = String(Math.round(state.sizeCurve * 100));
+        sizeCutoffInput.value = String(Math.round(state.sizeCutoff * 100));
+        flowResponseInput.value = String(Math.round(state.flowResponse * 100));
         brushSizeValue.textContent = `${Math.round(state.brushSize)}`;
         brushHardnessValue.textContent = `${Math.round(state.brushHardness * 100)}%`;
+        brushFlowValue.textContent = `${Math.round(state.brushFlow * 100)}%`;
         spacingValue.textContent = `${Math.round(state.spacing)} px`;
-        minDotValue.textContent = `${Math.round(state.minDot)} px`;
+        minDotValue.textContent = `${state.minDot.toFixed(1)} px`;
         dotScaleValue.textContent = `${Math.round(state.dotScale * 100)}%`;
         strokeWidthValue.textContent = `${Math.round(state.strokeWidth)} px`;
         strokeTaperValue.textContent = `${Math.round(state.strokeTaper * 100)}%`;
+        sizeCurveValue.textContent = `${state.sizeCurve.toFixed(1)}x`;
+        sizeCutoffValue.textContent = `${state.sizeCutoff.toFixed(1)} px`;
+        flowResponseValue.textContent = `${state.flowResponse.toFixed(1)}x`;
         imageOpacityValue.textContent = `${Math.round(state.layerOpacity.image * 100)}%`;
         frontOpacityValue.textContent = `${Math.round(state.layerOpacity.front * 100)}%`;
         backOpacityValue.textContent = `${Math.round(state.layerOpacity.back * 100)}%`;
@@ -3054,17 +3240,27 @@
         scheduleRender();
       }
 
+      function getEffectiveBrushFlow(hardness = state.brushHardness) {
+        const normalizedHardness = Math.max(0, Math.min(1, hardness));
+        const hardnessBoost = Math.pow(normalizedHardness, state.flowResponse);
+        return state.brushFlow + (1 - state.brushFlow) * hardnessBoost;
+      }
+
       function paintStroke(from, to) {
         const activeCtx = getActiveLayerContext();
         const dx = to.x - from.x;
         const dy = to.y - from.y;
         const distance = Math.hypot(dx, dy);
         const radius = state.brushSize * 0.5;
-        const spacing = Math.max(1, radius * 0.18);
-        const steps = Math.max(1, Math.ceil(distance / spacing));
+        const effectiveFlow = getEffectiveBrushFlow();
+        const spacing = Math.max(1, radius * (0.14 + (1 - effectiveFlow) * 0.34));
+        const stampCount =
+          distance <= 0.5
+            ? 1
+            : Math.max(2, Math.ceil(distance / spacing) + 1);
 
-        for (let step = 0; step <= steps; step += 1) {
-          const t = steps === 0 ? 0 : step / steps;
+        for (let step = 0; step < stampCount; step += 1) {
+          const t = stampCount === 1 ? 0 : step / (stampCount - 1);
           const x = from.x + dx * t;
           const y = from.y + dy * t;
           stampBrush(activeCtx, x, y, radius);
@@ -3074,6 +3270,7 @@
 
       function stampBrush(ctx, x, y, radius) {
         const hardness = state.brushHardness;
+        const effectiveFlow = getEffectiveBrushFlow(hardness);
         const left = Math.max(0, Math.floor(x - radius));
         const top = Math.max(0, Math.floor(y - radius));
         const right = Math.min(ctx.canvas.width, Math.ceil(x + radius));
@@ -3089,7 +3286,7 @@
         const data = imageData.data;
         const hardCore = 0.015 + Math.pow(hardness, 1.8) * 0.62;
         const falloffExponent = 2.4 + (1 - hardness) * 4.2;
-        const centerFlow = 0.22 + Math.pow(hardness, 0.55) * 0.78;
+        const centerFlow = (0.22 + Math.pow(hardness, 0.55) * 0.78) * effectiveFlow;
 
         for (let yy = 0; yy < height; yy += 1) {
           for (let xx = 0; xx < width; xx += 1) {
@@ -3373,8 +3570,12 @@
             if (darkness <= 0.001) {
               continue;
             }
-            const radius = state.minDot + darkness * Math.max(0, maxRadius - state.minDot);
+            const curvedDarkness = Math.pow(darkness, state.sizeCurve);
+            const radius = state.minDot + curvedDarkness * Math.max(0, maxRadius - state.minDot);
             if (radius <= 0.01) {
+              continue;
+            }
+            if (radius < state.sizeCutoff) {
               continue;
             }
             const arm = radius;
@@ -3493,6 +3694,10 @@
       function closeShortcutDialog() {
         shortcutDialog.hidden = true;
         shortcutDialog.classList.remove("visible");
+      }
+
+      function togglePatternSettingsSection() {
+        patternSettingsSection.classList.toggle("is-hidden");
       }
 
       function closeImageImportDialog() {
@@ -3686,6 +3891,10 @@
             dotScale: state.dotScale,
             strokeWidth: state.strokeWidth,
             strokeTaper: state.strokeTaper,
+            sizeCurve: state.sizeCurve,
+            sizeCutoff: state.sizeCutoff,
+            brushFlow: state.brushFlow,
+            flowResponse: state.flowResponse,
             dotColor: state.dotColor,
             zoom: state.zoom,
             referenceImageOpacity: state.referenceImageOpacity,
@@ -3771,6 +3980,10 @@
         state.dotScale = Math.max(0.2, Math.min(1.6, readNumber(settings.dotScale, state.dotScale)));
         state.strokeWidth = Math.max(0.2, Math.min(8, readNumber(settings.strokeWidth, state.strokeWidth)));
         state.strokeTaper = Math.max(0, Math.min(1, readNumber(settings.strokeTaper, state.strokeTaper)));
+        state.sizeCurve = Math.max(0.5, Math.min(3, readNumber(settings.sizeCurve, state.sizeCurve)));
+        state.sizeCutoff = Math.max(0, Math.min(4, readNumber(settings.sizeCutoff, state.sizeCutoff)));
+        state.brushFlow = clampBrushFlow(readNumber(settings.brushFlow, state.brushFlow));
+        state.flowResponse = clampFlowResponse(readNumber(settings.flowResponse, state.flowResponse));
         state.dotColor = typeof settings.dotColor === "string" ? settings.dotColor : state.dotColor;
         state.zoom = clampZoom(readNumber(settings.zoom, 1));
         state.referenceImageOpacity = Math.max(
@@ -3819,6 +4032,10 @@
         dotScaleInput.value = String(Math.round(state.dotScale * 100));
         strokeWidthInput.value = String(state.strokeWidth);
         strokeTaperInput.value = String(Math.round(state.strokeTaper * 100));
+        sizeCurveInput.value = String(Math.round(state.sizeCurve * 100));
+        sizeCutoffInput.value = String(Math.round(state.sizeCutoff * 100));
+        brushFlowInput.value = String(Math.round(state.brushFlow * 100));
+        flowResponseInput.value = String(Math.round(state.flowResponse * 100));
         dotColorInput.value = state.dotColor;
         zoomInput.value = String(Math.round(state.zoom * 100));
         imageOpacityInput.value = String(Math.round(state.referenceImageOpacity * 100));
@@ -3932,12 +4149,14 @@
       overlayToggleButton.addEventListener("click", () => {
         state.showOverlay = !state.showOverlay;
         updateToggleButtons();
+        updateLabels();
         redrawOverlay();
       });
 
       overlayToggleVisibleButton.addEventListener("click", () => {
         state.showOverlay = !state.showOverlay;
         updateToggleButtons();
+        updateLabels();
         redrawOverlay();
       });
 
@@ -3989,6 +4208,26 @@
         state.strokeTaper = Number(strokeTaperInput.value) / 100;
         updateLabels();
         scheduleRender();
+      });
+
+      sizeCurveInput.addEventListener("input", () => {
+        state.sizeCurve = Number(sizeCurveInput.value) / 100;
+        updateLabels();
+        scheduleRender();
+      });
+
+      sizeCutoffInput.addEventListener("input", () => {
+        state.sizeCutoff = Number(sizeCutoffInput.value) / 100;
+        updateLabels();
+        scheduleRender();
+      });
+
+      brushFlowInput.addEventListener("input", () => {
+        setBrushFlow(Number(brushFlowInput.value) / 100);
+      });
+
+      flowResponseInput.addEventListener("input", () => {
+        setFlowResponse(Number(flowResponseInput.value) / 100);
       });
 
       dotColorInput.addEventListener("input", () => {
@@ -4217,6 +4456,11 @@
         if (event.shiftKey && event.key === "!") {
           event.preventDefault();
           resetView();
+          return;
+        }
+        if (!event.metaKey && !event.ctrlKey && !event.altKey && event.shiftKey && event.key.toLowerCase() === "s") {
+          event.preventDefault();
+          togglePatternSettingsSection();
           return;
         }
         if (event.code === "Space" && !state.panKeyDown) {
