@@ -51,6 +51,11 @@
           linear-gradient(90deg, var(--bg) 0%, var(--bg) 100%);
       }
 
+      body.is-scrubbing-size {
+        cursor: ew-resize;
+        user-select: none;
+      }
+
       button,
       input,
       textarea {
@@ -110,15 +115,17 @@
 
       .brand-row {
         display: flex;
-        align-items: flex-end;
+        align-items: center;
         gap: 8px;
       }
 
       .brand-actions {
         margin-left: auto;
         display: inline-flex;
-        align-items: center;
-        gap: 10px;
+        align-items: flex-end;
+        gap: 4px;
+        min-width: 0;
+        padding-top: 10px;
       }
 
       .brand-logo {
@@ -135,12 +142,67 @@
       }
 
       .brand-version {
-        margin-left: auto;
         color: #bac1b8;
         font-size: 12px;
         font-weight: 500;
         line-height: 20px;
         text-align: right;
+        white-space: nowrap;
+      }
+
+      .mode-switch {
+        position: relative;
+        min-width: 0;
+        height: 20px;
+        display: inline-flex;
+        align-items: flex-end;
+        flex: 1 1 auto;
+        justify-content: flex-end;
+        cursor: pointer;
+      }
+
+      .mode-select {
+        width: 100%;
+        min-width: 0;
+        height: 20px;
+        padding: 0 20px 0 0;
+        border: 0;
+        border-radius: 0;
+        background: transparent;
+        color: #bac1b8;
+        font-size: 12px;
+        font-weight: 700;
+        line-height: 20px;
+        appearance: none;
+        outline: none;
+        text-align: right;
+        white-space: nowrap;
+        cursor: pointer;
+      }
+
+      .mode-switch-icon {
+        position: absolute;
+        top: 50%;
+        right: 0;
+        width: 16px;
+        height: 16px;
+        color: var(--accent);
+        transform: translateY(-50%);
+        pointer-events: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 1;
+        z-index: 1;
+        flex: 0 0 16px;
+        pointer-events: none;
+      }
+
+      .mode-switch-icon svg {
+        width: 16px;
+        height: 16px;
+        display: block;
+        overflow: visible;
       }
 
       .sidebar-section {
@@ -274,6 +336,11 @@
         color: var(--text);
         font-size: 15px;
         line-height: 30px;
+      }
+
+      .field-code.scrub-handle {
+        cursor: ew-resize;
+        user-select: none;
       }
 
       .field-number {
@@ -434,7 +501,7 @@
         padding: 8px;
         border-radius: 4px;
         background: #0d1912;
-        overflow: hidden;
+        overflow: visible;
       }
 
       .image-file-main {
@@ -467,8 +534,20 @@
         flex-shrink: 0;
       }
 
+      .is-hidden {
+        display: none !important;
+      }
+
       .accent-icon-button {
         color: var(--accent);
+      }
+
+      .supporting-image-section .accent-icon-button {
+        color: var(--text);
+      }
+
+      .project-row .accent-icon-button {
+        color: var(--text);
       }
 
       .image-action-button.is-danger {
@@ -476,12 +555,11 @@
       }
 
       .image-opacity-row {
-        min-height: 31px;
-        display: flex;
-        align-items: center;
-        gap: 12px;
+        min-height: 46px;
+        display: grid;
+        gap: 0;
         width: 100%;
-        padding: 8px;
+        padding: 0;
         border-radius: 4px;
       }
 
@@ -489,12 +567,24 @@
         opacity: 0.5;
       }
 
-      .image-opacity-readout {
-        width: 60px;
-        min-width: 60px;
+      .image-opacity-header {
         display: flex;
         align-items: center;
-        gap: 4px;
+        justify-content: space-between;
+        min-height: 30px;
+        padding: 0 8px;
+      }
+
+      .image-opacity-label {
+        font-size: 14px;
+        line-height: 30px;
+        color: var(--text);
+      }
+
+      .image-opacity-readout {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
       }
 
       .image-opacity-readout .range-value {
@@ -506,7 +596,32 @@
       }
 
       .image-opacity-row .range-track {
-        flex: 1 1 auto;
+        width: 100%;
+        height: 15px;
+      }
+
+      .image-opacity-row .range-track::before,
+      .image-opacity-row .range-track::after {
+        height: 1px;
+      }
+
+      .image-opacity-row .range-track input[type="range"] {
+        left: 0;
+        width: 100%;
+        height: 29px;
+      }
+
+      .image-opacity-row input[type="range"]::-webkit-slider-thumb {
+        width: 15px;
+        height: 15px;
+        margin-top: 0;
+        border: 0;
+      }
+
+      .image-opacity-row input[type="range"]::-moz-range-thumb {
+        width: 15px;
+        height: 15px;
+        border: 0;
       }
 
       .image-opacity-row button[disabled],
@@ -518,7 +633,7 @@
         position: relative;
         flex: 1 1 auto;
         min-width: 0;
-        height: 10px;
+        height: 15px;
       }
 
       .range-track::before {
@@ -527,7 +642,7 @@
         left: 0;
         top: 50%;
         width: 100%;
-        height: 2px;
+        height: 1px;
         transform: translateY(-50%);
         background: rgba(255, 255, 255, 0.2);
         border-radius: 4px;
@@ -539,7 +654,7 @@
         left: 0;
         top: 50%;
         width: var(--range-fill, 0%);
-        height: 2px;
+        height: 1px;
         transform: translateY(-50%);
         background: rgba(255, 255, 255, 1);
         border-radius: 4px;
@@ -550,7 +665,7 @@
         left: -7px;
         top: 50%;
         width: calc(100% + 14px);
-        height: 24px;
+        height: 29px;
         margin: 0;
         background: transparent;
         border: 0;
@@ -564,14 +679,14 @@
 
       input[type="range"]::-webkit-slider-runnable-track {
         -webkit-appearance: none;
-        height: 10px;
+        height: 15px;
         background: transparent;
         border: 0;
         box-shadow: none;
       }
 
       input[type="range"]::-moz-range-track {
-        height: 10px;
+        height: 15px;
         background: transparent;
         border: 0;
         box-shadow: none;
@@ -580,8 +695,8 @@
       input[type="range"]::-webkit-slider-thumb {
         -webkit-appearance: none;
         appearance: none;
-        width: 24px;
-        height: 24px;
+        width: 29px;
+        height: 29px;
         margin-top: -7px;
         border: 7px solid transparent;
         box-sizing: border-box;
@@ -592,8 +707,8 @@
       }
 
       input[type="range"]::-moz-range-thumb {
-        width: 24px;
-        height: 24px;
+        width: 29px;
+        height: 29px;
         border: 7px solid transparent;
         box-sizing: border-box;
         border-radius: 50%;
@@ -606,6 +721,37 @@
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 8px;
+      }
+
+      .mode-panel {
+        display: none;
+      }
+
+      [data-mode-scope="texture-only"] {
+        display: none;
+      }
+
+      body[data-generator-mode="texture"] [data-mode-scope="texture"] {
+        display: grid;
+      }
+
+      body[data-generator-mode="image"] [data-mode-scope="image"] {
+        display: grid;
+      }
+
+      body[data-generator-mode="texture"] [data-mode-scope="texture-only"] {
+        display: grid;
+      }
+
+      .image-generator-controls {
+        display: grid;
+        gap: 16px;
+      }
+
+      .generator-helper {
+        color: var(--text-dim);
+        font-size: 13px;
+        line-height: 18px;
       }
 
       .advanced-settings {
@@ -675,12 +821,15 @@
         position: relative;
       }
 
-      [data-tooltip]::after {
-        content: attr(data-tooltip);
-        position: absolute;
-        left: 50%;
-        bottom: calc(100% + 10px);
-        transform: translateX(-50%) translateY(4px);
+      .app-tooltip {
+        position: fixed;
+        left: 0;
+        top: 0;
+        z-index: 3000;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        max-width: min(280px, calc(100vw - 16px));
         padding: 6px 8px;
         border-radius: 6px;
         background: rgba(0, 0, 0, 0.88);
@@ -688,90 +837,39 @@
         font-size: 12px;
         line-height: 1.2;
         white-space: nowrap;
-        opacity: 0;
         pointer-events: none;
-        transition: opacity 120ms ease, transform 120ms ease;
-        transition-delay: 0s;
-        z-index: 20;
+        opacity: 0;
+        transform: translateY(10px);
+        transition:
+          opacity 250ms cubic-bezier(0.8, 0.07, 0.36, 1),
+          transform 250ms cubic-bezier(0.8, 0.07, 0.36, 1);
       }
 
-      [data-tooltip]::before {
-        content: "";
-        position: absolute;
-        left: 50%;
-        bottom: calc(100% + 6px);
-        width: 8px;
-        height: 8px;
-        background: rgba(0, 0, 0, 0.88);
-        transform: translateX(-50%) rotate(45deg) translateY(0);
-        opacity: 0;
-        pointer-events: none;
-        transition: opacity 120ms ease, transform 120ms ease;
-        transition-delay: 0s;
-        z-index: 19;
+      .app-tooltip.is-visible {
+        opacity: 1;
+        transform: translateY(0);
       }
 
-      .sidebar [data-tooltip]::after {
+      .app-tooltip.is-light {
         background: rgba(255, 255, 255, 0.96);
         color: #0d1912;
       }
 
-      .sidebar [data-tooltip]::before {
-        background: rgba(255, 255, 255, 0.96);
+      .app-tooltip-arrow {
+        position: absolute;
+        left: var(--tooltip-arrow-left, 50%);
+        top: calc(100% - 4px);
+        width: 8px;
+        height: 8px;
+        background: inherit;
+        transform: translateX(-50%) rotate(45deg);
       }
 
-      [data-tooltip][data-tooltip-align="left"]::after {
-        left: 0;
-        transform: translateX(0) translateY(4px);
-      }
-
-      [data-tooltip][data-tooltip-align="left"]::before {
-        left: 12px;
-        transform: translateX(0) rotate(45deg) translateY(0);
-      }
-
-      [data-tooltip][data-tooltip-align="right"]::after {
-        left: auto;
-        right: 0;
-        transform: translateX(0) translateY(4px);
-      }
-
-      [data-tooltip][data-tooltip-align="right"]::before {
-        left: auto;
-        right: 12px;
-        transform: translateX(0) rotate(45deg) translateY(0);
-      }
-
-      [data-tooltip]:hover::after,
-      [data-tooltip]:hover::before,
-      [data-tooltip]:focus-visible::after,
-      [data-tooltip]:focus-visible::before {
-        opacity: 1;
-        transition-delay: 1s;
-      }
-
-      [data-tooltip]:hover::after,
-      [data-tooltip]:focus-visible::after {
-        transform: translateX(-50%) translateY(0);
-      }
-
-      [data-tooltip]:hover::before,
-      [data-tooltip]:focus-visible::before {
-        transform: translateX(-50%) rotate(45deg) translateY(0);
-      }
-
-      [data-tooltip][data-tooltip-align="left"]:hover::after,
-      [data-tooltip][data-tooltip-align="left"]:focus-visible::after,
-      [data-tooltip][data-tooltip-align="right"]:hover::after,
-      [data-tooltip][data-tooltip-align="right"]:focus-visible::after {
-        transform: translateX(0) translateY(0);
-      }
-
-      [data-tooltip][data-tooltip-align="left"]:hover::before,
-      [data-tooltip][data-tooltip-align="left"]:focus-visible::before,
-      [data-tooltip][data-tooltip-align="right"]:hover::before,
-      [data-tooltip][data-tooltip-align="right"]:focus-visible::before {
-        transform: translateX(0) rotate(45deg) translateY(0);
+      .app-tooltip-label {
+        position: relative;
+        z-index: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
 
       .actions-list {
@@ -1582,7 +1680,7 @@
       }
     </style>
   </head>
-  <body>
+  <body data-generator-mode="texture">
     <svg class="icon-sprite" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
       <symbol id="i-file-down" viewBox="0 0 24 24">
         <path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/>
@@ -1599,8 +1697,8 @@
       <symbol id="i-layer-dot" viewBox="0 0 24 24">
         <circle cx="12" cy="12" r="3.25" fill="currentColor" stroke="none"/>
       </symbol>
-      <symbol id="i-chevron-down" viewBox="0 0 24 24">
-        <path d="m6 9 6 6 6-6"/>
+      <symbol id="i-chevron-down" viewBox="0 0 16 16">
+        <path d="M4 6L8 10L12 6" stroke="currentColor" stroke-width="1.33333" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
       </symbol>
       <symbol id="i-chevron-up" viewBox="0 0 24 24">
         <path d="m18 15-6-6-6 6"/>
@@ -1746,8 +1844,18 @@
                 </svg>
               </span>
             </div>
-          <div class="brand-actions">
-            <div class="brand-version">Texture Creator v1.0</div>
+            <div class="brand-actions">
+              <div class="mode-switch">
+                <select id="generatorModeSelect" class="mode-select" aria-label="Generator mode">
+                  <option value="texture">Texture creator v0.9</option>
+                  <option value="image">Image generator v0.1</option>
+                </select>
+                <span class="mode-switch-icon" aria-hidden="true">
+                  <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M4 6L8 10L12 6" stroke="currentColor" stroke-width="1.33333" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </span>
+              </div>
             </div>
           </div>
         </div>
@@ -1757,8 +1865,19 @@
           <div class="stack">
             <div class="project-row">
               <input id="projectNameInput" class="project-name-input" type="text" value="" placeholder="Untitled project" />
+              <button
+                id="loadProjectVisibleButton"
+                class="icon-button-sm accent-icon-button"
+                type="button"
+                aria-label="Load project"
+                data-mode-scope="texture-only"
+              >
+                <span class="sidebar-icon" data-tooltip="Upload project" data-tooltip-align="right" tabindex="0">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-upload"/></svg>
+                </span>
+              </button>
               <button id="saveProjectButton" class="icon-button-sm accent-icon-button" type="button" aria-label="Save project">
-                <span class="sidebar-icon">
+                <span class="sidebar-icon" data-tooltip="Save project" data-tooltip-align="right" tabindex="0">
                   <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-file-down"/></svg>
                 </span>
               </button>
@@ -1767,18 +1886,56 @@
             <div class="canvas-size-row">
               <div class="field-label">Canvas size</div>
               <div class="field-pill">
-                <span class="field-code">W</span>
+                <span id="widthScrubHandle" class="field-code scrub-handle">W</span>
                 <input id="widthInput" class="field-number" type="number" min="64" max="2400" step="1" value="640" />
               </div>
               <div class="field-pill">
-                <span class="field-code">H</span>
+                <span id="heightScrubHandle" class="field-code scrub-handle">H</span>
                 <input id="heightInput" class="field-number" type="number" min="64" max="2400" step="1" value="640" />
               </div>
             </div>
           </div>
         </section>
 
-        <section class="sidebar-section">
+        <section class="sidebar-section supporting-image-section">
+          <div class="section-title">Supporting Image</div>
+          <div class="image-stack">
+            <div id="imageControlRow" class="image-file-row is-empty">
+              <button id="chooseImageButton" class="image-file-main" type="button" aria-label="Choose image">
+                <span id="imageNameLabel" class="image-file-label">Choose image...</span>
+              </button>
+              <button id="replaceImageButton" class="icon-button-sm image-action-button accent-icon-button" type="button" aria-label="Upload or replace image">
+                <span class="sidebar-icon" data-tooltip="Add image" data-tooltip-align="right" tabindex="0">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-image-plus"/></svg>
+                </span>
+              </button>
+              <button id="clearImageButton" class="icon-button-sm image-action-button is-danger is-hidden" type="button" aria-label="Remove image" hidden>
+                <span class="sidebar-icon" data-tooltip="Delete image" data-tooltip-align="right" tabindex="0">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-trash"/></svg>
+                </span>
+              </button>
+            </div>
+
+            <div id="imageOpacityRow" class="image-opacity-row is-disabled is-hidden" hidden>
+              <div class="image-opacity-header">
+                <div class="image-opacity-label">Opacity</div>
+                <div class="image-opacity-readout">
+                  <span id="imageOpacityValue" class="range-value">65%</span>
+                  <button id="imageLayerVisibilityButton" class="icon-button-sm" type="button" aria-label="Toggle image visibility" disabled>
+                    <span class="sidebar-icon">
+                      <svg viewBox="0 0 24 24" aria-hidden="true"><use id="imageLayerVisibilityIcon" href="#i-eye"/></svg>
+                    </span>
+                  </button>
+                </div>
+              </div>
+              <div class="range-track">
+                <input id="imageOpacityInput" type="range" min="0" max="100" step="1" value="65" disabled />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="sidebar-section" data-mode-scope="texture-only">
           <div class="section-title">Layers</div>
           <div class="layer-list">
             <div class="layer-card">
@@ -1844,44 +2001,6 @@
         </section>
 
         <section class="sidebar-section">
-          <div class="section-title">Image</div>
-          <div class="image-stack">
-            <div id="imageControlRow" class="image-file-row is-empty">
-              <button id="chooseImageButton" class="image-file-main" type="button" aria-label="Choose image">
-                <span id="imageNameLabel" class="image-file-label">Choose image...</span>
-              </button>
-              <button id="replaceImageButton" class="icon-button-sm image-action-button accent-icon-button" type="button" aria-label="Upload or replace image">
-                <span class="sidebar-icon">
-                  <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-image-plus"/></svg>
-                </span>
-              </button>
-              <button id="clearImageButton" class="icon-button-sm image-action-button is-danger" type="button" aria-label="Remove image" hidden>
-                <span class="sidebar-icon">
-                  <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-trash"/></svg>
-                </span>
-              </button>
-            </div>
-
-            <div id="imageOpacityRow" class="image-opacity-row is-disabled">
-              <div class="image-opacity-readout">
-                <span class="sidebar-icon" data-tooltip="Image opacity" data-tooltip-align="left" aria-label="Image opacity" tabindex="0">
-                  <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-opacity"/></svg>
-                </span>
-                <span id="imageOpacityValue" class="range-value">65%</span>
-              </div>
-              <div class="range-track">
-                <input id="imageOpacityInput" type="range" min="0" max="100" step="1" value="65" disabled />
-              </div>
-              <button id="imageLayerVisibilityButton" class="icon-button-sm" type="button" aria-label="Toggle image visibility" disabled>
-                <span class="sidebar-icon">
-                  <svg viewBox="0 0 24 24" aria-hidden="true"><use id="imageLayerVisibilityIcon" href="#i-eye"/></svg>
-                </span>
-              </button>
-            </div>
-          </div>
-        </section>
-
-        <section class="sidebar-section">
           <div class="section-title">Pattern Style</div>
           <div class="style-grid">
             <button id="staggeredGridButton" class="style-button active" type="button">
@@ -1915,6 +2034,61 @@
                 </svg>
               </span>
             </button>
+          </div>
+        </section>
+
+        <section class="sidebar-section mode-panel" data-mode-scope="image">
+          <div class="section-title">Image Generator</div>
+          <div class="image-generator-controls">
+            <div class="advanced-setting-row">
+              <div class="advanced-setting-header">
+                <div class="advanced-setting-label">Brightness</div>
+                <span id="imageBrightnessValue" class="advanced-setting-value">0%</span>
+              </div>
+              <div class="range-track">
+                <input id="imageBrightnessInput" type="range" min="-100" max="100" step="1" value="0" />
+              </div>
+            </div>
+
+            <div class="advanced-setting-row">
+              <div class="advanced-setting-header">
+                <div class="advanced-setting-label">Contrast</div>
+                <span id="imageContrastValue" class="advanced-setting-value">20%</span>
+              </div>
+              <div class="range-track">
+                <input id="imageContrastInput" type="range" min="-100" max="100" step="1" value="20" />
+              </div>
+            </div>
+
+            <div class="advanced-setting-row">
+              <div class="advanced-setting-header">
+                <div class="advanced-setting-label">Gamma</div>
+                <span id="imageGammaValue" class="advanced-setting-value">1.0x</span>
+              </div>
+              <div class="range-track">
+                <input id="imageGammaInput" type="range" min="20" max="300" step="5" value="100" />
+              </div>
+            </div>
+
+            <div class="advanced-setting-row">
+              <div class="advanced-setting-header">
+                <div class="advanced-setting-label">Background cutoff</div>
+                <span id="imageCutoffValue" class="advanced-setting-value">96%</span>
+              </div>
+              <div class="range-track">
+                <input id="imageCutoffInput" type="range" min="50" max="100" step="1" value="96" />
+              </div>
+            </div>
+            <div class="advanced-setting-row">
+              <div class="advanced-setting-header">
+                <div class="advanced-setting-label">Density</div>
+                <span id="imageDensityValue" class="advanced-setting-value">100%</span>
+              </div>
+              <div class="range-track">
+                <input id="imageDensityInput" type="range" min="40" max="220" step="5" value="100" />
+              </div>
+            </div>
+            <div class="generator-helper">The pattern updates live from the current reference image as you adjust these controls.</div>
           </div>
         </section>
 
@@ -2432,6 +2606,11 @@
       </div>
     </div>
 
+    <div id="appTooltip" class="app-tooltip" hidden aria-hidden="true" role="tooltip">
+      <span id="appTooltipLabel" class="app-tooltip-label"></span>
+      <span class="app-tooltip-arrow" aria-hidden="true"></span>
+    </div>
+
     <script>
       const paintCanvas = document.getElementById("paintCanvas");
       const paintCtx = paintCanvas.getContext("2d", { willReadFrequently: true });
@@ -2452,6 +2631,7 @@
       const cursorReadout = document.getElementById("cursorReadout");
       const referenceImage = document.getElementById("referenceImage");
       const zoomShell = document.getElementById("zoomShell");
+      const generatorModeSelect = document.getElementById("generatorModeSelect");
 
       const referenceImageInput = document.getElementById("referenceImageInput");
       const imageControlRow = document.getElementById("imageControlRow");
@@ -2462,6 +2642,8 @@
       const clearImageButton = document.getElementById("clearImageButton");
       const chooseImageButton = document.getElementById("chooseImageButton");
       const replaceImageButton = document.getElementById("replaceImageButton");
+      const widthScrubHandle = document.getElementById("widthScrubHandle");
+      const heightScrubHandle = document.getElementById("heightScrubHandle");
       const widthInput = document.getElementById("widthInput");
       const heightInput = document.getElementById("heightInput");
       const resizeButton = document.getElementById("resizeButton");
@@ -2538,6 +2720,7 @@
       const bottomDeleteButton = document.getElementById("bottomDeleteButton");
       const clearBothButton = document.getElementById("clearBothButton");
       const saveProjectButton = document.getElementById("saveProjectButton");
+      const loadProjectVisibleButton = document.getElementById("loadProjectVisibleButton");
       const loadProjectButton = document.getElementById("loadProjectButton");
       const loadProjectInput = document.getElementById("loadProjectInput");
       const copyButton = document.getElementById("copyButton");
@@ -2554,13 +2737,27 @@
       const imageImportKeepButton = document.getElementById("imageImportKeepButton");
       const imageImportDeleteButton = document.getElementById("imageImportDeleteButton");
       const imageImportCancelButton = document.getElementById("imageImportCancelButton");
+      const appTooltip = document.getElementById("appTooltip");
+      const appTooltipLabel = document.getElementById("appTooltipLabel");
       const imageLayerRow = imageControlRow;
       const zoomToolbarShell = document.querySelector(".zoom-toolbar-shell");
       const floatingToolbarShell = document.querySelector(".floating-toolbar-shell");
       const floatingToolbar = document.querySelector(".floating-toolbar");
+      const floatingControls = document.querySelector(".floating-controls");
+      const imageBrightnessInput = document.getElementById("imageBrightnessInput");
+      const imageContrastInput = document.getElementById("imageContrastInput");
+      const imageGammaInput = document.getElementById("imageGammaInput");
+      const imageCutoffInput = document.getElementById("imageCutoffInput");
+      const imageDensityInput = document.getElementById("imageDensityInput");
+      const imageBrightnessValue = document.getElementById("imageBrightnessValue");
+      const imageContrastValue = document.getElementById("imageContrastValue");
+      const imageGammaValue = document.getElementById("imageGammaValue");
+      const imageCutoffValue = document.getElementById("imageCutoffValue");
+      const imageDensityValue = document.getElementById("imageDensityValue");
 
       const state = {
         activeLayer: "front",
+        generatorMode: "texture",
         mode: "paint",
         lastPaintEraseMode: "paint",
         drawing: false,
@@ -2648,6 +2845,19 @@
         pointerClientX: 0,
         pointerClientY: 0,
         resizeDebounceId: 0,
+        imageGenerationDebounceId: 0,
+        imageGenerationSequence: 0,
+        tooltipTarget: null,
+        tooltipTimerId: 0,
+        tooltipHideTimerId: 0,
+        sizeScrub: null,
+        imageGenerator: {
+          brightness: Number(imageBrightnessInput.value) / 100,
+          contrast: Number(imageContrastInput.value) / 100,
+          gamma: Number(imageGammaInput.value) / 100,
+          cutoff: Number(imageCutoffInput.value) / 100,
+          density: Number(imageDensityInput.value) / 100,
+        },
       };
 
       function clampBrushSize(value) {
@@ -2664,6 +2874,18 @@
 
       function clampFlowResponse(value) {
         return Math.max(0.2, Math.min(3, value));
+      }
+
+      function clampImageGamma(value) {
+        return Math.max(0.2, Math.min(3, value));
+      }
+
+      function clampImageCutoff(value) {
+        return Math.max(0.5, Math.min(1, value));
+      }
+
+      function clampImageDensity(value) {
+        return Math.max(0.4, Math.min(2.2, value));
       }
 
       function clampZoom(value) {
@@ -2693,6 +2915,28 @@
 
       function setFlowResponse(value) {
         state.flowResponse = clampFlowResponse(value);
+        updateLabels();
+      }
+
+      function setGeneratorMode(nextMode) {
+        if (nextMode !== "texture" && nextMode !== "image") {
+          return;
+        }
+        state.generatorMode = nextMode;
+        document.body.dataset.generatorMode = nextMode;
+        generatorModeSelect.value = nextMode;
+        if (nextMode === "image") {
+          state.activeLayer = "front";
+          state.showOverlay = false;
+          hideCursorRing();
+          scheduleImageGeneration(true);
+        } else if (state.pointerInsideCanvas && (state.mode === "paint" || state.mode === "erase")) {
+          showCursorRing({
+            clientX: state.pointerClientX,
+            clientY: state.pointerClientY,
+          });
+        }
+        updateToggleButtons();
         updateLabels();
       }
 
@@ -2808,6 +3052,155 @@
         cursorFill.style.opacity = String(previewOpacity);
         cursorFill.style.background = `radial-gradient(circle, rgba(204, 255, 0, 0.98) 0%, rgba(204, 255, 0, 0.98) ${hardCore.toFixed(0)}%, rgba(204, 255, 0, 0.9) ${softCore.toFixed(0)}%, rgba(204, 255, 0, 0.72) ${midFalloff.toFixed(0)}%, rgba(204, 255, 0, 0.38) ${edgeFalloff.toFixed(0)}%, rgba(204, 255, 0, 0.14) ${outerFalloff.toFixed(0)}%, rgba(204, 255, 0, 0) 100%)`;
         cursorReadout.innerHTML = `Diameter: <strong>${Math.round(state.brushSize)} px</strong><br>Hardness: <strong>${hardnessPercent}%</strong>`;
+      }
+
+      function clearTooltipTimer() {
+        if (state.tooltipTimerId) {
+          window.clearTimeout(state.tooltipTimerId);
+          state.tooltipTimerId = 0;
+        }
+      }
+
+      function clearTooltipHideTimer() {
+        if (state.tooltipHideTimerId) {
+          window.clearTimeout(state.tooltipHideTimerId);
+          state.tooltipHideTimerId = 0;
+        }
+      }
+
+      function hideAppTooltip() {
+        clearTooltipTimer();
+        clearTooltipHideTimer();
+        state.tooltipTarget = null;
+        appTooltip.classList.remove("is-visible");
+        appTooltip.setAttribute("aria-hidden", "true");
+        state.tooltipHideTimerId = window.setTimeout(() => {
+          appTooltip.hidden = true;
+          appTooltip.classList.remove("is-light");
+          state.tooltipHideTimerId = 0;
+        }, 250);
+      }
+
+      function positionAppTooltip(target) {
+        if (!target) {
+          return;
+        }
+
+        const label = target.getAttribute("data-tooltip");
+        if (!label) {
+          hideAppTooltip();
+          return;
+        }
+
+        appTooltipLabel.textContent = label;
+        appTooltip.classList.toggle("is-light", Boolean(target.closest(".sidebar")));
+        appTooltip.hidden = false;
+        appTooltip.setAttribute("aria-hidden", "false");
+
+        const rect = target.getBoundingClientRect();
+        const tooltipRect = appTooltip.getBoundingClientRect();
+        const viewportPadding = 8;
+        const desiredCenter = rect.left + rect.width / 2;
+        const top = Math.max(
+          viewportPadding,
+          rect.top - tooltipRect.height - 10
+        );
+        const minLeft = viewportPadding;
+        const maxLeft = Math.max(
+          viewportPadding,
+          window.innerWidth - tooltipRect.width - viewportPadding
+        );
+        const left = Math.min(
+          maxLeft,
+          Math.max(minLeft, desiredCenter - tooltipRect.width / 2)
+        );
+        const arrowLeft = Math.min(
+          tooltipRect.width - 12,
+          Math.max(12, desiredCenter - left)
+        );
+
+        appTooltip.style.left = `${left}px`;
+        appTooltip.style.top = `${top}px`;
+        appTooltip.style.setProperty("--tooltip-arrow-left", `${arrowLeft}px`);
+      }
+
+      function showAppTooltip(target) {
+        clearTooltipTimer();
+        clearTooltipHideTimer();
+        state.tooltipTarget = target;
+        state.tooltipTimerId = window.setTimeout(() => {
+          state.tooltipTimerId = 0;
+          if (state.tooltipTarget !== target) {
+            return;
+          }
+          positionAppTooltip(target);
+          requestAnimationFrame(() => {
+            if (state.tooltipTarget === target) {
+              appTooltip.classList.add("is-visible");
+            }
+          });
+        }, 500);
+      }
+
+      function refreshAppTooltip() {
+        if (!state.tooltipTarget || appTooltip.hidden) {
+          return;
+        }
+        positionAppTooltip(state.tooltipTarget);
+      }
+
+      function getTooltipTrigger(node) {
+        return node instanceof Element ? node.closest("[data-tooltip]") : null;
+      }
+
+      function handleTooltipPointerOver(event) {
+        const nextTarget = getTooltipTrigger(event.target);
+        if (!nextTarget || !nextTarget.getAttribute("data-tooltip")) {
+          return;
+        }
+        if (nextTarget === state.tooltipTarget) {
+          return;
+        }
+        showAppTooltip(nextTarget);
+      }
+
+      function handleTooltipPointerOut(event) {
+        const currentTarget = getTooltipTrigger(event.target);
+        if (!currentTarget) {
+          return;
+        }
+        const relatedTarget = event.relatedTarget;
+        if (relatedTarget instanceof Node && currentTarget.contains(relatedTarget)) {
+          return;
+        }
+        if (currentTarget === state.tooltipTarget) {
+          hideAppTooltip();
+        }
+      }
+
+      function handleTooltipFocusIn(event) {
+        const target = getTooltipTrigger(event.target);
+        if (!target || !target.getAttribute("data-tooltip")) {
+          return;
+        }
+        if (!(target instanceof HTMLElement) || !target.matches(":focus-visible")) {
+          return;
+        }
+        showAppTooltip(target);
+      }
+
+      function handleTooltipFocusOut(event) {
+        const target = getTooltipTrigger(event.target);
+        if (!target) {
+          return;
+        }
+        const relatedTarget = event.relatedTarget;
+        if (relatedTarget instanceof Node && target.contains(relatedTarget)) {
+          return;
+        }
+        if (target === state.tooltipTarget) {
+          hideAppTooltip();
+        }
       }
 
       function setFloatingToolbarVisibility(hidden, immediate = false) {
@@ -2978,6 +3371,9 @@
         updateToggleButtons();
         redrawOverlay();
         centerViewport();
+        if (state.generatorMode === "image" && state.referenceImageUrl) {
+          scheduleImageGeneration(true);
+        }
         scheduleRender();
       }
 
@@ -3059,6 +3455,8 @@
       }
 
       function clearReferenceImage() {
+        cancelImageGenerationDebounce();
+        state.imageGenerationSequence += 1;
         if (state.referenceImageUrl && state.referenceImageUrl.startsWith("blob:")) {
           URL.revokeObjectURL(state.referenceImageUrl);
         }
@@ -3072,6 +3470,131 @@
         state.layerVisibility.image = false;
         updateToggleButtons();
         updateLabels();
+      }
+
+      function applyProcessedImageToLayer(targetLayer, imageData) {
+        const targetCtx = layerContexts[targetLayer];
+        targetCtx.putImageData(imageData, 0, 0);
+      }
+
+      function cancelImageGenerationDebounce() {
+        if (state.imageGenerationDebounceId) {
+          window.clearTimeout(state.imageGenerationDebounceId);
+          state.imageGenerationDebounceId = 0;
+        }
+      }
+
+      function buildImageGeneratorMap() {
+        if (!state.referenceImageUrl) {
+          return null;
+        }
+
+        const sourceImage = new Image();
+        sourceImage.src = state.referenceImageUrl;
+
+        return new Promise((resolve, reject) => {
+          sourceImage.onload = () => {
+            const width = paintCanvas.width;
+            const height = paintCanvas.height;
+            const offscreen = document.createElement("canvas");
+            offscreen.width = width;
+            offscreen.height = height;
+            const ctx = offscreen.getContext("2d", { willReadFrequently: true });
+            ctx.drawImage(sourceImage, 0, 0, width, height);
+
+            const imageData = ctx.getImageData(0, 0, width, height);
+            const data = imageData.data;
+            const brightness = state.imageGenerator.brightness;
+            const contrast = state.imageGenerator.contrast;
+            const gamma = state.imageGenerator.gamma;
+            const cutoff = state.imageGenerator.cutoff;
+
+            for (let index = 0; index < data.length; index += 4) {
+              const alpha = data[index + 3] / 255;
+
+              if (alpha <= 0.01) {
+                data[index] = 255;
+                data[index + 1] = 255;
+                data[index + 2] = 255;
+                data[index + 3] = 255;
+                continue;
+              }
+
+              const red = 255 - (255 - data[index]) * alpha;
+              const green = 255 - (255 - data[index + 1]) * alpha;
+              const blue = 255 - (255 - data[index + 2]) * alpha;
+              const luminance = (red * 0.2126 + green * 0.7152 + blue * 0.0722) / 255;
+              let normalized = luminance;
+              normalized = Math.max(0, Math.min(1, normalized + brightness));
+              normalized = Math.max(
+                0,
+                Math.min(1, (normalized - 0.5) * (1 + contrast * 1.8) + 0.5)
+              );
+              normalized = Math.pow(normalized, gamma);
+              if (normalized >= cutoff) {
+                normalized = 0;
+              } else {
+                normalized = normalized / cutoff;
+              }
+              const channel = Math.max(0, Math.min(255, Math.round((1 - normalized) * 255)));
+              data[index] = channel;
+              data[index + 1] = channel;
+              data[index + 2] = channel;
+              data[index + 3] = 255;
+            }
+
+            resolve(imageData);
+          };
+          sourceImage.onerror = () => reject(new Error("Could not process the reference image."));
+        });
+      }
+
+      async function generatePatternFromImage() {
+        if (!state.referenceImageUrl) {
+          return;
+        }
+
+        const sequence = ++state.imageGenerationSequence;
+
+        try {
+          const imageData = await buildImageGeneratorMap();
+          if (!imageData || sequence !== state.imageGenerationSequence) {
+            return;
+          }
+
+          const frontCtx = layerContexts.front;
+          const backCtx = layerContexts.back;
+          frontCtx.fillStyle = "#ffffff";
+          frontCtx.fillRect(0, 0, layerCanvases.front.width, layerCanvases.front.height);
+          backCtx.fillStyle = "#ffffff";
+          backCtx.fillRect(0, 0, layerCanvases.back.width, layerCanvases.back.height);
+          applyProcessedImageToLayer(
+            "front",
+            new ImageData(new Uint8ClampedArray(imageData.data), imageData.width, imageData.height)
+          );
+          state.activeLayer = "front";
+          redrawOverlay();
+          scheduleRender();
+        } catch (error) {
+          if (sequence === state.imageGenerationSequence) {
+            window.alert("Could not generate the pattern from this image.");
+          }
+        }
+      }
+
+      function scheduleImageGeneration(immediate = false) {
+        cancelImageGenerationDebounce();
+        if (state.generatorMode !== "image" || !state.referenceImageUrl) {
+          return;
+        }
+        if (immediate) {
+          generatePatternFromImage();
+          return;
+        }
+        state.imageGenerationDebounceId = window.setTimeout(() => {
+          state.imageGenerationDebounceId = 0;
+          generatePatternFromImage();
+        }, 60);
       }
 
       function redrawOverlay() {
@@ -3100,15 +3623,19 @@
       function updateToggleButtons() {
         const hasReferenceImage = Boolean(state.referenceImageUrl);
         const imageControlsEnabled = hasReferenceImage && state.layerVisibility.image;
+        const isTextureMode = state.generatorMode === "texture";
         frontLayerButton.classList.toggle("active", state.activeLayer === "front");
         backLayerButton.classList.toggle("active", state.activeLayer === "back");
         frontLayerButton.classList.toggle("is-hidden-layer", !state.layerVisibility.front);
         backLayerButton.classList.toggle("is-hidden-layer", !state.layerVisibility.back);
         imageControlRow.classList.toggle("is-empty", !hasReferenceImage);
         imageOpacityRow.classList.toggle("is-disabled", !imageControlsEnabled);
+        imageOpacityRow.hidden = !hasReferenceImage;
+        imageOpacityRow.classList.toggle("is-hidden", !hasReferenceImage);
         imageLayerVisibilityButton.disabled = !hasReferenceImage;
         imageOpacityInput.disabled = !imageControlsEnabled;
         clearImageButton.hidden = !hasReferenceImage;
+        clearImageButton.classList.toggle("is-hidden", !hasReferenceImage);
         imageLayerRow.classList.remove("is-hidden-layer");
         frontLayerVisibilityIcon.setAttribute("href", state.layerVisibility.front ? "#i-eye" : "#i-eye-off");
         backLayerVisibilityIcon.setAttribute("href", state.layerVisibility.back ? "#i-eye" : "#i-eye-off");
@@ -3126,6 +3653,8 @@
         undoButton.classList.toggle("is-disabled", state.history.length === 0);
         redoButton.classList.toggle("is-available", state.redoHistory.length > 0);
         redoButton.classList.toggle("is-disabled", state.redoHistory.length === 0);
+        floatingControls.style.display = isTextureMode ? "" : "none";
+        refreshAppTooltip();
       }
 
       function updatePanCursor() {
@@ -3151,6 +3680,11 @@
         sizeCurveInput.value = String(Math.round(state.sizeCurve * 100));
         sizeCutoffInput.value = String(Math.round(state.sizeCutoff * 100));
         flowResponseInput.value = String(Math.round(state.flowResponse * 100));
+        imageBrightnessInput.value = String(Math.round(state.imageGenerator.brightness * 100));
+        imageContrastInput.value = String(Math.round(state.imageGenerator.contrast * 100));
+        imageGammaInput.value = String(Math.round(state.imageGenerator.gamma * 100));
+        imageCutoffInput.value = String(Math.round(state.imageGenerator.cutoff * 100));
+        imageDensityInput.value = String(Math.round(state.imageGenerator.density * 100));
         brushSizeValue.textContent = `${Math.round(state.brushSize)}`;
         brushHardnessValue.textContent = `${Math.round(state.brushHardness * 100)}%`;
         brushFlowValue.textContent = `${Math.round(state.brushFlow * 100)}%`;
@@ -3162,6 +3696,11 @@
         sizeCurveValue.textContent = `${state.sizeCurve.toFixed(1)}x`;
         sizeCutoffValue.textContent = `${state.sizeCutoff.toFixed(1)} px`;
         flowResponseValue.textContent = `${state.flowResponse.toFixed(1)}x`;
+        imageBrightnessValue.textContent = `${Math.round(state.imageGenerator.brightness * 100)}%`;
+        imageContrastValue.textContent = `${Math.round(state.imageGenerator.contrast * 100)}%`;
+        imageGammaValue.textContent = `${state.imageGenerator.gamma.toFixed(1)}x`;
+        imageCutoffValue.textContent = `${Math.round(state.imageGenerator.cutoff * 100)}%`;
+        imageDensityValue.textContent = `${Math.round(state.imageGenerator.density * 100)}%`;
         imageOpacityValue.textContent = `${Math.round(state.layerOpacity.image * 100)}%`;
         frontOpacityValue.textContent = `${Math.round(state.layerOpacity.front * 100)}%`;
         backOpacityValue.textContent = `${Math.round(state.layerOpacity.back * 100)}%`;
@@ -3178,15 +3717,23 @@
         referenceImage.hidden = !state.referenceImageUrl || !state.layerVisibility.image;
         frontSvgPreview.style.opacity = String(state.layerOpacity.front);
         backSvgPreview.style.opacity = String(state.layerOpacity.back);
-        frontSvgPreview.style.display = state.layerVisibility.front ? "grid" : "none";
-        backSvgPreview.style.display = state.layerVisibility.back ? "grid" : "none";
+        if (state.generatorMode === "image") {
+          frontSvgPreview.style.display = "grid";
+          backSvgPreview.style.display = "none";
+        } else {
+          frontSvgPreview.style.display = state.layerVisibility.front ? "grid" : "none";
+          backSvgPreview.style.display = state.layerVisibility.back ? "grid" : "none";
+        }
         if (state.showOverlay && (state.activeLayer === "front" ? state.layerVisibility.front : state.layerVisibility.back)) {
           paintCanvas.style.opacity = String(state.activeLayer === "front" ? state.layerOpacity.front : state.layerOpacity.back);
         } else {
           paintCanvas.style.opacity = "0";
         }
         imageNameLabel.textContent = state.referenceImageName || "Choose image...";
-        markCountStatus.textContent = `Top ${state.latestCounts.front.toLocaleString()} • Bottom ${state.latestCounts.back.toLocaleString()}`;
+        markCountStatus.textContent =
+          state.generatorMode === "image"
+            ? `${state.latestCounts.front.toLocaleString()} marks`
+            : `Top ${state.latestCounts.front.toLocaleString()} • Bottom ${state.latestCounts.back.toLocaleString()}`;
         document.querySelectorAll('input[type="range"]').forEach(updateRangeFill);
         updateViewportTransform();
         updateCursorPreview();
@@ -3351,6 +3898,10 @@
           paintCanvas.setPointerCapture(event.pointerId);
           return;
         }
+        if (state.generatorMode === "image") {
+          hideCursorRing();
+          return;
+        }
         if (event.altKey) {
           const anchorPoint = getCanvasPoint(event);
           state.adjustingBrush = true;
@@ -3489,7 +4040,14 @@
       }
 
       function showCursorRing(event) {
-        if (state.panKeyDown || state.panning || state.mode === "move" || state.mode === "zoom" || state.movingPattern) {
+        if (
+          state.generatorMode === "image" ||
+          state.panKeyDown ||
+          state.panning ||
+          state.mode === "move" ||
+          state.mode === "zoom" ||
+          state.movingPattern
+        ) {
           return;
         }
         state.pointerInsideCanvas = true;
@@ -3552,12 +4110,30 @@
         const width = paintCanvas.width;
         const height = paintCanvas.height;
         const imageData = layerCtx.getImageData(0, 0, width, height);
-        const spacing = state.spacing;
-        const minimumGap = 4;
+        const baseSpacing = state.spacing;
+        const spacing =
+          state.generatorMode === "image"
+            ? Math.max(2, baseSpacing / state.imageGenerator.density)
+            : baseSpacing;
+        const spacingScale = spacing / Math.max(0.0001, baseSpacing);
+        const effectiveMinDot =
+          state.generatorMode === "image" ? state.minDot * spacingScale : state.minDot;
+        const effectiveStrokeWidth =
+          state.generatorMode === "image"
+            ? Math.max(0.1, state.strokeWidth * spacingScale)
+            : state.strokeWidth;
+        const effectiveSizeCutoff =
+          state.generatorMode === "image"
+            ? state.sizeCutoff * spacingScale
+            : state.sizeCutoff;
+        const minimumGap =
+          state.generatorMode === "image"
+            ? Math.max(0.25, 4 * spacingScale)
+            : 4;
         const halfGap = minimumGap * 0.5;
-        const strokeInset = state.strokeWidth * 0.5;
+        const strokeInset = effectiveStrokeWidth * 0.5;
         const maxRadius = Math.max(0, (spacing * 0.5 - halfGap - strokeInset) * state.dotScale);
-        const safeMaxRadius = Math.max(maxRadius, state.minDot, 0.0001);
+        const safeMaxRadius = Math.max(maxRadius, effectiveMinDot, 0.0001);
         const sampleRadius = Math.max(1, spacing * 0.42);
         const circles = [];
         let dotCount = 0;
@@ -3571,17 +4147,19 @@
               continue;
             }
             const curvedDarkness = Math.pow(darkness, state.sizeCurve);
-            const radius = state.minDot + curvedDarkness * Math.max(0, maxRadius - state.minDot);
+            const radius =
+              effectiveMinDot + curvedDarkness * Math.max(0, maxRadius - effectiveMinDot);
             if (radius <= 0.01) {
               continue;
             }
-            if (radius < state.sizeCutoff) {
+            if (radius < effectiveSizeCutoff) {
               continue;
             }
             const arm = radius;
             const normalizedSize = Math.max(0, Math.min(1, radius / safeMaxRadius));
             const taperedWidth =
-              state.strokeWidth * (1 - state.strokeTaper + state.strokeTaper * normalizedSize);
+              effectiveStrokeWidth *
+              (1 - state.strokeTaper + state.strokeTaper * normalizedSize);
             const strokeWidth = Math.max(0.1, taperedWidth);
             circles.push(
               `<path d="M ${(x - arm).toFixed(2)} ${y.toFixed(2)} L ${(x + arm).toFixed(2)} ${y.toFixed(2)} M ${x.toFixed(2)} ${(y - arm).toFixed(2)} L ${x.toFixed(2)} ${(y + arm).toFixed(2)}" stroke="${state.dotColor}" stroke-width="${strokeWidth.toFixed(2)}" stroke-linecap="square" fill="none" />`
@@ -3633,6 +4211,47 @@
           return;
         }
         resizeCanvasPreserveContent(width, height);
+      }
+
+      function clampCanvasSizeValue(value) {
+        return Math.max(64, Math.min(2400, Math.round(value)));
+      }
+
+      function beginCanvasSizeScrub(axis, event) {
+        if (event.button !== 0) {
+          return;
+        }
+        event.preventDefault();
+        const input = axis === "width" ? widthInput : heightInput;
+        state.sizeScrub = {
+          axis,
+          startX: event.clientX,
+          startValue: clampCanvasSizeValue(Number(input.value) || (axis === "width" ? paintCanvas.width : paintCanvas.height)),
+        };
+        document.body.classList.add("is-scrubbing-size");
+      }
+
+      function updateCanvasSizeScrub(event) {
+        if (!state.sizeScrub) {
+          return;
+        }
+        const deltaX = event.clientX - state.sizeScrub.startX;
+        const stepSize = event.shiftKey ? 10 : 1;
+        const scrubSteps = Math.round(deltaX / 2);
+        const nextValue = clampCanvasSizeValue(state.sizeScrub.startValue + scrubSteps * stepSize);
+        const input = state.sizeScrub.axis === "width" ? widthInput : heightInput;
+        if (Number(input.value) !== nextValue) {
+          input.value = String(nextValue);
+          scheduleCanvasSizeApply();
+        }
+      }
+
+      function endCanvasSizeScrub() {
+        if (!state.sizeScrub) {
+          return;
+        }
+        state.sizeScrub = null;
+        document.body.classList.remove("is-scrubbing-size");
       }
 
       function scheduleCanvasSizeApply() {
@@ -3772,23 +4391,25 @@
               referenceImageInput.value = "";
               return;
             }
-            setReferenceImage(blobUrl, image.naturalWidth, image.naturalHeight);
-            state.referenceImageName = file.name;
-            if (choice === "delete") {
-              resetCanvas(image.naturalWidth, image.naturalHeight);
-            } else {
-              resizeCanvasPreserveContent(image.naturalWidth, image.naturalHeight);
-            }
-            return;
-          }
-
           setReferenceImage(blobUrl, image.naturalWidth, image.naturalHeight);
           state.referenceImageName = file.name;
-          if (!sameSize) {
+          if (choice === "delete") {
+            resetCanvas(image.naturalWidth, image.naturalHeight);
+          } else {
             resizeCanvasPreserveContent(image.naturalWidth, image.naturalHeight);
           }
-          updateLabels();
-        };
+          scheduleImageGeneration(true);
+          return;
+        }
+
+        setReferenceImage(blobUrl, image.naturalWidth, image.naturalHeight);
+        state.referenceImageName = file.name;
+        if (!sameSize) {
+          resizeCanvasPreserveContent(image.naturalWidth, image.naturalHeight);
+        }
+        updateLabels();
+        scheduleImageGeneration(true);
+      };
         image.onerror = () => {
           URL.revokeObjectURL(blobUrl);
         };
@@ -3800,7 +4421,8 @@
         const url = URL.createObjectURL(blob);
         const link = document.createElement("a");
         link.href = url;
-        link.download = `halftone-${suffix}-${paintCanvas.width}x${paintCanvas.height}.svg`;
+        const fileBaseName = sanitizeProjectName(projectNameInput.value || state.projectName);
+        link.download = `${fileBaseName}-${suffix}-${layerCanvases.front.width}x${layerCanvases.front.height}.svg`;
         link.click();
         URL.revokeObjectURL(url);
       }
@@ -3879,6 +4501,7 @@
             back: layerCanvases.back.toDataURL("image/png"),
           },
           settings: {
+            generatorMode: state.generatorMode,
             activeLayer: state.activeLayer,
             mode: state.mode,
             showOverlay: state.showOverlay,
@@ -3902,6 +4525,7 @@
               paint: { ...state.toolSettings.paint },
               erase: { ...state.toolSettings.erase },
             },
+            imageGenerator: { ...state.imageGenerator },
           },
         };
       }
@@ -3973,6 +4597,7 @@
 
         const settings = project.settings || {};
         state.projectName = normalizeProjectName(project.projectName || state.projectName);
+        state.generatorMode = settings.generatorMode === "image" ? "image" : "texture";
         state.showOverlay = Boolean(settings.showOverlay);
         state.gridMode = settings.gridMode === "staggered" ? "staggered" : "aligned";
         state.spacing = Math.max(4, Math.min(40, readNumber(settings.spacing, state.spacing)));
@@ -4006,6 +4631,13 @@
           back: settings.layerExpanded?.back !== false,
         };
         state.referenceImageOpacity = state.layerOpacity.image;
+        state.imageGenerator = {
+          brightness: Math.max(-1, Math.min(1, readNumber(settings.imageGenerator?.brightness, state.imageGenerator.brightness))),
+          contrast: Math.max(-1, Math.min(1, readNumber(settings.imageGenerator?.contrast, state.imageGenerator.contrast))),
+          gamma: clampImageGamma(readNumber(settings.imageGenerator?.gamma, state.imageGenerator.gamma)),
+          cutoff: clampImageCutoff(readNumber(settings.imageGenerator?.cutoff, state.imageGenerator.cutoff)),
+          density: clampImageDensity(readNumber(settings.imageGenerator?.density, state.imageGenerator.density)),
+        };
 
         const projectToolSettings = settings.toolSettings || {};
         state.toolSettings.paint = {
@@ -4040,6 +4672,7 @@
         zoomInput.value = String(Math.round(state.zoom * 100));
         imageOpacityInput.value = String(Math.round(state.referenceImageOpacity * 100));
         projectNameInput.value = state.projectName === "Untitled project" ? "" : state.projectName;
+        generatorModeSelect.value = state.generatorMode;
 
         switchMode(
           settings.mode === "erase"
@@ -4052,6 +4685,7 @@
         );
         setFloatingToolbarVisibility(state.mode === "move" || state.mode === "zoom", true);
         setZoomToolbarVisibility(state.mode !== "zoom", true);
+        setGeneratorMode(state.generatorMode);
         updateToggleButtons();
         updateLabels();
         redrawOverlay();
@@ -4123,6 +4757,9 @@
       imageLayerVisibilityButton.addEventListener("click", (event) => {
         event.stopPropagation();
         toggleLayerVisibility("image");
+        if (state.generatorMode === "image" && state.layerVisibility.image) {
+          scheduleImageGeneration(true);
+        }
       });
 
       backLayerVisibilityButton.addEventListener("click", (event) => {
@@ -4243,6 +4880,40 @@
         scheduleRender();
       });
 
+      generatorModeSelect.addEventListener("change", () => {
+        setGeneratorMode(generatorModeSelect.value);
+      });
+
+      imageBrightnessInput.addEventListener("input", () => {
+        state.imageGenerator.brightness = Math.max(-1, Math.min(1, Number(imageBrightnessInput.value) / 100));
+        updateLabels();
+        scheduleImageGeneration();
+      });
+
+      imageContrastInput.addEventListener("input", () => {
+        state.imageGenerator.contrast = Math.max(-1, Math.min(1, Number(imageContrastInput.value) / 100));
+        updateLabels();
+        scheduleImageGeneration();
+      });
+
+      imageGammaInput.addEventListener("input", () => {
+        state.imageGenerator.gamma = clampImageGamma(Number(imageGammaInput.value) / 100);
+        updateLabels();
+        scheduleImageGeneration();
+      });
+
+      imageCutoffInput.addEventListener("input", () => {
+        state.imageGenerator.cutoff = clampImageCutoff(Number(imageCutoffInput.value) / 100);
+        updateLabels();
+        scheduleImageGeneration();
+      });
+
+      imageDensityInput.addEventListener("input", () => {
+        state.imageGenerator.density = clampImageDensity(Number(imageDensityInput.value) / 100);
+        updateLabels();
+        scheduleRender();
+      });
+
       zoomInput.addEventListener("input", () => {
         setZoom(Number(zoomInput.value) / 100);
       });
@@ -4290,6 +4961,12 @@
       clearImageButton.addEventListener("click", clearReferenceImage);
       projectNameInput.addEventListener("input", () => {
         state.projectName = normalizeProjectName(projectNameInput.value);
+      });
+      widthScrubHandle.addEventListener("pointerdown", (event) => {
+        beginCanvasSizeScrub("width", event);
+      });
+      heightScrubHandle.addEventListener("pointerdown", (event) => {
+        beginCanvasSizeScrub("height", event);
       });
       widthInput.addEventListener("input", scheduleCanvasSizeApply);
       heightInput.addEventListener("input", scheduleCanvasSizeApply);
@@ -4374,6 +5051,9 @@
       });
 
       saveProjectButton.addEventListener("click", saveProjectFile);
+      loadProjectVisibleButton.addEventListener("click", () => {
+        loadProjectInput.click();
+      });
       loadProjectButton.addEventListener("click", () => {
         loadProjectInput.click();
       });
@@ -4405,6 +5085,20 @@
         }
       });
 
+      document.addEventListener("mouseover", handleTooltipPointerOver);
+      document.addEventListener("mouseout", handleTooltipPointerOut);
+      document.addEventListener("focusin", handleTooltipFocusIn);
+      document.addEventListener("focusout", handleTooltipFocusOut);
+      document.addEventListener("pointerdown", hideAppTooltip, true);
+      window.addEventListener("resize", refreshAppTooltip);
+      window.addEventListener("scroll", refreshAppTooltip, true);
+      window.addEventListener("blur", hideAppTooltip);
+      document.addEventListener("visibilitychange", () => {
+        if (document.hidden) {
+          hideAppTooltip();
+        }
+      });
+
       paintCanvas.addEventListener("pointerdown", pointerDown);
       paintCanvas.addEventListener("pointermove", pointerMove);
       paintCanvas.addEventListener("pointerup", pointerUp);
@@ -4429,6 +5123,18 @@
         },
         { passive: false }
       );
+
+      window.addEventListener("pointermove", (event) => {
+        updateCanvasSizeScrub(event);
+      });
+
+      window.addEventListener("pointerup", () => {
+        endCanvasSizeScrub();
+      });
+
+      window.addEventListener("pointercancel", () => {
+        endCanvasSizeScrub();
+      });
 
       window.addEventListener("keydown", (event) => {
         if (event.key === "Escape" && shortcutDialog.classList.contains("visible")) {
@@ -4541,12 +5247,14 @@
       });
 
       updateLabels();
+      setGeneratorMode(state.generatorMode);
       updateToggleButtons();
       setFloatingToolbarVisibility(state.mode === "move" || state.mode === "zoom", true);
       setZoomToolbarVisibility(state.mode !== "zoom", true);
       updatePanCursor();
       resetCanvas(paintCanvas.width, paintCanvas.height);
       window.requestAnimationFrame(centerViewport);
+      hideAppTooltip();
     </script>
   </body>
 </html>
