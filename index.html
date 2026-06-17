@@ -115,17 +115,17 @@
 
       .brand-row {
         display: flex;
-        align-items: center;
-        gap: 8px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
       }
 
       .brand-actions {
-        margin-left: auto;
+        width: auto;
         display: inline-flex;
-        align-items: flex-end;
-        gap: 4px;
+        align-items: flex-start;
         min-width: 0;
-        padding-top: 10px;
+        padding-top: 0;
       }
 
       .brand-logo {
@@ -136,7 +136,7 @@
       }
 
       .brand-mark {
-        width: 95px;
+        width: 96px;
         height: 30px;
         display: block;
       }
@@ -152,17 +152,17 @@
 
       .mode-switch {
         position: relative;
+        width: auto;
         min-width: 0;
         height: 20px;
         display: inline-flex;
-        align-items: flex-end;
-        flex: 1 1 auto;
-        justify-content: flex-end;
+        align-items: center;
+        justify-content: flex-start;
         cursor: pointer;
       }
 
       .mode-select {
-        width: 100%;
+        width: auto;
         min-width: 0;
         height: 20px;
         padding: 0 20px 0 0;
@@ -175,7 +175,7 @@
         line-height: 20px;
         appearance: none;
         outline: none;
-        text-align: right;
+        text-align: left;
         white-space: nowrap;
         cursor: pointer;
       }
@@ -368,8 +368,9 @@
       }
 
       .layer-card {
-        display: grid;
-        gap: 4px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
       }
 
       .layer-card.is-hidden-in-layers {
@@ -380,10 +381,10 @@
         display: flex;
         align-items: center;
         gap: 8px;
-        width: 100%;
+        flex: 1 1 auto;
+        min-width: 0;
         min-height: 40px;
         padding: 6px;
-        border-radius: 2px;
         text-align: left;
         color: var(--text);
       }
@@ -400,6 +401,8 @@
         width: 16px;
         height: 16px;
         flex: 0 0 16px;
+        order: 3;
+        margin-left: auto;
       }
 
       .layer-state-icon svg {
@@ -412,7 +415,7 @@
       }
 
       .layer-name {
-        flex: 1 1 auto;
+        flex: 0 1 auto;
         min-width: 0;
         font-size: 15px;
         line-height: 30px;
@@ -427,7 +430,17 @@
       }
 
       .layer-visibility-button {
-        margin-left: auto;
+        order: -1;
+      }
+
+      .layer-delete-button {
+        color: #ffffff;
+        opacity: 1;
+        transition: opacity 150ms ease;
+      }
+
+      .layer-delete-button.is-disabled {
+        opacity: 0.5;
       }
 
       .layer-expand-button {
@@ -552,6 +565,11 @@
 
       .image-action-button.is-danger {
         color: var(--danger);
+      }
+
+      .export-action-button.is-disabled {
+        opacity: 0.5;
+        pointer-events: none;
       }
 
       .image-opacity-row {
@@ -727,6 +745,10 @@
         display: none;
       }
 
+      [data-mode-scope="image"] {
+        display: none;
+      }
+
       [data-mode-scope="texture-only"] {
         display: none;
       }
@@ -739,8 +761,34 @@
         display: grid;
       }
 
+      body[data-generator-mode="texture"] [data-mode-scope="image"] {
+        display: none !important;
+      }
+
       body[data-generator-mode="texture"] [data-mode-scope="texture-only"] {
         display: grid;
+      }
+
+      body[data-generator-mode="image"] [data-mode-scope="texture-only"] {
+        display: none !important;
+      }
+
+      .texture-action-only,
+      .image-action-only {
+        display: none;
+      }
+
+      body[data-generator-mode="texture"] .texture-action-only {
+        display: inline;
+      }
+
+      body[data-generator-mode="image"] .image-action-only {
+        display: inline;
+      }
+
+      body[data-generator-mode="image"] #bottomActionRow,
+      body[data-generator-mode="image"] #bothActionRow {
+        display: none;
       }
 
       .image-generator-controls {
@@ -966,13 +1014,12 @@
 
       .reference-image {
         position: absolute;
-        inset: 0;
-        width: 100%;
-        height: 100%;
-        object-fit: contain;
+        left: 0;
+        top: 0;
         pointer-events: none;
         user-select: none;
         z-index: 1;
+        max-width: none;
       }
 
       .svg-preview {
@@ -1002,6 +1049,109 @@
         top: 50%;
         transform-origin: center center;
         will-change: transform;
+        overflow: visible;
+      }
+
+      .image-transform-overlay {
+        position: absolute;
+        inset: 0;
+        overflow: visible;
+        pointer-events: none;
+        z-index: 6;
+      }
+
+      .image-transform-bounds {
+        position: absolute;
+        box-sizing: border-box;
+        border: 1px solid rgba(255, 255, 255, 0.9);
+        box-shadow: none;
+        pointer-events: none;
+      }
+
+      .image-transform-bounds.is-hidden {
+        display: none !important;
+      }
+
+      .image-transform-handle {
+        position: absolute;
+        width: 5px;
+        height: 5px;
+        min-width: 5px;
+        min-height: 5px;
+        margin: 0;
+        padding: 0;
+        display: block;
+        box-sizing: border-box;
+        border-radius: 0;
+        border: 0;
+        background: #ffffff;
+        box-shadow: none;
+        font-size: 0;
+        line-height: 0;
+        pointer-events: auto;
+        transform: translate(calc(-50% + 0.5px), calc(-50% + 0.5px));
+        appearance: none;
+        -webkit-appearance: none;
+      }
+
+      .image-transform-handle[data-corner="nw"],
+      .image-transform-handle[data-corner="se"] {
+        cursor: nwse-resize;
+      }
+
+      .image-transform-handle[data-corner="ne"],
+      .image-transform-handle[data-corner="sw"] {
+        cursor: nesw-resize;
+      }
+
+      .image-transform-handle[data-corner="n"],
+      .image-transform-handle[data-corner="s"] {
+        cursor: ns-resize;
+      }
+
+      .image-transform-handle[data-corner="e"],
+      .image-transform-handle[data-corner="w"] {
+        cursor: ew-resize;
+      }
+
+      .image-transform-handle[data-corner="nw"] {
+        left: 0;
+        top: 0;
+      }
+
+      .image-transform-handle[data-corner="ne"] {
+        left: 100%;
+        top: 0;
+      }
+
+      .image-transform-handle[data-corner="sw"] {
+        left: 0;
+        top: 100%;
+      }
+
+      .image-transform-handle[data-corner="se"] {
+        left: 100%;
+        top: 100%;
+      }
+
+      .image-transform-handle[data-corner="n"] {
+        left: 50%;
+        top: 0;
+      }
+
+      .image-transform-handle[data-corner="e"] {
+        left: 100%;
+        top: 50%;
+      }
+
+      .image-transform-handle[data-corner="s"] {
+        left: 50%;
+        top: 100%;
+      }
+
+      .image-transform-handle[data-corner="w"] {
+        left: 0;
+        top: 50%;
       }
 
       canvas {
@@ -1071,6 +1221,14 @@
       }
 
       .overlay-wrap.moving-pattern {
+        cursor: grabbing;
+      }
+
+      .overlay-wrap.image-drag-ready {
+        cursor: grab;
+      }
+
+      .overlay-wrap.image-dragging {
         cursor: grabbing;
       }
 
@@ -1832,23 +1990,23 @@
           <div class="brand-row">
             <div class="brand-logo" aria-label="Kong">
               <span class="brand-mark" aria-hidden="true">
-                <svg viewBox="0 0 95 30" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M11.0244 24.7102L10.1998 25.7529L12.0654 28.6571L11.8709 30H19.7857L20.3336 28.6571L17.1502 24.7102H11.0244Z" fill="currentColor"/>
-                  <path d="M15.353 7.03667L12.4901 12.0289L26.454 28.4906L26.0567 30H32.462L33.6208 24.6447L18.6789 7.03394L15.353 7.03667Z" fill="currentColor"/>
-                  <path d="M17.2543 3.2836L15.8927 5.78109H19.2707L25.0677 12.654L28.5142 9.83441V8.04385L27.3169 6.36794L28.2018 5.45082L21.287 0L17.2543 3.2836Z" fill="currentColor"/>
-                  <path d="M6.86015 17.1959H4.97254L0.00012207 23.4847V30H5.33418L6.27661 28.7799L10.3915 23.471H16.3447L18.1775 20.6733L11.723 13.0416L6.86015 17.1959Z" fill="currentColor"/>
-                  <path fill-rule="evenodd" clip-rule="evenodd" d="M57.8422 20.5403H62.4863V13.4448H57.8422V20.5403ZM58.0049 23.3785C56.7122 23.3785 56.0408 23.169 55.4876 22.5937C54.6564 21.7617 54.334 20.6052 54.334 17.0205C54.334 13.4359 54.6564 12.2794 55.4876 11.4238C56.0201 10.8691 56.7122 10.6597 58.0049 10.6597H62.3236C63.6162 10.6597 64.2877 10.8691 64.8408 11.4238C65.672 12.2794 65.9945 13.4123 65.9945 17.0205C65.9945 20.6288 65.672 21.7617 64.8408 22.5937C64.2877 23.1719 63.6162 23.3785 62.3236 23.3785H58.0049Z" fill="currentColor"/>
-                  <path fill-rule="evenodd" clip-rule="evenodd" d="M76.4964 14.6685C76.4964 14.7128 76.4964 14.757 76.4964 14.8042V23.3749H80.0282V14.3882C80.0282 12.5236 79.8212 11.8539 79.2887 11.3465C78.8036 10.8626 78.1085 10.6443 77.0229 10.6443L73.917 10.6531L72.1362 12.2552V10.6531H70.9442H68.6162V23.3719H72.1481V13.4382H76.4904V14.6626L76.4964 14.6685Z" fill="currentColor"/>
-                  <path fill-rule="evenodd" clip-rule="evenodd" d="M48.8078 7.1543H53.0141L46.9739 14.7779L53.2685 23.3751H48.8078L44.0188 16.6218L42.8829 16.6159V23.3751H39.0967V7.1543H42.8829V13.4414H44.0188L48.8078 7.1543Z" fill="currentColor"/>
-                  <path fill-rule="evenodd" clip-rule="evenodd" d="M90.872 10.6568V12.2588L89.0913 10.6568L86.4409 10.6479C85.1719 10.6479 84.4265 10.8663 83.8497 11.418C83.0866 12.1998 82.7168 13.911 82.7168 17.0442C82.7168 20.1775 83.0185 21.8178 83.7551 22.579C84.3319 23.1307 85.0181 23.3756 86.3818 23.3756H90.8632L90.8691 25.1959L84.6484 25.2077L84.6543 25.9542L86.2605 27.7303H91.1235C92.4161 27.7303 93.1556 27.5001 93.6171 27.0163C94.1939 26.4174 94.4246 26.0456 94.4246 23.8594V10.6598H90.8691L90.872 10.6568ZM90.8957 20.5256H86.2516V13.4419H90.8927V20.5256H90.8957Z" fill="currentColor"/>
+                <svg width="96" height="30" viewBox="0 0 96 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12.0243 24.7102L11.1996 25.7529L13.0653 28.6571L12.8708 30H20.7856L21.3335 28.6571L18.1501 24.7102H12.0243Z" fill="currentColor"/>
+                  <path d="M16.3529 7.03667L13.49 12.0289L27.4538 28.4906L27.0566 30H33.4618L34.6207 24.6447L19.6788 7.03394L16.3529 7.03667Z" fill="currentColor"/>
+                  <path d="M18.2542 3.2836L16.8926 5.78109H20.2705L26.0676 12.654L29.514 9.83441V8.04385L28.3168 6.36794L29.2017 5.45082L22.2869 0L18.2542 3.2836Z" fill="currentColor"/>
+                  <path d="M7.86003 17.1959H5.97242L1 23.4847V30H6.33405L7.27648 28.7799L11.3914 23.471H17.3446L19.1774 20.6733L12.7229 13.0416L7.86003 17.1959Z" fill="currentColor"/>
+                  <path fill-rule="evenodd" clip-rule="evenodd" d="M58.8422 20.5403H63.4863V13.4448H58.8422V20.5403ZM59.0049 23.3785C57.7122 23.3785 57.0408 23.169 56.4876 22.5937C55.6564 21.7617 55.334 20.6052 55.334 17.0205C55.334 13.4359 55.6564 12.2794 56.4876 11.4238C57.0201 10.8691 57.7122 10.6597 59.0049 10.6597H63.3236C64.6162 10.6597 65.2877 10.8691 65.8408 11.4238C66.672 12.2794 66.9945 13.4123 66.9945 17.0205C66.9945 20.6288 66.672 21.7617 65.8408 22.5937C65.2877 23.1719 64.6162 23.3785 63.3236 23.3785H59.0049Z" fill="currentColor"/>
+                  <path fill-rule="evenodd" clip-rule="evenodd" d="M77.4964 14.6685C77.4964 14.7128 77.4964 14.757 77.4964 14.8042V23.3749H81.0282V14.3882C81.0282 12.5236 80.8212 11.8539 80.2887 11.3465C79.8036 10.8626 79.1085 10.6443 78.0229 10.6443L74.917 10.6531L73.1362 12.2552V10.6531H71.9442H69.6162V23.3719H73.1481V13.4382H77.4904V14.6626L77.4964 14.6685Z" fill="currentColor"/>
+                  <path fill-rule="evenodd" clip-rule="evenodd" d="M49.8078 7.1543H54.0141L47.9739 14.7779L54.2685 23.3751H49.8078L45.0188 16.6218L43.8829 16.6159V23.3751H40.0967V7.1543H43.8829V13.4414H45.0188L49.8078 7.1543Z" fill="currentColor"/>
+                  <path fill-rule="evenodd" clip-rule="evenodd" d="M91.872 10.6568V12.2588L90.0913 10.6568L87.4409 10.6479C86.1719 10.6479 85.4265 10.8663 84.8497 11.418C84.0866 12.1998 83.7168 13.911 83.7168 17.0442C83.7168 20.1775 84.0185 21.8178 84.7551 22.579C85.3319 23.1307 86.0181 23.3756 87.3818 23.3756H91.8632L91.8691 25.1959L85.6484 25.2077L85.6543 25.9542L87.2605 27.7303H92.1235C93.4161 27.7303 94.1556 27.5001 94.6171 27.0163C95.1939 26.4174 95.4246 26.0456 95.4246 23.8594V10.6598H91.8691L91.872 10.6568ZM91.8957 20.5256H87.2516V13.4419H91.8927V20.5256H91.8957Z" fill="currentColor"/>
                 </svg>
               </span>
             </div>
             <div class="brand-actions">
               <div class="mode-switch">
                 <select id="generatorModeSelect" class="mode-select" aria-label="Generator mode">
-                  <option value="texture">Texture creator v0.9</option>
-                  <option value="image">Image generator v0.1</option>
+                  <option value="texture" selected>Texture Composer v1.0</option>
+                  <option value="image">Pattern generator v0.2</option>
                 </select>
                 <span class="mode-switch-icon" aria-hidden="true">
                   <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -1861,7 +2019,10 @@
         </div>
 
         <section class="sidebar-section">
-          <div class="section-title">Project Info</div>
+          <div class="section-title">
+            <span class="texture-action-only">Project</span>
+            <span class="image-action-only">Project</span>
+          </div>
           <div class="stack">
             <div class="project-row">
               <input id="projectNameInput" class="project-name-input" type="text" value="" placeholder="Untitled project" />
@@ -1876,6 +2037,17 @@
                   <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-upload"/></svg>
                 </span>
               </button>
+              <button
+                id="loadImageProjectVisibleButton"
+                class="icon-button-sm accent-icon-button"
+                type="button"
+                aria-label="Load image project"
+                data-mode-scope="image"
+              >
+                <span class="sidebar-icon" data-tooltip="Upload image project" data-tooltip-align="right" tabindex="0">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-upload"/></svg>
+                </span>
+              </button>
               <button id="saveProjectButton" class="icon-button-sm accent-icon-button" type="button" aria-label="Save project">
                 <span class="sidebar-icon" data-tooltip="Save project" data-tooltip-align="right" tabindex="0">
                   <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-file-down"/></svg>
@@ -1883,8 +2055,8 @@
               </button>
             </div>
 
-            <div class="canvas-size-row">
-              <div class="field-label">Canvas size</div>
+            <div class="canvas-size-row" data-mode-scope="texture-only">
+              <div class="field-label">Canvas</div>
               <div class="field-pill">
                 <span id="widthScrubHandle" class="field-code scrub-handle">W</span>
                 <input id="widthInput" class="field-number" type="number" min="64" max="2400" step="1" value="640" />
@@ -1898,7 +2070,7 @@
         </section>
 
         <section class="sidebar-section supporting-image-section">
-          <div class="section-title">Supporting Image</div>
+          <div class="section-title">Reference Image</div>
           <div class="image-stack">
             <div id="imageControlRow" class="image-file-row is-empty">
               <button id="chooseImageButton" class="image-file-main" type="button" aria-label="Choose image">
@@ -1929,7 +2101,7 @@
                 </div>
               </div>
               <div class="range-track">
-                <input id="imageOpacityInput" type="range" min="0" max="100" step="1" value="65" disabled />
+                <input id="imageOpacityInput" type="range" min="0" max="100" step="1" value="50" disabled />
               </div>
             </div>
           </div>
@@ -1940,68 +2112,49 @@
           <div class="layer-list">
             <div class="layer-card">
               <div id="frontLayerButton" class="layer-row active" role="button" tabindex="0">
-                <span class="layer-state-icon">
-                  <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-layer-dot"/></svg>
-                </span>
-                <span class="layer-name">Top layer</span>
-                <button id="frontLayerExpandButton" class="icon-button-sm layer-expand-button" type="button" aria-label="Expand top layer" tabindex="-1">
-                  <span class="sidebar-icon">
-                    <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chevron-down"/></svg>
-                  </span>
-                </button>
                 <button id="frontLayerVisibilityButton" class="icon-button-sm layer-visibility-button" type="button" aria-label="Toggle top layer visibility">
                   <span class="sidebar-icon">
                     <svg viewBox="0 0 24 24" aria-hidden="true"><use id="frontLayerVisibilityIcon" href="#i-eye"/></svg>
                   </span>
                 </button>
+                <span class="layer-name">Top Layer</span>
+                <span class="layer-state-icon">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-layer-dot"/></svg>
+                </span>
               </div>
-              <div id="frontLayerChildren" class="layer-children">
-                <div class="compact-control">
-                  <span class="sidebar-icon" data-tooltip="Top layer opacity" aria-label="Top layer opacity" tabindex="0">
-                    <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-opacity"/></svg>
-                  </span>
-                  <span id="frontOpacityValue" class="range-value">100%</span>
-                  <div class="range-track">
-                    <input id="frontOpacityInput" type="range" min="0" max="100" step="1" value="100" />
-                  </div>
-                </div>
-              </div>
+              <button id="frontLayerDeleteButton" class="icon-button-sm layer-delete-button" type="button" aria-label="Clear top layer" data-tooltip="Clear top layer" data-tooltip-align="right">
+                <span class="sidebar-icon">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-trash"/></svg>
+                </span>
+              </button>
             </div>
 
             <div class="layer-card">
               <div id="backLayerButton" class="layer-row" role="button" tabindex="0">
-                <span class="layer-state-icon">
-                  <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-layer-dot"/></svg>
-                </span>
-                <span class="layer-name">Bottom layer</span>
-                <button id="backLayerExpandButton" class="icon-button-sm layer-expand-button" type="button" aria-label="Expand bottom layer" tabindex="-1">
-                  <span class="sidebar-icon">
-                    <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chevron-up"/></svg>
-                  </span>
-                </button>
                 <button id="backLayerVisibilityButton" class="icon-button-sm layer-visibility-button" type="button" aria-label="Toggle bottom layer visibility">
                   <span class="sidebar-icon">
                     <svg viewBox="0 0 24 24" aria-hidden="true"><use id="backLayerVisibilityIcon" href="#i-eye"/></svg>
                   </span>
                 </button>
+                <span class="layer-name">Bottom Layer</span>
+                <span class="layer-state-icon">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-layer-dot"/></svg>
+                </span>
               </div>
-              <div id="backLayerChildren" class="layer-children open">
-                <div class="compact-control">
-                  <span class="sidebar-icon" data-tooltip="Bottom layer opacity" aria-label="Bottom layer opacity" tabindex="0">
-                    <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-opacity"/></svg>
-                  </span>
-                  <span id="backOpacityValue" class="range-value">100%</span>
-                  <div class="range-track">
-                    <input id="backOpacityInput" type="range" min="0" max="100" step="1" value="100" />
-                  </div>
-                </div>
-              </div>
+              <button id="backLayerDeleteButton" class="icon-button-sm layer-delete-button" type="button" aria-label="Clear bottom layer" data-tooltip="Clear bottom layer" data-tooltip-align="right">
+                <span class="sidebar-icon">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-trash"/></svg>
+                </span>
+              </button>
             </div>
           </div>
         </section>
 
         <section class="sidebar-section">
-          <div class="section-title">Pattern Style</div>
+          <div class="section-title">
+            <span class="texture-action-only">Pattern Type</span>
+            <span class="image-action-only">Pattern Type</span>
+          </div>
           <div class="style-grid">
             <button id="staggeredGridButton" class="style-button active" type="button">
               <span class="sidebar-pattern-icon staggered-icon">
@@ -2037,8 +2190,8 @@
           </div>
         </section>
 
-        <section class="sidebar-section mode-panel" data-mode-scope="image">
-          <div class="section-title">Image Generator</div>
+        <section id="imageAdjustmentsSection" class="sidebar-section mode-panel" data-mode-scope="image">
+          <div class="section-title">Image Adjustments</div>
           <div class="image-generator-controls">
             <div class="advanced-setting-row">
               <div class="advanced-setting-header">
@@ -2072,23 +2225,22 @@
 
             <div class="advanced-setting-row">
               <div class="advanced-setting-header">
-                <div class="advanced-setting-label">Background cutoff</div>
+                <div class="advanced-setting-label">Subject Threshold</div>
                 <span id="imageCutoffValue" class="advanced-setting-value">96%</span>
               </div>
               <div class="range-track">
                 <input id="imageCutoffInput" type="range" min="50" max="100" step="1" value="96" />
               </div>
             </div>
-            <div class="advanced-setting-row">
+            <div class="advanced-setting-row is-hidden">
               <div class="advanced-setting-header">
-                <div class="advanced-setting-label">Density</div>
-                <span id="imageDensityValue" class="advanced-setting-value">100%</span>
+                <div class="advanced-setting-label">Image scale</div>
+                <span id="imageScaleValue" class="advanced-setting-value">100%</span>
               </div>
               <div class="range-track">
-                <input id="imageDensityInput" type="range" min="40" max="220" step="5" value="100" />
+                <input id="imageScaleInput" type="range" min="10" max="300" step="1" value="100" />
               </div>
             </div>
-            <div class="generator-helper">The pattern updates live from the current reference image as you adjust these controls.</div>
           </div>
         </section>
 
@@ -2122,6 +2274,16 @@
               </div>
               <div class="range-track">
                 <input id="dotScaleInput" type="range" min="20" max="160" step="1" value="100" />
+              </div>
+            </div>
+
+            <div class="advanced-setting-row" data-mode-scope="image">
+              <div class="advanced-setting-header">
+                <div class="advanced-setting-label">Density</div>
+                <span id="imageDensityValue" class="advanced-setting-value">100%</span>
+              </div>
+              <div class="range-track">
+                <input id="imageDensityInput" type="range" min="20" max="200" step="5" value="100" />
               </div>
             </div>
 
@@ -2188,59 +2350,51 @@
         </section>
 
         <section class="sidebar-section actions-section">
-          <div class="section-title">Pattern Actions</div>
+          <div class="section-title">
+            <span class="texture-action-only">Export</span>
+            <span class="image-action-only">Export</span>
+          </div>
           <div class="actions-list">
             <div class="action-row">
-              <div class="action-label">Top layer</div>
-              <button id="topCopyButton" class="icon-button-sm" type="button" aria-label="Copy top layer SVG" data-tooltip="Copy top layer" data-tooltip-align="right">
+              <div class="action-label">
+                <span class="texture-action-only">Top Layer</span>
+                <span class="image-action-only">Pattern Image</span>
+              </div>
+              <button id="topCopyButton" class="icon-button-sm export-action-button" type="button" aria-label="Copy top layer SVG" data-tooltip="Copy top layer" data-tooltip-align="right">
                 <span class="sidebar-icon">
                   <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-copy"/></svg>
                 </span>
               </button>
-              <button id="downloadFrontButton" class="icon-button-sm" type="button" aria-label="Download top layer" data-tooltip="Download top layer" data-tooltip-align="right">
+              <button id="downloadFrontButton" class="icon-button-sm export-action-button" type="button" aria-label="Download top layer" data-tooltip="Download top layer" data-tooltip-align="right">
                 <span class="sidebar-icon">
                   <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-download"/></svg>
                 </span>
               </button>
-              <button id="topDeleteButton" class="icon-button-sm" type="button" aria-label="Clear top layer" data-tooltip="Clear top layer" data-tooltip-align="right">
-                <span class="sidebar-icon" style="color: var(--danger);">
-                  <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-trash"/></svg>
-                </span>
-              </button>
             </div>
-            <div class="action-row">
-              <div class="action-label">Bottom layer</div>
-              <button id="bottomCopyButton" class="icon-button-sm" type="button" aria-label="Copy bottom layer SVG" data-tooltip="Copy bottom layer" data-tooltip-align="right">
+            <div id="bottomActionRow" class="action-row">
+              <div class="action-label">Bottom Layer</div>
+              <button id="bottomCopyButton" class="icon-button-sm export-action-button" type="button" aria-label="Copy bottom layer SVG" data-tooltip="Copy bottom layer" data-tooltip-align="right">
                 <span class="sidebar-icon">
                   <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-copy"/></svg>
                 </span>
               </button>
-              <button id="downloadBackButton" class="icon-button-sm" type="button" aria-label="Download bottom layer" data-tooltip="Download bottom layer" data-tooltip-align="right">
+              <button id="downloadBackButton" class="icon-button-sm export-action-button" type="button" aria-label="Download bottom layer" data-tooltip="Download bottom layer" data-tooltip-align="right">
                 <span class="sidebar-icon">
                   <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-download"/></svg>
-                </span>
-              </button>
-              <button id="bottomDeleteButton" class="icon-button-sm" type="button" aria-label="Clear bottom layer" data-tooltip="Clear bottom layer" data-tooltip-align="right">
-                <span class="sidebar-icon" style="color: var(--danger);">
-                  <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-trash"/></svg>
                 </span>
               </button>
             </div>
-            <div class="action-row">
-              <div class="action-label">Both</div>
-              <button id="downloadBothButton" class="icon-button-sm" type="button" aria-label="Download both layers" data-tooltip="Download both layers" data-tooltip-align="right">
+            <div id="bothActionRow" class="action-row">
+              <div class="action-label">Both Layers</div>
+              <button id="downloadBothButton" class="icon-button-sm export-action-button" type="button" aria-label="Download both layers" data-tooltip="Download both layers" data-tooltip-align="right">
                 <span class="sidebar-icon">
                   <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-download"/></svg>
-                </span>
-              </button>
-              <button id="clearBothButton" class="icon-button-sm" type="button" aria-label="Clear both layers" data-tooltip="Clear both layers" data-tooltip-align="right">
-                <span class="sidebar-icon" style="color: var(--danger);">
-                  <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-trash"/></svg>
                 </span>
               </button>
             </div>
           </div>
           <input id="loadProjectInput" class="hidden-control" type="file" accept=".json,application/json" hidden />
+          <input id="loadImageProjectInput" class="hidden-control" type="file" accept=".json,application/json" hidden />
           <button id="loadProjectButton" class="hidden-control" type="button" hidden aria-hidden="true">Load Project</button>
           <button id="copyButton" class="hidden-control" type="button" hidden aria-hidden="true">Copy Active SVG</button>
           <button id="clearButton" class="hidden-control" type="button" hidden aria-hidden="true">Clear</button>
@@ -2276,6 +2430,18 @@
                 <div id="cursorRing" class="cursor-ring">
                   <div id="cursorFill" class="cursor-fill"></div>
                   <div id="cursorReadout" class="cursor-readout"></div>
+                </div>
+              </div>
+              <div id="imageTransformOverlay" class="image-transform-overlay" aria-hidden="true">
+                <div id="imageTransformBounds" class="image-transform-bounds is-hidden">
+                  <button id="imageHandleNW" class="image-transform-handle" data-corner="nw" type="button" aria-label="Scale image from top left"></button>
+                  <button id="imageHandleN" class="image-transform-handle" data-corner="n" type="button" aria-label="Scale image from top"></button>
+                  <button id="imageHandleNE" class="image-transform-handle" data-corner="ne" type="button" aria-label="Scale image from top right"></button>
+                  <button id="imageHandleE" class="image-transform-handle" data-corner="e" type="button" aria-label="Scale image from right"></button>
+                  <button id="imageHandleSW" class="image-transform-handle" data-corner="sw" type="button" aria-label="Scale image from bottom left"></button>
+                  <button id="imageHandleS" class="image-transform-handle" data-corner="s" type="button" aria-label="Scale image from bottom"></button>
+                  <button id="imageHandleSE" class="image-transform-handle" data-corner="se" type="button" aria-label="Scale image from bottom right"></button>
+                  <button id="imageHandleW" class="image-transform-handle" data-corner="w" type="button" aria-label="Scale image from left"></button>
                 </div>
               </div>
             </div>
@@ -2351,12 +2517,12 @@
 
             <div class="tool-cluster">
               <div class="tool-segment">
-                <button id="paintModeButton" class="tool-button active" type="button" aria-label="Paint">
+                <button id="paintModeButton" class="tool-button active" type="button" aria-label="Paint" data-tooltip="Brush">
                   <span class="toolbar-icon">
                     <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-brush"/></svg>
                   </span>
                 </button>
-                <button id="eraseModeButton" class="tool-button" type="button" aria-label="Erase">
+                <button id="eraseModeButton" class="tool-button" type="button" aria-label="Erase" data-tooltip="Eraser">
                   <span class="toolbar-icon">
                     <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-eraser"/></svg>
                   </span>
@@ -2368,7 +2534,7 @@
                 </button>
               </div>
               <div class="tool-divider"></div>
-              <div class="tool-color" aria-label="Pattern color">
+              <div class="tool-color" aria-label="Pattern color" data-tooltip="Pattern color">
                 <div class="tool-color-inner">
                   <input id="dotColorVisible" class="tool-color-input" type="color" value="#ccff00" aria-label="Pattern color" />
                   <div id="dotColorSwatch" class="tool-color-swatch"></div>
@@ -2425,6 +2591,32 @@
           <button id="imageImportKeepButton" class="primary" type="button">Keep Pattern</button>
           <button id="imageImportDeleteButton" class="secondary" type="button">Delete Pattern</button>
           <button id="imageImportCancelButton" class="secondary" type="button">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="modeSwitchDialog" class="dialog-backdrop" hidden>
+      <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="modeSwitchDialogTitle">
+        <h2 id="modeSwitchDialogTitle">Change Generator?</h2>
+        <p id="modeSwitchDialogMessage">
+          Switching generators will delete the current progress. Do you want to continue?
+        </p>
+        <div class="dialog-actions">
+          <button id="modeSwitchCancelButton" class="secondary" type="button">Cancel</button>
+          <button id="modeSwitchContinueButton" class="primary" type="button">Continue</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="layerDeleteDialog" class="dialog-backdrop" hidden>
+      <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="layerDeleteDialogTitle">
+        <h2 id="layerDeleteDialogTitle">Delete Layer Content?</h2>
+        <p id="layerDeleteDialogMessage">
+          This will delete the current layer content. Do you want to continue?
+        </p>
+        <div class="dialog-actions">
+          <button id="layerDeleteCancelButton" class="secondary" type="button">Cancel</button>
+          <button id="layerDeleteConfirmButton" class="primary" type="button">Delete</button>
         </div>
       </div>
     </div>
@@ -2612,6 +2804,33 @@
     </div>
 
     <script>
+      const IMAGE_MODE_FRAME_WIDTH = 290;
+      const IMAGE_MODE_FRAME_HEIGHT = 340;
+      const IMAGE_MODE_DEFAULT_ZOOM = 2;
+      const IMAGE_DENSITY_BASELINE = 2.2;
+      const TEXTURE_PATTERN_DEFAULTS = {
+        spacing: 14,
+        minDot: 0.4,
+        dotScale: 1,
+        strokeWidth: 1.6,
+        strokeTaper: 0.95,
+        sizeCurve: 1,
+        sizeCutoff: 0.8,
+        brushFlow: 0.25,
+        flowResponse: 2,
+      };
+      const IMAGE_PATTERN_DEFAULTS = {
+        spacing: 10,
+        minDot: 0.9,
+        dotScale: 1.5,
+        strokeWidth: 2,
+        strokeTaper: 0.95,
+        sizeCurve: 1.2,
+        sizeCutoff: 0.9,
+        brushFlow: 0.25,
+        flowResponse: 2,
+      };
+
       const paintCanvas = document.getElementById("paintCanvas");
       const paintCtx = paintCanvas.getContext("2d", { willReadFrequently: true });
       const layerCanvases = {
@@ -2626,10 +2845,20 @@
       const backSvgPreview = document.getElementById("backSvgPreview");
       const canvasStatus = document.getElementById("canvasStatus");
       const overlayWrap = document.querySelector(".overlay-wrap");
+      const overlayStage = document.querySelector(".overlay-stage");
       const cursorRing = document.getElementById("cursorRing");
       const cursorFill = document.getElementById("cursorFill");
       const cursorReadout = document.getElementById("cursorReadout");
       const referenceImage = document.getElementById("referenceImage");
+      const imageTransformBounds = document.getElementById("imageTransformBounds");
+      const imageHandleNW = document.getElementById("imageHandleNW");
+      const imageHandleN = document.getElementById("imageHandleN");
+      const imageHandleNE = document.getElementById("imageHandleNE");
+      const imageHandleE = document.getElementById("imageHandleE");
+      const imageHandleSW = document.getElementById("imageHandleSW");
+      const imageHandleS = document.getElementById("imageHandleS");
+      const imageHandleSE = document.getElementById("imageHandleSE");
+      const imageHandleW = document.getElementById("imageHandleW");
       const zoomShell = document.getElementById("zoomShell");
       const generatorModeSelect = document.getElementById("generatorModeSelect");
 
@@ -2648,22 +2877,16 @@
       const heightInput = document.getElementById("heightInput");
       const resizeButton = document.getElementById("resizeButton");
       const projectNameInput = document.getElementById("projectNameInput");
-      const frontLayerExpandButton = document.getElementById("frontLayerExpandButton");
       const frontLayerVisibilityButton = document.getElementById("frontLayerVisibilityButton");
       const frontLayerVisibilityIcon = document.getElementById("frontLayerVisibilityIcon");
       const imageLayerVisibilityButton = document.getElementById("imageLayerVisibilityButton");
       const imageLayerVisibilityIcon = document.getElementById("imageLayerVisibilityIcon");
       const imageLayerExpandButton = null;
-      const backLayerExpandButton = document.getElementById("backLayerExpandButton");
       const backLayerVisibilityButton = document.getElementById("backLayerVisibilityButton");
       const backLayerVisibilityIcon = document.getElementById("backLayerVisibilityIcon");
-      const frontLayerChildren = document.getElementById("frontLayerChildren");
       const imageLayerChildren = null;
-      const backLayerChildren = document.getElementById("backLayerChildren");
-      const frontOpacityInput = document.getElementById("frontOpacityInput");
-      const frontOpacityValue = document.getElementById("frontOpacityValue");
-      const backOpacityInput = document.getElementById("backOpacityInput");
-      const backOpacityValue = document.getElementById("backOpacityValue");
+      const frontLayerDeleteButton = document.getElementById("frontLayerDeleteButton");
+      const backLayerDeleteButton = document.getElementById("backLayerDeleteButton");
       const imageNameLabel = document.getElementById("imageNameLabel");
 
       const frontLayerButton = document.getElementById("frontLayerButton");
@@ -2716,13 +2939,12 @@
       const downloadBothButton = document.getElementById("downloadBothButton");
       const topCopyButton = document.getElementById("topCopyButton");
       const bottomCopyButton = document.getElementById("bottomCopyButton");
-      const topDeleteButton = document.getElementById("topDeleteButton");
-      const bottomDeleteButton = document.getElementById("bottomDeleteButton");
-      const clearBothButton = document.getElementById("clearBothButton");
       const saveProjectButton = document.getElementById("saveProjectButton");
       const loadProjectVisibleButton = document.getElementById("loadProjectVisibleButton");
+      const loadImageProjectVisibleButton = document.getElementById("loadImageProjectVisibleButton");
       const loadProjectButton = document.getElementById("loadProjectButton");
       const loadProjectInput = document.getElementById("loadProjectInput");
+      const loadImageProjectInput = document.getElementById("loadImageProjectInput");
       const copyButton = document.getElementById("copyButton");
       const shortcutHelpButton = document.getElementById("shortcutHelpButton");
       const patternSettingsSection = document.getElementById("patternSettingsSection");
@@ -2734,12 +2956,21 @@
       const shortcutDialogCloseButton = document.getElementById("shortcutDialogCloseButton");
       const imageImportDialog = document.getElementById("imageImportDialog");
       const imageImportDialogMessage = document.getElementById("imageImportDialogMessage");
+      const modeSwitchDialog = document.getElementById("modeSwitchDialog");
+      const modeSwitchDialogMessage = document.getElementById("modeSwitchDialogMessage");
+      const layerDeleteDialog = document.getElementById("layerDeleteDialog");
+      const layerDeleteDialogMessage = document.getElementById("layerDeleteDialogMessage");
       const imageImportKeepButton = document.getElementById("imageImportKeepButton");
       const imageImportDeleteButton = document.getElementById("imageImportDeleteButton");
       const imageImportCancelButton = document.getElementById("imageImportCancelButton");
+      const modeSwitchCancelButton = document.getElementById("modeSwitchCancelButton");
+      const modeSwitchContinueButton = document.getElementById("modeSwitchContinueButton");
+      const layerDeleteCancelButton = document.getElementById("layerDeleteCancelButton");
+      const layerDeleteConfirmButton = document.getElementById("layerDeleteConfirmButton");
       const appTooltip = document.getElementById("appTooltip");
       const appTooltipLabel = document.getElementById("appTooltipLabel");
       const imageLayerRow = imageControlRow;
+      const imageAdjustmentsSection = document.getElementById("imageAdjustmentsSection");
       const zoomToolbarShell = document.querySelector(".zoom-toolbar-shell");
       const floatingToolbarShell = document.querySelector(".floating-toolbar-shell");
       const floatingToolbar = document.querySelector(".floating-toolbar");
@@ -2749,11 +2980,13 @@
       const imageGammaInput = document.getElementById("imageGammaInput");
       const imageCutoffInput = document.getElementById("imageCutoffInput");
       const imageDensityInput = document.getElementById("imageDensityInput");
+      const imageScaleInput = document.getElementById("imageScaleInput");
       const imageBrightnessValue = document.getElementById("imageBrightnessValue");
       const imageContrastValue = document.getElementById("imageContrastValue");
       const imageGammaValue = document.getElementById("imageGammaValue");
       const imageCutoffValue = document.getElementById("imageCutoffValue");
       const imageDensityValue = document.getElementById("imageDensityValue");
+      const imageScaleValue = document.getElementById("imageScaleValue");
 
       const state = {
         activeLayer: "front",
@@ -2768,7 +3001,7 @@
         showOverlay: false,
         brushSize: Number(brushSizeInput.value),
         brushHardness: Number(brushHardnessInput.value) / 100,
-        brushFlow: Number(brushFlowInput.value) / 100,
+        brushFlow: IMAGE_PATTERN_DEFAULTS.brushFlow,
         toolSettings: {
           paint: {
             size: Number(brushSizeInput.value),
@@ -2780,15 +3013,15 @@
           },
         },
         gridMode: "staggered",
-        spacing: Number(spacingInput.value),
-        minDot: Number(minDotInput.value),
-        dotScale: Number(dotScaleInput.value) / 100,
-        strokeWidth: Number(strokeWidthInput.value),
-        strokeTaper: Number(strokeTaperInput.value) / 100,
-        sizeCurve: Number(sizeCurveInput.value) / 100,
-        sizeCutoff: Number(sizeCutoffInput.value) / 100,
+        spacing: IMAGE_PATTERN_DEFAULTS.spacing,
+        minDot: IMAGE_PATTERN_DEFAULTS.minDot,
+        dotScale: IMAGE_PATTERN_DEFAULTS.dotScale,
+        strokeWidth: IMAGE_PATTERN_DEFAULTS.strokeWidth,
+        strokeTaper: IMAGE_PATTERN_DEFAULTS.strokeTaper,
+        sizeCurve: IMAGE_PATTERN_DEFAULTS.sizeCurve,
+        sizeCutoff: IMAGE_PATTERN_DEFAULTS.sizeCutoff,
         dotColor: dotColorInput.value,
-        flowResponse: Number(flowResponseInput.value) / 100,
+        flowResponse: IMAGE_PATTERN_DEFAULTS.flowResponse,
         zoom: Number(zoomInput.value) / 100,
         lastPoint: null,
         pendingRender: false,
@@ -2851,12 +3084,26 @@
         tooltipTimerId: 0,
         tooltipHideTimerId: 0,
         sizeScrub: null,
+        imageDragging: false,
+        imageDragStartX: 0,
+        imageDragStartY: 0,
+        imageDragInitialOffsetX: 0,
+        imageDragInitialOffsetY: 0,
+        imageScaling: null,
+        imageTransformVisible: false,
+        patternSettingsByMode: {
+          texture: { ...TEXTURE_PATTERN_DEFAULTS },
+          image: { ...IMAGE_PATTERN_DEFAULTS },
+        },
         imageGenerator: {
           brightness: Number(imageBrightnessInput.value) / 100,
           contrast: Number(imageContrastInput.value) / 100,
           gamma: Number(imageGammaInput.value) / 100,
           cutoff: Number(imageCutoffInput.value) / 100,
-          density: Number(imageDensityInput.value) / 100,
+          density: IMAGE_DENSITY_BASELINE,
+          imageScale: Number(imageScaleInput.value) / 100,
+          offsetX: 0,
+          offsetY: 0,
         },
       };
 
@@ -2885,7 +3132,19 @@
       }
 
       function clampImageDensity(value) {
-        return Math.max(0.4, Math.min(2.2, value));
+        return Math.max(0.4, Math.min(4.4, value));
+      }
+
+      function imageDensityToPercent(value) {
+        return (clampImageDensity(value) / IMAGE_DENSITY_BASELINE) * 100;
+      }
+
+      function imageDensityFromPercent(value) {
+        return clampImageDensity((value / 100) * IMAGE_DENSITY_BASELINE);
+      }
+
+      function clampImageScale(value) {
+        return Math.max(0.1, Math.min(3, value));
       }
 
       function clampZoom(value) {
@@ -2918,26 +3177,75 @@
         updateLabels();
       }
 
+      function getCurrentPatternSettings() {
+        return {
+          spacing: state.spacing,
+          minDot: state.minDot,
+          dotScale: state.dotScale,
+          strokeWidth: state.strokeWidth,
+          strokeTaper: state.strokeTaper,
+          sizeCurve: state.sizeCurve,
+          sizeCutoff: state.sizeCutoff,
+          brushFlow: state.brushFlow,
+          flowResponse: state.flowResponse,
+        };
+      }
+
+      function syncCurrentModePatternSettings() {
+        state.patternSettingsByMode[state.generatorMode] = getCurrentPatternSettings();
+      }
+
+      function applyPatternSettings(settings) {
+        state.spacing = settings.spacing;
+        state.minDot = settings.minDot;
+        state.dotScale = settings.dotScale;
+        state.strokeWidth = settings.strokeWidth;
+        state.strokeTaper = settings.strokeTaper;
+        state.sizeCurve = settings.sizeCurve;
+        state.sizeCutoff = settings.sizeCutoff;
+        state.brushFlow = settings.brushFlow;
+        state.flowResponse = settings.flowResponse;
+      }
+
       function setGeneratorMode(nextMode) {
         if (nextMode !== "texture" && nextMode !== "image") {
           return;
         }
+        const previousMode = state.generatorMode;
+        if (previousMode === "texture" || previousMode === "image") {
+          syncCurrentModePatternSettings();
+        }
         state.generatorMode = nextMode;
+        applyPatternSettings(state.patternSettingsByMode[nextMode]);
         document.body.dataset.generatorMode = nextMode;
         generatorModeSelect.value = nextMode;
         if (nextMode === "image") {
+          if (
+            previousMode !== "image" ||
+            paintCanvas.width !== IMAGE_MODE_FRAME_WIDTH ||
+            paintCanvas.height !== IMAGE_MODE_FRAME_HEIGHT
+          ) {
+            resizeCanvasPreserveContent(IMAGE_MODE_FRAME_WIDTH, IMAGE_MODE_FRAME_HEIGHT);
+          }
+          state.zoom = IMAGE_MODE_DEFAULT_ZOOM;
+          centerViewport();
           state.activeLayer = "front";
           state.showOverlay = false;
+          state.imageTransformVisible = Boolean(state.referenceImageUrl);
           hideCursorRing();
           scheduleImageGeneration(true);
-        } else if (state.pointerInsideCanvas && (state.mode === "paint" || state.mode === "erase")) {
+        } else {
+          scheduleRender();
+          if (state.pointerInsideCanvas && (state.mode === "paint" || state.mode === "erase")) {
           showCursorRing({
             clientX: state.pointerClientX,
             clientY: state.pointerClientY,
           });
+          }
         }
         updateToggleButtons();
         updateLabels();
+        updatePanCursor();
       }
 
       function switchMode(nextMode) {
@@ -3039,6 +3347,269 @@
         state.zoom = clampZoom(snapZoomToTenth(nextZoom));
         centerViewport();
         updateLabels();
+      }
+
+      function getImagePlacementRect() {
+        const frameWidth = paintCanvas.width;
+        const frameHeight = paintCanvas.height;
+        const imageWidth = state.referenceImageWidth;
+        const imageHeight = state.referenceImageHeight;
+
+        if (!imageWidth || !imageHeight) {
+          return {
+            x: 0,
+            y: 0,
+            width: frameWidth,
+            height: frameHeight,
+            maxOffsetX: 0,
+            maxOffsetY: 0,
+          };
+        }
+
+        const coverScale = Math.max(frameWidth / imageWidth, frameHeight / imageHeight);
+        const renderedWidth = imageWidth * coverScale * state.imageGenerator.imageScale;
+        const renderedHeight = imageHeight * coverScale * state.imageGenerator.imageScale;
+        const offsetX = state.imageGenerator.offsetX;
+        const offsetY = state.imageGenerator.offsetY;
+
+        return {
+          x: (frameWidth - renderedWidth) * 0.5 + offsetX,
+          y: (frameHeight - renderedHeight) * 0.5 + offsetY,
+          width: renderedWidth,
+          height: renderedHeight,
+          maxOffsetX: Number.POSITIVE_INFINITY,
+          maxOffsetY: Number.POSITIVE_INFINITY,
+        };
+      }
+
+      function resetImagePlacement() {
+        state.imageGenerator.imageScale = 1;
+        state.imageGenerator.offsetX = 0;
+        state.imageGenerator.offsetY = 0;
+      }
+
+      function updateImageTransformOverlay() {
+        const shouldShow =
+          state.generatorMode === "image" &&
+          Boolean(state.referenceImageUrl) &&
+          state.imageTransformVisible;
+        imageTransformBounds.classList.toggle("is-hidden", !shouldShow);
+        if (!shouldShow) {
+          return;
+        }
+
+        const placement = getImagePlacementRect();
+        imageTransformBounds.style.left = `${placement.x}px`;
+        imageTransformBounds.style.top = `${placement.y}px`;
+        imageTransformBounds.style.width = `${placement.width}px`;
+        imageTransformBounds.style.height = `${placement.height}px`;
+      }
+
+      function updateReferenceImageTransform() {
+        const placement = getImagePlacementRect();
+        referenceImage.style.left = `${placement.x}px`;
+        referenceImage.style.top = `${placement.y}px`;
+        referenceImage.style.width = `${placement.width}px`;
+        referenceImage.style.height = `${placement.height}px`;
+        updateImageTransformOverlay();
+      }
+
+      function nudgeReferenceImage(deltaX, deltaY) {
+        if (state.generatorMode !== "image" || !state.referenceImageUrl || !state.imageTransformVisible) {
+          return false;
+        }
+        state.imageGenerator.offsetX += deltaX;
+        state.imageGenerator.offsetY += deltaY;
+        updateReferenceImageTransform();
+        scheduleImageGeneration();
+        return true;
+      }
+
+      function beginImageScale(corner, event) {
+        if (!state.referenceImageUrl || event.button !== 0) {
+          return;
+        }
+        event.preventDefault();
+        event.stopPropagation();
+        const handleElement = event.currentTarget instanceof HTMLElement ? event.currentTarget : null;
+        if (handleElement && typeof event.pointerId === "number") {
+          handleElement.setPointerCapture(event.pointerId);
+        }
+        const placement = getImagePlacementRect();
+        const stageRect = overlayStage.getBoundingClientRect();
+        const isWest = corner === "nw" || corner === "sw";
+        const isNorth = corner === "nw" || corner === "ne";
+        const isHorizontalEdge = corner === "e" || corner === "w";
+        const isVerticalEdge = corner === "n" || corner === "s";
+        const scaleX = paintCanvas.width / Math.max(1, stageRect.width);
+        const scaleY = paintCanvas.height / Math.max(1, stageRect.height);
+        const oppositeX =
+          corner === "w" || isWest ? placement.x + placement.width : placement.x;
+        const oppositeY =
+          corner === "n" || isNorth ? placement.y + placement.height : placement.y;
+
+        state.imageScaling = {
+          corner,
+          isWest,
+          isNorth,
+          isHorizontalEdge,
+          isVerticalEdge,
+          startRectLeft: placement.x,
+          startRectTop: placement.y,
+          startRectWidth: placement.width,
+          startRectHeight: placement.height,
+          startCenterX: placement.x + placement.width * 0.5,
+          startCenterY: placement.y + placement.height * 0.5,
+          oppositeX,
+          oppositeY,
+          stageLeft: stageRect.left,
+          stageTop: stageRect.top,
+          scaleX,
+          scaleY,
+          startScale: state.imageGenerator.imageScale,
+          startOffsetX: state.imageGenerator.offsetX,
+          startOffsetY: state.imageGenerator.offsetY,
+          pointerId: typeof event.pointerId === "number" ? event.pointerId : null,
+          handleElement,
+        };
+        document.body.classList.add("is-scrubbing-size");
+      }
+
+      function updateImageScale(event) {
+        if (!state.imageScaling) {
+          return;
+        }
+        const localX = (event.clientX - state.imageScaling.stageLeft) * state.imageScaling.scaleX;
+        const localY = (event.clientY - state.imageScaling.stageTop) * state.imageScaling.scaleY;
+        const preserveCenter = event.altKey;
+        const aspect =
+          state.imageScaling.startRectHeight <= 0
+            ? 1
+            : state.imageScaling.startRectWidth / state.imageScaling.startRectHeight;
+
+        let nextWidth;
+        let nextHeight;
+        let nextLeft;
+        let nextTop;
+
+        if (preserveCenter) {
+          if (state.imageScaling.isHorizontalEdge) {
+            const halfWidthFromCursor = Math.max(
+              1,
+              state.imageScaling.corner === "w"
+                ? state.imageScaling.startCenterX - localX
+                : localX - state.imageScaling.startCenterX
+            );
+            nextWidth = halfWidthFromCursor * 2;
+            nextHeight = nextWidth / aspect;
+          } else if (state.imageScaling.isVerticalEdge) {
+            const halfHeightFromCursor = Math.max(
+              1,
+              state.imageScaling.corner === "n"
+                ? state.imageScaling.startCenterY - localY
+                : localY - state.imageScaling.startCenterY
+            );
+            nextHeight = halfHeightFromCursor * 2;
+            nextWidth = nextHeight * aspect;
+          } else {
+            const halfWidthFromCursor = Math.max(
+              1,
+              state.imageScaling.isWest
+                ? state.imageScaling.startCenterX - localX
+                : localX - state.imageScaling.startCenterX
+            );
+            const halfHeightFromCursor = Math.max(
+              1,
+              state.imageScaling.isNorth
+                ? state.imageScaling.startCenterY - localY
+                : localY - state.imageScaling.startCenterY
+            );
+            const widthFromHeight = halfHeightFromCursor * 2 * aspect;
+            const heightFromWidth = (halfWidthFromCursor * 2) / aspect;
+            nextWidth = Math.max(halfWidthFromCursor * 2, widthFromHeight);
+            nextHeight = Math.max(halfHeightFromCursor * 2, heightFromWidth);
+          }
+          nextLeft = state.imageScaling.startCenterX - nextWidth * 0.5;
+          nextTop = state.imageScaling.startCenterY - nextHeight * 0.5;
+        } else {
+          let scaleRatio;
+          if (state.imageScaling.isHorizontalEdge) {
+            const widthFromCursor = Math.max(
+              1,
+              state.imageScaling.corner === "w"
+                ? state.imageScaling.oppositeX - localX
+                : localX - state.imageScaling.oppositeX
+            );
+            scaleRatio = widthFromCursor / Math.max(1, state.imageScaling.startRectWidth);
+          } else if (state.imageScaling.isVerticalEdge) {
+            const heightFromCursor = Math.max(
+              1,
+              state.imageScaling.corner === "n"
+                ? state.imageScaling.oppositeY - localY
+                : localY - state.imageScaling.oppositeY
+            );
+            scaleRatio = heightFromCursor / Math.max(1, state.imageScaling.startRectHeight);
+          } else {
+            const widthFromCursor = Math.max(
+              1,
+              state.imageScaling.isWest
+                ? state.imageScaling.oppositeX - localX
+                : localX - state.imageScaling.oppositeX
+            );
+            const heightFromCursor = Math.max(
+              1,
+              state.imageScaling.isNorth
+                ? state.imageScaling.oppositeY - localY
+                : localY - state.imageScaling.oppositeY
+            );
+            const widthScale = widthFromCursor / Math.max(1, state.imageScaling.startRectWidth);
+            const heightScale = heightFromCursor / Math.max(1, state.imageScaling.startRectHeight);
+            scaleRatio = Math.max(widthScale, heightScale);
+          }
+          nextWidth = state.imageScaling.startRectWidth * scaleRatio;
+          nextHeight = state.imageScaling.startRectHeight * scaleRatio;
+          nextLeft =
+            state.imageScaling.corner === "w" || state.imageScaling.isWest
+              ? state.imageScaling.oppositeX - nextWidth
+              : state.imageScaling.oppositeX;
+          nextTop =
+            state.imageScaling.corner === "n" || state.imageScaling.isNorth
+              ? state.imageScaling.oppositeY - nextHeight
+              : state.imageScaling.oppositeY;
+          if (state.imageScaling.isHorizontalEdge) {
+            nextTop = state.imageScaling.startCenterY - nextHeight * 0.5;
+          }
+          if (state.imageScaling.isVerticalEdge) {
+            nextLeft = state.imageScaling.startCenterX - nextWidth * 0.5;
+          }
+        }
+
+        const relativeScale = nextWidth / Math.max(1, state.imageScaling.startRectWidth);
+        state.imageGenerator.imageScale = clampImageScale(
+          state.imageScaling.startScale * relativeScale
+        );
+
+        const nextCenterX = nextLeft + nextWidth * 0.5;
+        const nextCenterY = nextTop + nextHeight * 0.5;
+        state.imageGenerator.offsetX = nextCenterX - paintCanvas.width * 0.5;
+        state.imageGenerator.offsetY = nextCenterY - paintCanvas.height * 0.5;
+        updateLabels();
+        scheduleImageGeneration();
+      }
+
+      function endImageScale() {
+        if (!state.imageScaling) {
+          return;
+        }
+        if (
+          state.imageScaling.handleElement &&
+          state.imageScaling.pointerId !== null &&
+          state.imageScaling.handleElement.hasPointerCapture(state.imageScaling.pointerId)
+        ) {
+          state.imageScaling.handleElement.releasePointerCapture(state.imageScaling.pointerId);
+        }
+        state.imageScaling = null;
+        document.body.classList.remove("is-scrubbing-size");
       }
 
       function updateCursorPreview() {
@@ -3386,13 +3957,12 @@
         frontSvgPreview.style.height = `${height}px`;
         backSvgPreview.style.width = `${width}px`;
         backSvgPreview.style.height = `${height}px`;
-        referenceImage.style.width = `${width}px`;
-        referenceImage.style.height = `${height}px`;
         cursorRing.style.width = `${state.brushSize}px`;
         cursorRing.style.height = `${state.brushSize}px`;
         canvasStatus.textContent = `${width} × ${height} px`;
         widthInput.value = width;
         heightInput.value = height;
+        updateReferenceImageTransform();
       }
 
       function resizeCanvasPreserveContent(width, height) {
@@ -3446,12 +4016,15 @@
         state.referenceImageUrl = url;
         state.referenceImageWidth = width;
         state.referenceImageHeight = height;
+        resetImagePlacement();
+        state.imageTransformVisible = true;
         referenceImage.src = url;
         referenceImage.style.opacity = String(state.layerOpacity.image);
         referenceImage.hidden = false;
         state.layerVisibility.image = true;
         updateToggleButtons();
         updateLabels();
+        updatePanCursor();
       }
 
       function clearReferenceImage() {
@@ -3464,12 +4037,15 @@
         state.referenceImageWidth = 0;
         state.referenceImageHeight = 0;
         state.referenceImageName = "";
+        resetImagePlacement();
+        state.imageTransformVisible = false;
         referenceImage.removeAttribute("src");
         referenceImage.hidden = true;
         referenceImageInput.value = "";
         state.layerVisibility.image = false;
         updateToggleButtons();
         updateLabels();
+        updatePanCursor();
       }
 
       function applyProcessedImageToLayer(targetLayer, imageData) {
@@ -3500,7 +4076,14 @@
             offscreen.width = width;
             offscreen.height = height;
             const ctx = offscreen.getContext("2d", { willReadFrequently: true });
-            ctx.drawImage(sourceImage, 0, 0, width, height);
+            const placement = getImagePlacementRect();
+            ctx.drawImage(
+              sourceImage,
+              placement.x,
+              placement.y,
+              placement.width,
+              placement.height
+            );
 
             const imageData = ctx.getImageData(0, 0, width, height);
             const data = imageData.data;
@@ -3622,7 +4205,8 @@
 
       function updateToggleButtons() {
         const hasReferenceImage = Boolean(state.referenceImageUrl);
-        const imageControlsEnabled = hasReferenceImage && state.layerVisibility.image;
+        const isImageMode = state.generatorMode === "image";
+        const imageControlsEnabled = hasReferenceImage && state.layerVisibility.image && !isImageMode;
         const isTextureMode = state.generatorMode === "texture";
         frontLayerButton.classList.toggle("active", state.activeLayer === "front");
         backLayerButton.classList.toggle("active", state.activeLayer === "back");
@@ -3630,16 +4214,40 @@
         backLayerButton.classList.toggle("is-hidden-layer", !state.layerVisibility.back);
         imageControlRow.classList.toggle("is-empty", !hasReferenceImage);
         imageOpacityRow.classList.toggle("is-disabled", !imageControlsEnabled);
-        imageOpacityRow.hidden = !hasReferenceImage;
-        imageOpacityRow.classList.toggle("is-hidden", !hasReferenceImage);
-        imageLayerVisibilityButton.disabled = !hasReferenceImage;
+        imageOpacityRow.hidden = !hasReferenceImage || isImageMode;
+        imageOpacityRow.classList.toggle("is-hidden", !hasReferenceImage || isImageMode);
+        imageLayerVisibilityButton.disabled = !hasReferenceImage || isImageMode;
+        imageLayerVisibilityButton.hidden = isImageMode;
         imageOpacityInput.disabled = !imageControlsEnabled;
         clearImageButton.hidden = !hasReferenceImage;
         clearImageButton.classList.toggle("is-hidden", !hasReferenceImage);
+        imageAdjustmentsSection.hidden = isImageMode && !hasReferenceImage;
+        imageAdjustmentsSection.classList.toggle("is-hidden", isImageMode && !hasReferenceImage);
         imageLayerRow.classList.remove("is-hidden-layer");
+        const frontHasPattern = layerHasPattern("front");
+        const backHasPattern = layerHasPattern("back");
+        const bothHavePattern = frontHasPattern && backHasPattern;
+        frontLayerDeleteButton.disabled = !frontHasPattern;
+        backLayerDeleteButton.disabled = !backHasPattern;
+        frontLayerDeleteButton.classList.toggle("is-disabled", !frontHasPattern);
+        backLayerDeleteButton.classList.toggle("is-disabled", !backHasPattern);
         frontLayerVisibilityIcon.setAttribute("href", state.layerVisibility.front ? "#i-eye" : "#i-eye-off");
         backLayerVisibilityIcon.setAttribute("href", state.layerVisibility.back ? "#i-eye" : "#i-eye-off");
         imageLayerVisibilityIcon.setAttribute("href", !hasReferenceImage || state.layerVisibility.image ? "#i-eye" : "#i-eye-off");
+        topCopyButton.setAttribute("data-tooltip", isImageMode ? "Copy Pattern" : "Copy top layer");
+        topCopyButton.setAttribute("aria-label", isImageMode ? "Copy pattern" : "Copy top layer SVG");
+        downloadFrontButton.setAttribute("data-tooltip", isImageMode ? "Download Pattern" : "Download top layer");
+        downloadFrontButton.setAttribute("aria-label", isImageMode ? "Download pattern" : "Download top layer");
+        topCopyButton.disabled = !frontHasPattern;
+        downloadFrontButton.disabled = !frontHasPattern;
+        bottomCopyButton.disabled = !backHasPattern;
+        downloadBackButton.disabled = !backHasPattern;
+        downloadBothButton.disabled = !bothHavePattern;
+        topCopyButton.classList.toggle("is-disabled", !frontHasPattern);
+        downloadFrontButton.classList.toggle("is-disabled", !frontHasPattern);
+        bottomCopyButton.classList.toggle("is-disabled", !backHasPattern);
+        downloadBackButton.classList.toggle("is-disabled", !backHasPattern);
+        downloadBothButton.classList.toggle("is-disabled", !bothHavePattern);
         paintModeButton.classList.toggle("active", state.mode === "paint");
         eraseModeButton.classList.toggle("active", state.mode === "erase");
         moveModeButton.classList.toggle("active", state.mode === "move");
@@ -3662,6 +4270,11 @@
         overlayWrap.classList.toggle("panning", state.panning);
         overlayWrap.classList.toggle("move-ready", state.mode === "move" && !state.movingPattern);
         overlayWrap.classList.toggle("moving-pattern", state.movingPattern);
+        overlayWrap.classList.toggle(
+          "image-drag-ready",
+          state.generatorMode === "image" && Boolean(state.referenceImageUrl) && !state.imageDragging && !state.imageScaling
+        );
+        overlayWrap.classList.toggle("image-dragging", state.imageDragging);
       }
 
       function updateRangeFill(input) {
@@ -3684,7 +4297,8 @@
         imageContrastInput.value = String(Math.round(state.imageGenerator.contrast * 100));
         imageGammaInput.value = String(Math.round(state.imageGenerator.gamma * 100));
         imageCutoffInput.value = String(Math.round(state.imageGenerator.cutoff * 100));
-        imageDensityInput.value = String(Math.round(state.imageGenerator.density * 100));
+        imageDensityInput.value = String(Math.round(imageDensityToPercent(state.imageGenerator.density)));
+        imageScaleInput.value = String(Math.round(state.imageGenerator.imageScale * 100));
         brushSizeValue.textContent = `${Math.round(state.brushSize)}`;
         brushHardnessValue.textContent = `${Math.round(state.brushHardness * 100)}%`;
         brushFlowValue.textContent = `${Math.round(state.brushFlow * 100)}%`;
@@ -3700,21 +4314,22 @@
         imageContrastValue.textContent = `${Math.round(state.imageGenerator.contrast * 100)}%`;
         imageGammaValue.textContent = `${state.imageGenerator.gamma.toFixed(1)}x`;
         imageCutoffValue.textContent = `${Math.round(state.imageGenerator.cutoff * 100)}%`;
-        imageDensityValue.textContent = `${Math.round(state.imageGenerator.density * 100)}%`;
+        imageDensityValue.textContent = `${Math.round(imageDensityToPercent(state.imageGenerator.density))}%`;
+        imageScaleValue.textContent = `${Math.round(state.imageGenerator.imageScale * 100)}%`;
         imageOpacityValue.textContent = `${Math.round(state.layerOpacity.image * 100)}%`;
-        frontOpacityValue.textContent = `${Math.round(state.layerOpacity.front * 100)}%`;
-        backOpacityValue.textContent = `${Math.round(state.layerOpacity.back * 100)}%`;
         zoomValue.textContent = `${Math.round(state.zoom * 100)}%`;
         zoomStatusValue.textContent = `${Math.round(state.zoom * 100)}%`;
         cursorRing.style.width = `${Math.round(state.brushSize)}px`;
         cursorRing.style.height = `${Math.round(state.brushSize)}px`;
         dotColorVisible.value = state.dotColor;
         dotColorSwatch.style.background = state.dotColor;
-        frontOpacityInput.value = String(Math.round(state.layerOpacity.front * 100));
-        backOpacityInput.value = String(Math.round(state.layerOpacity.back * 100));
         imageOpacityInput.value = String(Math.round(state.layerOpacity.image * 100));
         referenceImage.style.opacity = String(state.layerOpacity.image);
-        referenceImage.hidden = !state.referenceImageUrl || !state.layerVisibility.image;
+        referenceImage.hidden =
+          !state.referenceImageUrl ||
+          state.generatorMode === "image" ||
+          !state.layerVisibility.image;
+        updateReferenceImageTransform();
         frontSvgPreview.style.opacity = String(state.layerOpacity.front);
         backSvgPreview.style.opacity = String(state.layerOpacity.back);
         if (state.generatorMode === "image") {
@@ -3887,6 +4502,9 @@
 
       function pointerDown(event) {
         event.preventDefault();
+        if (state.imageScaling) {
+          return;
+        }
         if (state.panKeyDown) {
           state.panning = true;
           state.panStartX = event.clientX;
@@ -3899,6 +4517,20 @@
           return;
         }
         if (state.generatorMode === "image") {
+          if (state.referenceImageUrl) {
+            state.imageTransformVisible = true;
+            updateImageTransformOverlay();
+            const stageRect = overlayStage.getBoundingClientRect();
+            state.imageDragging = true;
+            state.imageDragStartX = event.clientX;
+            state.imageDragStartY = event.clientY;
+            state.imageDragInitialOffsetX = state.imageGenerator.offsetX;
+            state.imageDragInitialOffsetY = state.imageGenerator.offsetY;
+            state.imageDragScaleX = paintCanvas.width / Math.max(1, stageRect.width);
+            state.imageDragScaleY = paintCanvas.height / Math.max(1, stageRect.height);
+            updatePanCursor();
+            paintCanvas.setPointerCapture(event.pointerId);
+          }
           hideCursorRing();
           return;
         }
@@ -3935,6 +4567,7 @@
         const point = getCanvasPoint(event);
         state.lastPoint = point;
         paintStroke(point, point);
+        updateToggleButtons();
         scheduleRender();
         paintCanvas.setPointerCapture(event.pointerId);
       }
@@ -3951,6 +4584,23 @@
           state.viewOffsetX = state.panInitialOffsetX + deltaX;
           state.viewOffsetY = state.panInitialOffsetY + deltaY;
           updateViewportTransform();
+          return;
+        }
+        if (state.imageScaling) {
+          event.preventDefault();
+          updateImageScale(event);
+          return;
+        }
+        if (state.imageDragging) {
+          event.preventDefault();
+          state.imageGenerator.offsetX =
+            state.imageDragInitialOffsetX +
+            (event.clientX - state.imageDragStartX) * state.imageDragScaleX;
+          state.imageGenerator.offsetY =
+            state.imageDragInitialOffsetY +
+            (event.clientY - state.imageDragStartY) * state.imageDragScaleY;
+          updateReferenceImageTransform();
+          scheduleImageGeneration();
           return;
         }
         if (state.adjustingBrush) {
@@ -3976,12 +4626,26 @@
         const point = getCanvasPoint(event);
         paintStroke(state.lastPoint, point);
         state.lastPoint = point;
+        updateToggleButtons();
         scheduleRender();
       }
 
       function pointerUp(event) {
         if (state.panning) {
           state.panning = false;
+          if (typeof event.pointerId === "number") {
+            paintCanvas.releasePointerCapture(event.pointerId);
+          }
+          updatePanCursor();
+          return;
+        }
+        if (state.imageScaling) {
+          endImageScale();
+          updatePanCursor();
+          return;
+        }
+        if (state.imageDragging) {
+          state.imageDragging = false;
           if (typeof event.pointerId === "number") {
             paintCanvas.releasePointerCapture(event.pointerId);
           }
@@ -4074,6 +4738,18 @@
       function handleCanvasPointerLeave() {
         state.pointerInsideCanvas = false;
         hideCursorRing();
+      }
+
+      function handleCanvasPointerLeaveForActions(event) {
+        if (
+          state.drawing ||
+          state.adjustingBrush ||
+          state.panning ||
+          state.movingPattern ||
+          state.imageDragging
+        ) {
+          pointerUp(event);
+        }
       }
 
       function sampleDarkness(imageData, width, x, y, radius) {
@@ -4203,6 +4879,10 @@
       }
 
       function applyCanvasSize() {
+        if (state.generatorMode === "image") {
+          resizeCanvasPreserveContent(IMAGE_MODE_FRAME_WIDTH, IMAGE_MODE_FRAME_HEIGHT);
+          return;
+        }
         const width = Math.max(64, Math.min(2400, Number(widthInput.value) || 640));
         const height = Math.max(64, Math.min(2400, Number(heightInput.value) || 640));
         if (width === paintCanvas.width && height === paintCanvas.height) {
@@ -4324,6 +5004,126 @@
         imageImportDialog.classList.remove("visible");
       }
 
+      function closeModeSwitchDialog() {
+        modeSwitchDialog.hidden = true;
+        modeSwitchDialog.classList.remove("visible");
+      }
+
+      function closeLayerDeleteDialog() {
+        layerDeleteDialog.hidden = true;
+        layerDeleteDialog.classList.remove("visible");
+      }
+
+      function hasGeneratorProgress(mode = state.generatorMode) {
+        if (mode === "image") {
+          return Boolean(state.referenceImageUrl) || state.latestCounts.front > 0;
+        }
+        return hasAnyPattern() || Boolean(state.referenceImageUrl);
+      }
+
+      function resetGeneratorWorkspace(targetMode) {
+        const nextWidth =
+          targetMode === "image" ? IMAGE_MODE_FRAME_WIDTH : Number(widthInput.defaultValue || 640);
+        const nextHeight =
+          targetMode === "image" ? IMAGE_MODE_FRAME_HEIGHT : Number(heightInput.defaultValue || 640);
+
+        clearReferenceImage();
+        state.activeLayer = "front";
+        state.showOverlay = false;
+        state.imageTransformVisible = false;
+        state.layerVisibility.front = true;
+        state.layerVisibility.back = true;
+        state.zoom = targetMode === "image" ? IMAGE_MODE_DEFAULT_ZOOM : 1;
+        resetCanvas(nextWidth, nextHeight);
+        centerViewport();
+      }
+
+      function askGeneratorModeChange(nextMode) {
+        return new Promise((resolve) => {
+          const nextLabel = nextMode === "image" ? "Image Generator" : "Texture Creator";
+          modeSwitchDialogMessage.textContent =
+            `Switching to ${nextLabel} will delete the current progress. Do you want to continue or cancel?`;
+
+          modeSwitchDialog.hidden = false;
+          modeSwitchDialog.classList.add("visible");
+
+          const cleanup = () => {
+            closeModeSwitchDialog();
+            modeSwitchContinueButton.removeEventListener("click", handleContinue);
+            modeSwitchCancelButton.removeEventListener("click", handleCancel);
+            modeSwitchDialog.removeEventListener("click", handleBackdrop);
+            window.removeEventListener("keydown", handleKeydown);
+          };
+
+          const finish = (confirmed) => {
+            cleanup();
+            resolve(confirmed);
+          };
+
+          const handleContinue = () => finish(true);
+          const handleCancel = () => finish(false);
+          const handleBackdrop = (event) => {
+            if (event.target === modeSwitchDialog) {
+              finish(false);
+            }
+          };
+          const handleKeydown = (event) => {
+            if (event.key === "Escape") {
+              event.preventDefault();
+              finish(false);
+            }
+          };
+
+          modeSwitchContinueButton.addEventListener("click", handleContinue);
+          modeSwitchCancelButton.addEventListener("click", handleCancel);
+          modeSwitchDialog.addEventListener("click", handleBackdrop);
+          window.addEventListener("keydown", handleKeydown);
+        });
+      }
+
+      function askLayerDeleteAction(layerName) {
+        return new Promise((resolve) => {
+          const layerLabel = layerName === "back" ? "Bottom Layer" : "Top Layer";
+          layerDeleteDialogMessage.textContent =
+            `This will delete all content in ${layerLabel}. Do you want to continue or cancel?`;
+
+          layerDeleteDialog.hidden = false;
+          layerDeleteDialog.classList.add("visible");
+
+          const cleanup = () => {
+            closeLayerDeleteDialog();
+            layerDeleteConfirmButton.removeEventListener("click", handleConfirm);
+            layerDeleteCancelButton.removeEventListener("click", handleCancel);
+            layerDeleteDialog.removeEventListener("click", handleBackdrop);
+            window.removeEventListener("keydown", handleKeydown);
+          };
+
+          const finish = (confirmed) => {
+            cleanup();
+            resolve(confirmed);
+          };
+
+          const handleConfirm = () => finish(true);
+          const handleCancel = () => finish(false);
+          const handleBackdrop = (event) => {
+            if (event.target === layerDeleteDialog) {
+              finish(false);
+            }
+          };
+          const handleKeydown = (event) => {
+            if (event.key === "Escape") {
+              event.preventDefault();
+              finish(false);
+            }
+          };
+
+          layerDeleteConfirmButton.addEventListener("click", handleConfirm);
+          layerDeleteCancelButton.addEventListener("click", handleCancel);
+          layerDeleteDialog.addEventListener("click", handleBackdrop);
+          window.addEventListener("keydown", handleKeydown);
+        });
+      }
+
       function askImageImportAction(width, height) {
         return new Promise((resolve) => {
           imageImportDialogMessage.textContent =
@@ -4379,6 +5179,14 @@
         const blobUrl = URL.createObjectURL(file);
         const image = new Image();
         image.onload = async () => {
+          if (state.generatorMode === "image") {
+            setReferenceImage(blobUrl, image.naturalWidth, image.naturalHeight);
+            state.referenceImageName = file.name;
+            updateLabels();
+            scheduleImageGeneration(true);
+            return;
+          }
+
           const hasPattern = hasAnyPattern();
           const sameSize =
             image.naturalWidth === paintCanvas.width &&
@@ -4432,6 +5240,7 @@
         const layerCtx = layerContexts[layerName];
         layerCtx.fillStyle = "#ffffff";
         layerCtx.fillRect(0, 0, layerCanvases[layerName].width, layerCanvases[layerName].height);
+        updateToggleButtons();
         redrawOverlay();
         scheduleRender();
       }
@@ -4484,6 +5293,7 @@
       }
 
       function getProjectSnapshot() {
+        syncCurrentModePatternSettings();
         return {
           version: 1,
           savedAt: new Date().toISOString(),
@@ -4525,7 +5335,66 @@
               paint: { ...state.toolSettings.paint },
               erase: { ...state.toolSettings.erase },
             },
+            patternSettingsByMode: {
+              texture: { ...state.patternSettingsByMode.texture },
+              image: { ...state.patternSettingsByMode.image },
+            },
             imageGenerator: { ...state.imageGenerator },
+          },
+        };
+      }
+
+      function blobToDataUrl(blob) {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(String(reader.result || ""));
+          reader.onerror = () => reject(new Error("Could not read blob data."));
+          reader.readAsDataURL(blob);
+        });
+      }
+
+      async function resolveReferenceImageSourceForSave() {
+        if (!state.referenceImageUrl) {
+          return "";
+        }
+        if (state.referenceImageUrl.startsWith("data:")) {
+          return state.referenceImageUrl;
+        }
+        if (state.referenceImageUrl.startsWith("blob:")) {
+          const response = await fetch(state.referenceImageUrl);
+          const blob = await response.blob();
+          return blobToDataUrl(blob);
+        }
+        return state.referenceImageUrl;
+      }
+
+      async function getImageProjectSnapshot() {
+        syncCurrentModePatternSettings();
+        const referenceImageSource = await resolveReferenceImageSourceForSave();
+        return {
+          kind: "kong-image-generator-project",
+          version: 1,
+          savedAt: new Date().toISOString(),
+          projectName: normalizeProjectName(state.projectName),
+          frame: {
+            width: IMAGE_MODE_FRAME_WIDTH,
+            height: IMAGE_MODE_FRAME_HEIGHT,
+          },
+          referenceImage: state.referenceImageUrl
+            ? {
+                name: state.referenceImageName || "reference-image",
+                src: referenceImageSource,
+                width: state.referenceImageWidth,
+                height: state.referenceImageHeight,
+              }
+            : null,
+          settings: {
+            generatorMode: "image",
+            mode: state.mode,
+            dotColor: state.dotColor,
+            zoom: state.zoom,
+            imageGenerator: { ...state.imageGenerator },
+            imagePatternSettings: { ...state.patternSettingsByMode.image },
           },
         };
       }
@@ -4535,6 +5404,14 @@
         projectNameInput.value = projectNameInput.value.trim();
         const snapshot = getProjectSnapshot();
         const fileName = `${sanitizeProjectName(state.projectName)}.json`;
+        downloadTextFile(JSON.stringify(snapshot, null, 2), fileName, "application/json;charset=utf-8");
+      }
+
+      async function saveImageProjectFile() {
+        state.projectName = normalizeProjectName(projectNameInput.value);
+        projectNameInput.value = projectNameInput.value.trim();
+        const snapshot = await getImageProjectSnapshot();
+        const fileName = `${sanitizeProjectName(state.projectName)}-image-project.json`;
         downloadTextFile(JSON.stringify(snapshot, null, 2), fileName, "application/json;charset=utf-8");
       }
 
@@ -4637,6 +5514,30 @@
           gamma: clampImageGamma(readNumber(settings.imageGenerator?.gamma, state.imageGenerator.gamma)),
           cutoff: clampImageCutoff(readNumber(settings.imageGenerator?.cutoff, state.imageGenerator.cutoff)),
           density: clampImageDensity(readNumber(settings.imageGenerator?.density, state.imageGenerator.density)),
+          imageScale: clampImageScale(readNumber(settings.imageGenerator?.imageScale, state.imageGenerator.imageScale)),
+          offsetX: readNumber(settings.imageGenerator?.offsetX, state.imageGenerator.offsetX),
+          offsetY: readNumber(settings.imageGenerator?.offsetY, state.imageGenerator.offsetY),
+        };
+        state.patternSettingsByMode = {
+          texture: {
+            ...TEXTURE_PATTERN_DEFAULTS,
+            ...(settings.patternSettingsByMode?.texture || {}),
+          },
+          image: {
+            ...IMAGE_PATTERN_DEFAULTS,
+            ...(settings.patternSettingsByMode?.image || {}),
+          },
+        };
+        state.patternSettingsByMode[state.generatorMode] = {
+          spacing: state.spacing,
+          minDot: state.minDot,
+          dotScale: state.dotScale,
+          strokeWidth: state.strokeWidth,
+          strokeTaper: state.strokeTaper,
+          sizeCurve: state.sizeCurve,
+          sizeCutoff: state.sizeCutoff,
+          brushFlow: state.brushFlow,
+          flowResponse: state.flowResponse,
         };
 
         const projectToolSettings = settings.toolSettings || {};
@@ -4693,6 +5594,72 @@
         scheduleRender();
       }
 
+      async function applyImageProjectSnapshot(project) {
+        if (
+          !project ||
+          project.kind !== "kong-image-generator-project" ||
+          project.version !== 1 ||
+          !project.frame ||
+          !project.settings
+        ) {
+          throw new Error("Unsupported image project file.");
+        }
+
+        const readNumber = (value, fallback) => {
+          const parsed = Number(value);
+          return Number.isFinite(parsed) ? parsed : fallback;
+        };
+
+        resetGeneratorWorkspace("image");
+        state.projectName = normalizeProjectName(project.projectName || state.projectName);
+        projectNameInput.value = state.projectName === "Untitled project" ? "" : state.projectName;
+        state.dotColor =
+          typeof project.settings.dotColor === "string" ? project.settings.dotColor : state.dotColor;
+        dotColorInput.value = state.dotColor;
+
+        if (project.referenceImage?.src) {
+          setReferenceImage(
+            project.referenceImage.src,
+            Math.max(1, readNumber(project.referenceImage.width, IMAGE_MODE_FRAME_WIDTH)),
+            Math.max(1, readNumber(project.referenceImage.height, IMAGE_MODE_FRAME_HEIGHT))
+          );
+          state.referenceImageName = project.referenceImage.name || "reference-image";
+        } else {
+          clearReferenceImage();
+        }
+
+        state.imageGenerator = {
+          brightness: Math.max(-1, Math.min(1, readNumber(project.settings.imageGenerator?.brightness, state.imageGenerator.brightness))),
+          contrast: Math.max(-1, Math.min(1, readNumber(project.settings.imageGenerator?.contrast, state.imageGenerator.contrast))),
+          gamma: clampImageGamma(readNumber(project.settings.imageGenerator?.gamma, state.imageGenerator.gamma)),
+          cutoff: clampImageCutoff(readNumber(project.settings.imageGenerator?.cutoff, state.imageGenerator.cutoff)),
+          density: clampImageDensity(readNumber(project.settings.imageGenerator?.density, state.imageGenerator.density)),
+          imageScale: clampImageScale(readNumber(project.settings.imageGenerator?.imageScale, state.imageGenerator.imageScale)),
+          offsetX: readNumber(project.settings.imageGenerator?.offsetX, state.imageGenerator.offsetX),
+          offsetY: readNumber(project.settings.imageGenerator?.offsetY, state.imageGenerator.offsetY),
+        };
+        state.patternSettingsByMode.image = {
+          ...IMAGE_PATTERN_DEFAULTS,
+          ...(project.settings.imagePatternSettings || {}),
+        };
+        state.zoom = clampZoom(readNumber(project.settings.zoom, IMAGE_MODE_DEFAULT_ZOOM));
+        state.imageTransformVisible = Boolean(state.referenceImageUrl);
+
+        setGeneratorMode("image");
+        switchMode(
+          project.settings.mode === "move"
+            ? "move"
+            : project.settings.mode === "zoom"
+              ? "zoom"
+              : "paint"
+        );
+        updateToggleButtons();
+        updateLabels();
+        centerViewport();
+        updateViewportTransform();
+        scheduleImageGeneration(true);
+      }
+
       async function loadProjectFile(file) {
         if (!file) {
           return;
@@ -4705,6 +5672,21 @@
           window.alert("Could not load this project file.");
         } finally {
           loadProjectInput.value = "";
+        }
+      }
+
+      async function loadImageProjectFile(file) {
+        if (!file) {
+          return;
+        }
+
+        try {
+          const project = JSON.parse(await file.text());
+          await applyImageProjectSnapshot(project);
+        } catch (error) {
+          window.alert("Could not load this image project file.");
+        } finally {
+          loadImageProjectInput.value = "";
         }
       }
 
@@ -4739,16 +5721,6 @@
         handleLayerButtonKeydown(event, "back");
       });
 
-      frontLayerExpandButton.addEventListener("click", (event) => {
-        event.stopPropagation();
-        toggleLayerExpanded("front");
-      });
-
-      backLayerExpandButton.addEventListener("click", (event) => {
-        event.stopPropagation();
-        toggleLayerExpanded("back");
-      });
-
       frontLayerVisibilityButton.addEventListener("click", (event) => {
         event.stopPropagation();
         toggleLayerVisibility("front");
@@ -4756,6 +5728,9 @@
 
       imageLayerVisibilityButton.addEventListener("click", (event) => {
         event.stopPropagation();
+        if (state.generatorMode === "image") {
+          return;
+        }
         toggleLayerVisibility("image");
         if (state.generatorMode === "image" && state.layerVisibility.image) {
           scheduleImageGeneration(true);
@@ -4765,6 +5740,30 @@
       backLayerVisibilityButton.addEventListener("click", (event) => {
         event.stopPropagation();
         toggleLayerVisibility("back");
+      });
+
+      frontLayerDeleteButton.addEventListener("click", async (event) => {
+        event.stopPropagation();
+        if (frontLayerDeleteButton.disabled) {
+          return;
+        }
+        const confirmed = await askLayerDeleteAction("front");
+        if (!confirmed) {
+          return;
+        }
+        clearLayer("front");
+      });
+
+      backLayerDeleteButton.addEventListener("click", async (event) => {
+        event.stopPropagation();
+        if (backLayerDeleteButton.disabled) {
+          return;
+        }
+        const confirmed = await askLayerDeleteAction("back");
+        if (!confirmed) {
+          return;
+        }
+        clearLayer("back");
       });
 
       paintModeButton.addEventListener("click", () => {
@@ -4819,52 +5818,61 @@
 
       spacingInput.addEventListener("input", () => {
         state.spacing = Number(spacingInput.value);
+        syncCurrentModePatternSettings();
         updateLabels();
         scheduleRender();
       });
 
       minDotInput.addEventListener("input", () => {
         state.minDot = Number(minDotInput.value);
+        syncCurrentModePatternSettings();
         updateLabels();
         scheduleRender();
       });
 
       dotScaleInput.addEventListener("input", () => {
         state.dotScale = Number(dotScaleInput.value) / 100;
+        syncCurrentModePatternSettings();
         updateLabels();
         scheduleRender();
       });
 
       strokeWidthInput.addEventListener("input", () => {
         state.strokeWidth = Number(strokeWidthInput.value);
+        syncCurrentModePatternSettings();
         updateLabels();
         scheduleRender();
       });
 
       strokeTaperInput.addEventListener("input", () => {
         state.strokeTaper = Number(strokeTaperInput.value) / 100;
+        syncCurrentModePatternSettings();
         updateLabels();
         scheduleRender();
       });
 
       sizeCurveInput.addEventListener("input", () => {
         state.sizeCurve = Number(sizeCurveInput.value) / 100;
+        syncCurrentModePatternSettings();
         updateLabels();
         scheduleRender();
       });
 
       sizeCutoffInput.addEventListener("input", () => {
         state.sizeCutoff = Number(sizeCutoffInput.value) / 100;
+        syncCurrentModePatternSettings();
         updateLabels();
         scheduleRender();
       });
 
       brushFlowInput.addEventListener("input", () => {
         setBrushFlow(Number(brushFlowInput.value) / 100);
+        syncCurrentModePatternSettings();
       });
 
       flowResponseInput.addEventListener("input", () => {
         setFlowResponse(Number(flowResponseInput.value) / 100);
+        syncCurrentModePatternSettings();
       });
 
       dotColorInput.addEventListener("input", () => {
@@ -4880,8 +5888,20 @@
         scheduleRender();
       });
 
-      generatorModeSelect.addEventListener("change", () => {
-        setGeneratorMode(generatorModeSelect.value);
+      generatorModeSelect.addEventListener("change", async () => {
+        const nextMode = generatorModeSelect.value;
+        if (nextMode === state.generatorMode) {
+          return;
+        }
+        if (hasGeneratorProgress()) {
+          const confirmed = await askGeneratorModeChange(nextMode);
+          if (!confirmed) {
+            generatorModeSelect.value = state.generatorMode;
+            return;
+          }
+        }
+        resetGeneratorWorkspace(nextMode);
+        setGeneratorMode(nextMode);
       });
 
       imageBrightnessInput.addEventListener("input", () => {
@@ -4909,9 +5929,15 @@
       });
 
       imageDensityInput.addEventListener("input", () => {
-        state.imageGenerator.density = clampImageDensity(Number(imageDensityInput.value) / 100);
+        state.imageGenerator.density = imageDensityFromPercent(Number(imageDensityInput.value));
         updateLabels();
-        scheduleRender();
+        scheduleImageGeneration();
+      });
+
+      imageScaleInput.addEventListener("input", () => {
+        state.imageGenerator.imageScale = clampImageScale(Number(imageScaleInput.value) / 100);
+        updateLabels();
+        scheduleImageGeneration();
       });
 
       zoomInput.addEventListener("input", () => {
@@ -4951,12 +5977,6 @@
       imageOpacityInput.addEventListener("input", () => {
         setLayerOpacity("image", Number(imageOpacityInput.value) / 100);
       });
-      frontOpacityInput.addEventListener("input", () => {
-        setLayerOpacity("front", Number(frontOpacityInput.value) / 100);
-      });
-      backOpacityInput.addEventListener("input", () => {
-        setLayerOpacity("back", Number(backOpacityInput.value) / 100);
-      });
       fitImageButton.addEventListener("click", fitCanvasToReferenceImage);
       clearImageButton.addEventListener("click", clearReferenceImage);
       projectNameInput.addEventListener("input", () => {
@@ -4967,6 +5987,30 @@
       });
       heightScrubHandle.addEventListener("pointerdown", (event) => {
         beginCanvasSizeScrub("height", event);
+      });
+      imageHandleNW.addEventListener("pointerdown", (event) => {
+        beginImageScale("nw", event);
+      });
+      imageHandleN.addEventListener("pointerdown", (event) => {
+        beginImageScale("n", event);
+      });
+      imageHandleNE.addEventListener("pointerdown", (event) => {
+        beginImageScale("ne", event);
+      });
+      imageHandleE.addEventListener("pointerdown", (event) => {
+        beginImageScale("e", event);
+      });
+      imageHandleSW.addEventListener("pointerdown", (event) => {
+        beginImageScale("sw", event);
+      });
+      imageHandleS.addEventListener("pointerdown", (event) => {
+        beginImageScale("s", event);
+      });
+      imageHandleSE.addEventListener("pointerdown", (event) => {
+        beginImageScale("se", event);
+      });
+      imageHandleW.addEventListener("pointerdown", (event) => {
+        beginImageScale("w", event);
       });
       widthInput.addEventListener("input", scheduleCanvasSizeApply);
       heightInput.addEventListener("input", scheduleCanvasSizeApply);
@@ -5017,42 +6061,58 @@
         clearLayer(state.activeLayer);
       });
 
-      topDeleteButton.addEventListener("click", () => {
-        clearLayer("front");
-      });
-
-      bottomDeleteButton.addEventListener("click", () => {
-        clearLayer("back");
-      });
-
-      clearBothButton.addEventListener("click", () => {
-        clearAllLayers();
-      });
-
       downloadFrontButton.addEventListener("click", () => {
+        if (downloadFrontButton.disabled) {
+          return;
+        }
         downloadSvg(state.latestSvgs.front, "front");
       });
 
       downloadBackButton.addEventListener("click", () => {
+        if (downloadBackButton.disabled) {
+          return;
+        }
         downloadSvg(state.latestSvgs.back, "back");
       });
 
       downloadBothButton.addEventListener("click", () => {
+        if (downloadBothButton.disabled) {
+          return;
+        }
         downloadSvg(state.latestSvgs.front, "front");
         window.setTimeout(() => downloadSvg(state.latestSvgs.back, "back"), 50);
       });
 
       topCopyButton.addEventListener("click", () => {
+        if (topCopyButton.disabled) {
+          return;
+        }
         copyLayerSvg("front");
       });
 
       bottomCopyButton.addEventListener("click", () => {
+        if (bottomCopyButton.disabled) {
+          return;
+        }
         copyLayerSvg("back");
       });
 
-      saveProjectButton.addEventListener("click", saveProjectFile);
+      saveProjectButton.addEventListener("click", async () => {
+        if (state.generatorMode === "image") {
+          try {
+            await saveImageProjectFile();
+          } catch (error) {
+            window.alert("Could not save this image project.");
+          }
+          return;
+        }
+        saveProjectFile();
+      });
       loadProjectVisibleButton.addEventListener("click", () => {
         loadProjectInput.click();
+      });
+      loadImageProjectVisibleButton.addEventListener("click", () => {
+        loadImageProjectInput.click();
       });
       loadProjectButton.addEventListener("click", () => {
         loadProjectInput.click();
@@ -5060,6 +6120,10 @@
       loadProjectInput.addEventListener("change", (event) => {
         const [file] = event.target.files || [];
         loadProjectFile(file);
+      });
+      loadImageProjectInput.addEventListener("change", (event) => {
+        const [file] = event.target.files || [];
+        loadImageProjectFile(file);
       });
 
       copyButton.addEventListener("click", async () => {
@@ -5090,6 +6154,25 @@
       document.addEventListener("focusin", handleTooltipFocusIn);
       document.addEventListener("focusout", handleTooltipFocusOut);
       document.addEventListener("pointerdown", hideAppTooltip, true);
+      document.addEventListener(
+        "pointerdown",
+        (event) => {
+          if (state.generatorMode !== "image" || !state.referenceImageUrl) {
+            return;
+          }
+          const target = event.target;
+          if (!(target instanceof Node)) {
+            return;
+          }
+          if (zoomShell.contains(target)) {
+            state.imageTransformVisible = true;
+          } else {
+            state.imageTransformVisible = false;
+          }
+          updateImageTransformOverlay();
+        },
+        true
+      );
       window.addEventListener("resize", refreshAppTooltip);
       window.addEventListener("scroll", refreshAppTooltip, true);
       window.addEventListener("blur", hideAppTooltip);
@@ -5102,7 +6185,7 @@
       paintCanvas.addEventListener("pointerdown", pointerDown);
       paintCanvas.addEventListener("pointermove", pointerMove);
       paintCanvas.addEventListener("pointerup", pointerUp);
-      paintCanvas.addEventListener("pointerleave", pointerUp);
+      paintCanvas.addEventListener("pointerleave", handleCanvasPointerLeaveForActions);
       paintCanvas.addEventListener("pointercancel", pointerUp);
       paintCanvas.addEventListener("pointerenter", handleCanvasPointerEnter);
       paintCanvas.addEventListener("pointerleave", handleCanvasPointerLeave);
@@ -5125,14 +6208,17 @@
       );
 
       window.addEventListener("pointermove", (event) => {
+        updateImageScale(event);
         updateCanvasSizeScrub(event);
       });
 
       window.addEventListener("pointerup", () => {
+        endImageScale();
         endCanvasSizeScrub();
       });
 
       window.addEventListener("pointercancel", () => {
+        endImageScale();
         endCanvasSizeScrub();
       });
 
@@ -5174,6 +6260,31 @@
           state.panKeyDown = true;
           hideCursorRing();
           updatePanCursor();
+          return;
+        }
+        if (
+          state.generatorMode === "image" &&
+          state.referenceImageUrl &&
+          state.imageTransformVisible &&
+          !event.metaKey &&
+          !event.ctrlKey &&
+          !event.altKey &&
+          (event.key === "ArrowLeft" ||
+            event.key === "ArrowRight" ||
+            event.key === "ArrowUp" ||
+            event.key === "ArrowDown")
+        ) {
+          event.preventDefault();
+          const step = event.shiftKey ? 10 : 1;
+          if (event.key === "ArrowLeft") {
+            nudgeReferenceImage(-step, 0);
+          } else if (event.key === "ArrowRight") {
+            nudgeReferenceImage(step, 0);
+          } else if (event.key === "ArrowUp") {
+            nudgeReferenceImage(0, -step);
+          } else if (event.key === "ArrowDown") {
+            nudgeReferenceImage(0, step);
+          }
           return;
         }
         if (
