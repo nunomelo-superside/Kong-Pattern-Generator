@@ -4268,6 +4268,7 @@
         const frontHasPattern = state.layerHasContent.front;
         const backHasPattern = state.layerHasContent.back;
         const bothHavePattern = frontHasPattern && backHasPattern;
+        const frontExportAvailable = isImageMode ? state.latestCounts.front > 0 : frontHasPattern;
         frontLayerDeleteButton.disabled = !frontHasPattern;
         backLayerDeleteButton.disabled = !backHasPattern;
         frontLayerDeleteButton.classList.toggle("is-disabled", !frontHasPattern);
@@ -4279,13 +4280,13 @@
         topCopyButton.setAttribute("aria-label", isImageMode ? "Copy pattern" : "Copy top layer SVG");
         downloadFrontButton.setAttribute("data-tooltip", isImageMode ? "Download Pattern" : "Download top layer");
         downloadFrontButton.setAttribute("aria-label", isImageMode ? "Download pattern" : "Download top layer");
-        topCopyButton.disabled = !frontHasPattern;
-        downloadFrontButton.disabled = !frontHasPattern;
+        topCopyButton.disabled = !frontExportAvailable;
+        downloadFrontButton.disabled = !frontExportAvailable;
         bottomCopyButton.disabled = !backHasPattern;
         downloadBackButton.disabled = !backHasPattern;
         downloadBothButton.disabled = !bothHavePattern;
-        topCopyButton.classList.toggle("is-disabled", !frontHasPattern);
-        downloadFrontButton.classList.toggle("is-disabled", !frontHasPattern);
+        topCopyButton.classList.toggle("is-disabled", !frontExportAvailable);
+        downloadFrontButton.classList.toggle("is-disabled", !frontExportAvailable);
         bottomCopyButton.classList.toggle("is-disabled", !backHasPattern);
         downloadBackButton.classList.toggle("is-disabled", !backHasPattern);
         downloadBothButton.classList.toggle("is-disabled", !bothHavePattern);
@@ -4916,6 +4917,7 @@
         frontSvgPreview.innerHTML = front.svg.replace("<svg ", `<svg opacity="${state.layerOpacity.front.toFixed(2)}" `);
         backSvgPreview.innerHTML = back.svg.replace("<svg ", `<svg opacity="${state.layerOpacity.back.toFixed(2)}" `);
         const active = state.activeLayer === "front" ? front : back;
+        updateToggleButtons();
         updateLabels();
       }
 
