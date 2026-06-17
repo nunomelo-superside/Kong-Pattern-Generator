@@ -6,7 +6,7 @@
         spacing: 14,
         minDot: 0.4,
         dotScale: 1,
-        strokeWidth: 1.6,
+        strokeWidth: 1.25,
         strokeTaper: 0.95,
         sizeCurve: 1,
         sizeCutoff: 0.8,
@@ -17,7 +17,7 @@
         spacing: 10,
         minDot: 0.9,
         dotScale: 1.5,
-        strokeWidth: 2,
+        strokeWidth: 1.25,
         strokeTaper: 0.95,
         sizeCurve: 1.2,
         sizeCutoff: 0.9,
@@ -1522,7 +1522,7 @@
         spacingValue.textContent = `${Math.round(state.spacing)} px`;
         minDotValue.textContent = `${state.minDot.toFixed(1)} px`;
         dotScaleValue.textContent = `${Math.round(state.dotScale * 100)}%`;
-        strokeWidthValue.textContent = `${Math.round(state.strokeWidth)} px`;
+        strokeWidthValue.textContent = `${Number(state.strokeWidth.toFixed(2))} px`;
         strokeTaperValue.textContent = `${Math.round(state.strokeTaper * 100)}%`;
         sizeCurveValue.textContent = `${state.sizeCurve.toFixed(1)}x`;
         sizeCutoffValue.textContent = `${state.sizeCutoff.toFixed(1)} px`;
