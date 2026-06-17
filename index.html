@@ -77,6 +77,8 @@
       }
 
       .sidebar {
+        display: flex;
+        flex-direction: column;
         width: 300px;
         min-width: 300px;
         max-width: 300px;
@@ -215,7 +217,10 @@
       .sidebar-section.actions-section {
         min-height: 0;
         flex: 1 0 auto;
-        align-content: end;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        gap: 16px;
       }
 
       .section-title {
@@ -401,8 +406,7 @@
         width: 16px;
         height: 16px;
         flex: 0 0 16px;
-        order: 3;
-        margin-left: auto;
+        order: -1;
       }
 
       .layer-state-icon svg {
@@ -425,12 +429,17 @@
         opacity: 0.5;
       }
 
+      .layer-row.is-hidden-layer .layer-visibility-button {
+        opacity: 0.5;
+      }
+
       .layer-row.is-hidden-layer:not(.active) .layer-state-icon {
         opacity: 0.5;
       }
 
       .layer-visibility-button {
-        order: -1;
+        order: 3;
+        margin-left: auto;
       }
 
       .layer-delete-button {
@@ -939,6 +948,10 @@
         line-height: 30px;
       }
 
+      .actions-section .section-title {
+        color: var(--accent);
+      }
+
       .workspace {
         position: relative;
         min-width: 0;
@@ -1063,8 +1076,8 @@
       .image-transform-bounds {
         position: absolute;
         box-sizing: border-box;
-        border: 1px solid rgba(255, 255, 255, 0.9);
-        box-shadow: none;
+        border: 0;
+        box-shadow: inset 0 0 0 0.5px rgba(255, 255, 255, 0.92);
         pointer-events: none;
       }
 
@@ -1074,24 +1087,35 @@
 
       .image-transform-handle {
         position: absolute;
-        width: 5px;
-        height: 5px;
-        min-width: 5px;
-        min-height: 5px;
+        width: 12px;
+        height: 12px;
+        min-width: 12px;
+        min-height: 12px;
         margin: 0;
         padding: 0;
         display: block;
         box-sizing: border-box;
         border-radius: 0;
         border: 0;
-        background: #ffffff;
+        background: transparent;
         box-shadow: none;
         font-size: 0;
         line-height: 0;
         pointer-events: auto;
-        transform: translate(calc(-50% + 0.5px), calc(-50% + 0.5px));
+        transform: translate(-50%, -50%);
         appearance: none;
         -webkit-appearance: none;
+      }
+
+      .image-transform-handle::before {
+        content: "";
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: 4px;
+        height: 4px;
+        background: #ffffff;
+        transform: translate(-50%, -50%);
       }
 
       .image-transform-handle[data-corner="nw"],
@@ -2059,11 +2083,11 @@
               <div class="field-label">Canvas</div>
               <div class="field-pill">
                 <span id="widthScrubHandle" class="field-code scrub-handle">W</span>
-                <input id="widthInput" class="field-number" type="number" min="64" max="2400" step="1" value="640" />
+                <input id="widthInput" class="field-number" type="number" min="1" max="2400" step="1" value="640" />
               </div>
               <div class="field-pill">
                 <span id="heightScrubHandle" class="field-code scrub-handle">H</span>
-                <input id="heightInput" class="field-number" type="number" min="64" max="2400" step="1" value="640" />
+                <input id="heightInput" class="field-number" type="number" min="1" max="2400" step="1" value="640" />
               </div>
             </div>
           </div>
@@ -2713,6 +2737,14 @@
                   <span class="shortcut-plus">+</span>
                   <span class="shortcut-key">1</span>
                 </div>
+                <div class="shortcut-desc">Zoom to fit the canvas in view.</div>
+              </div>
+              <div class="shortcut-row">
+                <div class="shortcut-keys">
+                  <span class="shortcut-key">Shift</span>
+                  <span class="shortcut-plus">+</span>
+                  <span class="shortcut-key">0</span>
+                </div>
                 <div class="shortcut-desc">Reset to 100% zoom and recenter the view.</div>
               </div>
               <div class="shortcut-row">
@@ -3033,6 +3065,10 @@
           front: 0,
           back: 0,
         },
+        layerHasContent: {
+          front: false,
+          back: false,
+        },
         referenceImageUrl: "",
         referenceImageWidth: 0,
         referenceImageHeight: 0,
@@ -3078,6 +3114,7 @@
         pointerClientX: 0,
         pointerClientY: 0,
         resizeDebounceId: 0,
+        resizeDebounceMode: "",
         imageGenerationDebounceId: 0,
         imageGenerationSequence: 0,
         tooltipTarget: null,
@@ -3878,6 +3915,7 @@
         for (const layerEntry of entries) {
           layerContexts[layerEntry.layer].putImageData(layerEntry.snapshot, 0, 0);
         }
+        syncLayerContentState(entries.map((layerEntry) => layerEntry.layer));
         updateToggleButtons();
         redrawOverlay();
         scheduleRender();
@@ -3912,6 +3950,7 @@
         for (const layerEntry of entries) {
           layerContexts[layerEntry.layer].putImageData(layerEntry.snapshot, 0, 0);
         }
+        syncLayerContentState(entries.map((layerEntry) => layerEntry.layer));
         updateToggleButtons();
         redrawOverlay();
         scheduleRender();
@@ -3938,6 +3977,8 @@
           ctx.fillStyle = "#ffffff";
           ctx.fillRect(0, 0, width, height);
         }
+        state.layerHasContent.front = false;
+        state.layerHasContent.back = false;
         updateFrameDimensions(width, height);
         updateToggleButtons();
         redrawOverlay();
@@ -4224,8 +4265,8 @@
         imageAdjustmentsSection.hidden = isImageMode && !hasReferenceImage;
         imageAdjustmentsSection.classList.toggle("is-hidden", isImageMode && !hasReferenceImage);
         imageLayerRow.classList.remove("is-hidden-layer");
-        const frontHasPattern = layerHasPattern("front");
-        const backHasPattern = layerHasPattern("back");
+        const frontHasPattern = state.layerHasContent.front;
+        const backHasPattern = state.layerHasContent.back;
         const bothHavePattern = frontHasPattern && backHasPattern;
         frontLayerDeleteButton.disabled = !frontHasPattern;
         backLayerDeleteButton.disabled = !backHasPattern;
@@ -4567,7 +4608,10 @@
         const point = getCanvasPoint(event);
         state.lastPoint = point;
         paintStroke(point, point);
-        updateToggleButtons();
+        if (state.mode === "paint") {
+          state.layerHasContent[state.activeLayer] = true;
+          updateToggleButtons();
+        }
         scheduleRender();
         paintCanvas.setPointerCapture(event.pointerId);
       }
@@ -4626,7 +4670,10 @@
         const point = getCanvasPoint(event);
         paintStroke(state.lastPoint, point);
         state.lastPoint = point;
-        updateToggleButtons();
+        if (state.mode === "paint") {
+          state.layerHasContent[state.activeLayer] = true;
+          updateToggleButtons();
+        }
         scheduleRender();
       }
 
@@ -4668,6 +4715,9 @@
             state.history.pop();
             state.redoHistory = [];
             updateToggleButtons();
+          } else {
+            syncLayerContentState(["front", "back"]);
+            updateToggleButtons();
           }
           if (typeof event.pointerId === "number") {
             paintCanvas.releasePointerCapture(event.pointerId);
@@ -4680,6 +4730,8 @@
         }
         state.drawing = false;
         state.lastPoint = null;
+        syncLayerContentState([state.activeLayer]);
+        updateToggleButtons();
         if (typeof event.pointerId === "number") {
           paintCanvas.releasePointerCapture(event.pointerId);
         }
@@ -4883,8 +4935,8 @@
           resizeCanvasPreserveContent(IMAGE_MODE_FRAME_WIDTH, IMAGE_MODE_FRAME_HEIGHT);
           return;
         }
-        const width = Math.max(64, Math.min(2400, Number(widthInput.value) || 640));
-        const height = Math.max(64, Math.min(2400, Number(heightInput.value) || 640));
+        const width = Math.max(1, Math.min(2400, Number(widthInput.value) || 640));
+        const height = Math.max(1, Math.min(2400, Number(heightInput.value) || 640));
         if (width === paintCanvas.width && height === paintCanvas.height) {
           widthInput.value = width;
           heightInput.value = height;
@@ -4894,7 +4946,7 @@
       }
 
       function clampCanvasSizeValue(value) {
-        return Math.max(64, Math.min(2400, Math.round(value)));
+        return Math.max(1, Math.min(2400, Math.round(value)));
       }
 
       function beginCanvasSizeScrub(axis, event) {
@@ -4922,7 +4974,7 @@
         const input = state.sizeScrub.axis === "width" ? widthInput : heightInput;
         if (Number(input.value) !== nextValue) {
           input.value = String(nextValue);
-          scheduleCanvasSizeApply();
+          scheduleCanvasSizeApply("frame");
         }
       }
 
@@ -4934,14 +4986,34 @@
         document.body.classList.remove("is-scrubbing-size");
       }
 
-      function scheduleCanvasSizeApply() {
+      function cancelScheduledCanvasSizeApply() {
         if (state.resizeDebounceId) {
-          window.clearTimeout(state.resizeDebounceId);
-        }
-        state.resizeDebounceId = window.setTimeout(() => {
+          if (state.resizeDebounceMode === "timeout") {
+            window.clearTimeout(state.resizeDebounceId);
+          } else {
+            window.cancelAnimationFrame(state.resizeDebounceId);
+          }
           state.resizeDebounceId = 0;
+          state.resizeDebounceMode = "";
+        }
+      }
+
+      function scheduleCanvasSizeApply(mode = "frame") {
+        cancelScheduledCanvasSizeApply();
+        state.resizeDebounceMode = mode;
+        if (mode === "timeout") {
+          state.resizeDebounceId = window.setTimeout(() => {
+            state.resizeDebounceId = 0;
+            state.resizeDebounceMode = "";
+            applyCanvasSize();
+          }, 500);
+          return;
+        }
+        state.resizeDebounceId = window.requestAnimationFrame(() => {
+          state.resizeDebounceId = 0;
+          state.resizeDebounceMode = "";
           applyCanvasSize();
-        }, 250);
+        });
       }
 
       async function fitCanvasToReferenceImage() {
@@ -4981,8 +5053,14 @@
         return false;
       }
 
+      function syncLayerContentState(layerNames = ["front", "back"]) {
+        for (const layerName of layerNames) {
+          state.layerHasContent[layerName] = layerHasPattern(layerName);
+        }
+      }
+
       function hasAnyPattern() {
-        return layerHasPattern("front") || layerHasPattern("back");
+        return state.layerHasContent.front || state.layerHasContent.back;
       }
 
       function openShortcutDialog() {
@@ -5240,6 +5318,7 @@
         const layerCtx = layerContexts[layerName];
         layerCtx.fillStyle = "#ffffff";
         layerCtx.fillRect(0, 0, layerCanvases[layerName].width, layerCanvases[layerName].height);
+        state.layerHasContent[layerName] = false;
         updateToggleButtons();
         redrawOverlay();
         scheduleRender();
@@ -5256,6 +5335,9 @@
             layerCanvases[layerName].height
           );
         }
+        state.layerHasContent.front = false;
+        state.layerHasContent.back = false;
+        updateToggleButtons();
         redrawOverlay();
         scheduleRender();
       }
@@ -5292,8 +5374,9 @@
         return cleaned || "Untitled-project";
       }
 
-      function getProjectSnapshot() {
+      async function getProjectSnapshot() {
         syncCurrentModePatternSettings();
+        const referenceImageSource = await resolveReferenceImageSourceForSave();
         return {
           version: 1,
           savedAt: new Date().toISOString(),
@@ -5306,6 +5389,14 @@
             width: layerCanvases.front.width,
             height: layerCanvases.front.height,
           },
+          referenceImage: state.referenceImageUrl
+            ? {
+                name: state.referenceImageName || "reference-image",
+                src: referenceImageSource,
+                width: state.referenceImageWidth,
+                height: state.referenceImageHeight,
+              }
+            : null,
           layers: {
             front: layerCanvases.front.toDataURL("image/png"),
             back: layerCanvases.back.toDataURL("image/png"),
@@ -5399,10 +5490,10 @@
         };
       }
 
-      function saveProjectFile() {
+      async function saveProjectFile() {
         state.projectName = normalizeProjectName(projectNameInput.value);
         projectNameInput.value = projectNameInput.value.trim();
-        const snapshot = getProjectSnapshot();
+        const snapshot = await getProjectSnapshot();
         const fileName = `${sanitizeProjectName(state.projectName)}.json`;
         downloadTextFile(JSON.stringify(snapshot, null, 2), fileName, "application/json;charset=utf-8");
       }
@@ -5449,8 +5540,8 @@
           return Number.isFinite(parsed) ? parsed : fallback;
         };
 
-        const frameWidth = Math.max(64, Math.min(2400, readNumber(project.frame.width, 640)));
-        const frameHeight = Math.max(64, Math.min(2400, readNumber(project.frame.height, 640)));
+        const frameWidth = Math.max(1, Math.min(2400, readNumber(project.frame.width, 640)));
+        const frameHeight = Math.max(1, Math.min(2400, readNumber(project.frame.height, 640)));
         const documentWidth = Math.max(frameWidth, readNumber(project.document.width, frameWidth));
         const documentHeight = Math.max(frameHeight, readNumber(project.document.height, frameHeight));
 
@@ -5468,8 +5559,18 @@
           loadImageToCanvas(layerCanvases.front, project.layers.front),
           loadImageToCanvas(layerCanvases.back, project.layers.back),
         ]);
+        syncLayerContentState();
 
-        clearReferenceImage();
+        if (project.referenceImage?.src) {
+          setReferenceImage(
+            project.referenceImage.src,
+            Math.max(1, readNumber(project.referenceImage.width, frameWidth)),
+            Math.max(1, readNumber(project.referenceImage.height, frameHeight))
+          );
+          state.referenceImageName = project.referenceImage.name || "reference-image";
+        } else {
+          clearReferenceImage();
+        }
         updateFrameDimensions(frameWidth, frameHeight);
 
         const settings = project.settings || {};
@@ -6012,49 +6113,51 @@
       imageHandleW.addEventListener("pointerdown", (event) => {
         beginImageScale("w", event);
       });
-      widthInput.addEventListener("input", scheduleCanvasSizeApply);
-      heightInput.addEventListener("input", scheduleCanvasSizeApply);
+      widthInput.addEventListener("input", cancelScheduledCanvasSizeApply);
+      heightInput.addEventListener("input", cancelScheduledCanvasSizeApply);
       widthInput.addEventListener("keydown", (event) => {
         if (event.key === "ArrowUp" || event.key === "ArrowDown") {
           const stepSize = event.shiftKey ? 10 : 1;
           const currentValue = Number(widthInput.value) || 640;
           const delta = event.key === "ArrowUp" ? stepSize : -stepSize;
-          const nextValue = Math.max(64, Math.min(2400, currentValue + delta));
+          const nextValue = Math.max(1, Math.min(2400, currentValue + delta));
           window.requestAnimationFrame(() => {
             widthInput.value = String(nextValue);
-            scheduleCanvasSizeApply();
+            scheduleCanvasSizeApply("frame");
           });
         }
       });
       widthInput.addEventListener("keydown", (event) => {
         if (event.key === "Enter") {
-          if (state.resizeDebounceId) {
-            window.clearTimeout(state.resizeDebounceId);
-            state.resizeDebounceId = 0;
-          }
+          cancelScheduledCanvasSizeApply();
           applyCanvasSize();
         }
+      });
+      widthInput.addEventListener("blur", () => {
+        cancelScheduledCanvasSizeApply();
+        applyCanvasSize();
       });
       heightInput.addEventListener("keydown", (event) => {
         if (event.key === "ArrowUp" || event.key === "ArrowDown") {
           const stepSize = event.shiftKey ? 10 : 1;
           const currentValue = Number(heightInput.value) || 640;
           const delta = event.key === "ArrowUp" ? stepSize : -stepSize;
-          const nextValue = Math.max(64, Math.min(2400, currentValue + delta));
+          const nextValue = Math.max(1, Math.min(2400, currentValue + delta));
           window.requestAnimationFrame(() => {
             heightInput.value = String(nextValue);
-            scheduleCanvasSizeApply();
+            scheduleCanvasSizeApply("frame");
           });
         }
       });
       heightInput.addEventListener("keydown", (event) => {
         if (event.key === "Enter") {
-          if (state.resizeDebounceId) {
-            window.clearTimeout(state.resizeDebounceId);
-            state.resizeDebounceId = 0;
-          }
+          cancelScheduledCanvasSizeApply();
           applyCanvasSize();
         }
+      });
+      heightInput.addEventListener("blur", () => {
+        cancelScheduledCanvasSizeApply();
+        applyCanvasSize();
       });
 
       clearButton.addEventListener("click", () => {
@@ -6106,7 +6209,11 @@
           }
           return;
         }
-        saveProjectFile();
+        try {
+          await saveProjectFile();
+        } catch (error) {
+          window.alert("Could not save this project.");
+        }
       });
       loadProjectVisibleButton.addEventListener("click", () => {
         loadProjectInput.click();
@@ -6245,7 +6352,24 @@
           undoLastAction();
           return;
         }
-        if (event.shiftKey && event.key === "!") {
+        if (
+          !event.metaKey &&
+          !event.ctrlKey &&
+          !event.altKey &&
+          event.shiftKey &&
+          event.code === "Digit1"
+        ) {
+          event.preventDefault();
+          fitZoomToWorkspace();
+          return;
+        }
+        if (
+          !event.metaKey &&
+          !event.ctrlKey &&
+          !event.altKey &&
+          event.shiftKey &&
+          event.code === "Digit0"
+        ) {
           event.preventDefault();
           resetView();
           return;
