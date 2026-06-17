@@ -1506,10 +1506,14 @@
       function updateLabels() {
         brushSizeInput.value = String(Math.round(state.brushSize));
         brushHardnessInput.value = String(Math.round(state.brushHardness * 100));
-        brushFlowInput.value = String(Math.round(state.brushFlow * 100));
+        if (brushFlowInput) {
+          brushFlowInput.value = String(Math.round(state.brushFlow * 100));
+        }
         sizeCurveInput.value = String(Math.round(state.sizeCurve * 100));
         sizeCutoffInput.value = String(Math.round(state.sizeCutoff * 100));
-        flowResponseInput.value = String(Math.round(state.flowResponse * 100));
+        if (flowResponseInput) {
+          flowResponseInput.value = String(Math.round(state.flowResponse * 100));
+        }
         imageBrightnessInput.value = String(Math.round(state.imageGenerator.brightness * 100));
         imageContrastInput.value = String(Math.round(state.imageGenerator.contrast * 100));
         imageGammaInput.value = String(Math.round(state.imageGenerator.gamma * 100));
@@ -1518,7 +1522,9 @@
         imageScaleInput.value = String(Math.round(state.imageGenerator.imageScale * 100));
         brushSizeValue.textContent = `${Math.round(state.brushSize)}`;
         brushHardnessValue.textContent = `${Math.round(state.brushHardness * 100)}%`;
-        brushFlowValue.textContent = `${Math.round(state.brushFlow * 100)}%`;
+        if (brushFlowValue) {
+          brushFlowValue.textContent = `${Math.round(state.brushFlow * 100)}%`;
+        }
         spacingValue.textContent = `${Math.round(state.spacing)} px`;
         minDotValue.textContent = `${state.minDot.toFixed(1)} px`;
         dotScaleValue.textContent = `${Math.round(state.dotScale * 100)}%`;
@@ -1526,7 +1532,9 @@
         strokeTaperValue.textContent = `${Math.round(state.strokeTaper * 100)}%`;
         sizeCurveValue.textContent = `${state.sizeCurve.toFixed(1)}x`;
         sizeCutoffValue.textContent = `${state.sizeCutoff.toFixed(1)} px`;
-        flowResponseValue.textContent = `${state.flowResponse.toFixed(1)}x`;
+        if (flowResponseValue) {
+          flowResponseValue.textContent = `${state.flowResponse.toFixed(1)}x`;
+        }
         imageBrightnessValue.textContent = `${Math.round(state.imageGenerator.brightness * 100)}%`;
         imageContrastValue.textContent = `${Math.round(state.imageGenerator.contrast * 100)}%`;
         imageGammaValue.textContent = `${state.imageGenerator.gamma.toFixed(1)}x`;
@@ -2871,8 +2879,12 @@
         strokeTaperInput.value = String(Math.round(state.strokeTaper * 100));
         sizeCurveInput.value = String(Math.round(state.sizeCurve * 100));
         sizeCutoffInput.value = String(Math.round(state.sizeCutoff * 100));
-        brushFlowInput.value = String(Math.round(state.brushFlow * 100));
-        flowResponseInput.value = String(Math.round(state.flowResponse * 100));
+        if (brushFlowInput) {
+          brushFlowInput.value = String(Math.round(state.brushFlow * 100));
+        }
+        if (flowResponseInput) {
+          flowResponseInput.value = String(Math.round(state.flowResponse * 100));
+        }
         dotColorInput.value = state.dotColor;
         zoomInput.value = String(Math.round(state.zoom * 100));
         imageOpacityInput.value = String(Math.round(state.referenceImageOpacity * 100));
@@ -3169,15 +3181,19 @@
         scheduleRender();
       });
 
-      brushFlowInput.addEventListener("input", () => {
-        setBrushFlow(Number(brushFlowInput.value) / 100);
-        syncCurrentModePatternSettings();
-      });
+      if (brushFlowInput) {
+        brushFlowInput.addEventListener("input", () => {
+          setBrushFlow(Number(brushFlowInput.value) / 100);
+          syncCurrentModePatternSettings();
+        });
+      }
 
-      flowResponseInput.addEventListener("input", () => {
-        setFlowResponse(Number(flowResponseInput.value) / 100);
-        syncCurrentModePatternSettings();
-      });
+      if (flowResponseInput) {
+        flowResponseInput.addEventListener("input", () => {
+          setFlowResponse(Number(flowResponseInput.value) / 100);
+          syncCurrentModePatternSettings();
+        });
+      }
 
       dotColorInput.addEventListener("input", () => {
         state.dotColor = dotColorInput.value;
