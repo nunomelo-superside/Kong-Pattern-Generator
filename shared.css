@@ -1044,6 +1044,60 @@
         shape-rendering: geometricPrecision;
       }
 
+      .lasso-overlay {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        overflow: visible;
+        z-index: 4;
+      }
+
+      .lasso-path,
+      .lasso-bounds {
+        fill: none;
+        stroke: #ffffff;
+        stroke-width: 1;
+        vector-effect: non-scaling-stroke;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+
+      .lasso-path {
+        stroke-dasharray: 5 4;
+      }
+
+      .lasso-bounds {
+        stroke-dasharray: 4 4;
+        opacity: 0.95;
+      }
+
+      .lasso-rotate-zone {
+        fill: transparent;
+        stroke: none;
+        pointer-events: auto;
+        cursor: alias; /* overridden per-corner by JS with the custom SVG cursor */
+      }
+
+      .lasso-handle {
+        fill: #ffffff;
+        stroke: rgba(17, 17, 17, 0.82);
+        stroke-width: 1;
+        vector-effect: non-scaling-stroke;
+        pointer-events: auto;
+      }
+
+      .lasso-handle[data-corner="nw"],
+      .lasso-handle[data-corner="se"] {
+        cursor: nwse-resize;
+      }
+
+      .lasso-handle[data-corner="ne"],
+      .lasso-handle[data-corner="sw"] {
+        cursor: nesw-resize;
+      }
+
       .zoom-shell {
         position: absolute;
         left: 50%;
@@ -1063,8 +1117,9 @@
       .image-transform-bounds {
         position: absolute;
         box-sizing: border-box;
-        border: 0;
-        box-shadow: inset 0 0 0 0.5px rgba(255, 255, 255, 0.92);
+        border: 1px dashed #ffffff;
+        box-shadow: none;
+        opacity: 0.95;
         pointer-events: none;
       }
 
@@ -1074,17 +1129,17 @@
 
       .image-transform-handle {
         position: absolute;
-        width: 12px;
-        height: 12px;
-        min-width: 12px;
-        min-height: 12px;
+        width: 8px;
+        height: 8px;
+        min-width: 8px;
+        min-height: 8px;
         margin: 0;
         padding: 0;
         display: block;
         box-sizing: border-box;
         border-radius: 0;
-        border: 0;
-        background: transparent;
+        border: 1px solid rgba(17, 17, 17, 0.82);
+        background: #ffffff;
         box-shadow: none;
         font-size: 0;
         line-height: 0;
@@ -1092,17 +1147,6 @@
         transform: translate(-50%, -50%);
         appearance: none;
         -webkit-appearance: none;
-      }
-
-      .image-transform-handle::before {
-        content: "";
-        position: absolute;
-        left: 50%;
-        top: 50%;
-        width: 4px;
-        height: 4px;
-        background: #ffffff;
-        transform: translate(-50%, -50%);
       }
 
       .image-transform-handle[data-corner="nw"],
@@ -1235,6 +1279,26 @@
         cursor: grabbing;
       }
 
+      .overlay-wrap.lasso-ready {
+        cursor: crosshair;
+      }
+
+      .overlay-wrap.lasso-drag-ready {
+        cursor: move;
+      }
+
+      .overlay-wrap.lasso-dragging {
+        cursor: grabbing;
+      }
+
+      .overlay-wrap.lasso-scaling {
+        cursor: default;
+      }
+
+      .overlay-wrap.lasso-rotating {
+        cursor: grabbing;
+      }
+
       .overlay-wrap.image-drag-ready {
         cursor: grab;
       }
@@ -1323,6 +1387,59 @@
         opacity: 0;
         transform: translateX(-50%) translateY(20px);
         pointer-events: none;
+      }
+
+      .random-toolbar-shell {
+        position: absolute;
+        left: 50%;
+        top: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 43px;
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+        transition: opacity 250ms cubic-bezier(0.8, 0.07, 0.36, 1), transform 250ms cubic-bezier(0.8, 0.07, 0.36, 1);
+      }
+
+      .random-toolbar-shell.is-toolbar-hidden {
+        opacity: 0;
+        transform: translateX(-50%) translateY(20px);
+        pointer-events: none;
+      }
+
+      .random-toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        width: max-content;
+        height: 43px;
+        padding: 6px;
+        background: rgba(0, 0, 0, 0.2);
+        backdrop-filter: blur(10px);
+        border-radius: 8px;
+      }
+
+      .random-toolbar-actions {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+
+      .random-toolbar-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 76px;
+        height: 31px;
+        padding: 0 12px;
+        border-radius: 4px;
+        background: rgba(255, 255, 255, 0.05);
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 14px;
+        line-height: 30px;
+        white-space: nowrap;
       }
 
       .zoom-toolbar-button,

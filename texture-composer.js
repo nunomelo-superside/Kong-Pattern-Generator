@@ -2,6 +2,13 @@
       const IMAGE_MODE_FRAME_HEIGHT = 370;
       const IMAGE_MODE_DEFAULT_ZOOM = 2;
       const IMAGE_DENSITY_BASELINE = 2.2;
+      const RANDOM_GENERATOR_DEFAULTS = {
+        amount: 240,
+        baseSize: 28,
+        variation: 0.6,
+        strength: 0.75,
+        eraseMix: 0.3,
+      };
       const TEXTURE_PATTERN_DEFAULTS = {
         spacing: 14,
         minDot: 0.4,
@@ -55,6 +62,43 @@
       const imageHandleW = document.getElementById("imageHandleW");
       const zoomShell = document.getElementById("zoomShell");
       const generatorModeSelect = document.getElementById("generatorModeSelect");
+      const lassoOverlay = document.getElementById("lassoOverlay");
+      const lassoPath = document.getElementById("lassoPath");
+      const lassoBounds = document.getElementById("lassoBounds");
+      const lassoHandleNW = document.getElementById("lassoHandleNW");
+      const lassoHandleNE = document.getElementById("lassoHandleNE");
+      const lassoHandleSE = document.getElementById("lassoHandleSE");
+      const lassoHandleSW = document.getElementById("lassoHandleSW");
+      const lassoRotateZoneNW = document.getElementById("lassoRotateZoneNW");
+      const lassoRotateZoneNE = document.getElementById("lassoRotateZoneNE");
+      const lassoRotateZoneSE = document.getElementById("lassoRotateZoneSE");
+      const lassoRotateZoneSW = document.getElementById("lassoRotateZoneSW");
+
+      // Rotation cursor — base angles per corner (0° = NE, shape supplied by user).
+      // updateRotateZoneCursors() is called from updateLassoBoundsPreview so the
+      // cursor rotates in sync with the selection as you drag it.
+      const ROTATE_CURSOR_PATH = "M0.146447 3.32845C-0.0488155 3.52372 -0.0488155 3.8403 0.146447 4.03556L3.32843 7.21754C3.52369 7.4128 3.84027 7.4128 4.03553 7.21754C4.2308 7.02228 4.2308 6.7057 4.03553 6.51043L1.20711 3.68201L4.03553 0.85358C4.2308 0.658318 4.2308 0.341735 4.03553 0.146473C3.84027 -0.0487893 3.52369 -0.0487893 3.32843 0.146473L0.146447 3.32845ZM20.1464 24.0356C20.3417 24.2308 20.6583 24.2308 20.8536 24.0356L24.0355 20.8536C24.2308 20.6583 24.2308 20.3417 24.0355 20.1465C23.8403 19.9512 23.5237 19.9512 23.3284 20.1465L20.5 22.9749L17.6716 20.1465C17.4763 19.9512 17.1597 19.9512 16.9645 20.1465C16.7692 20.3417 16.7692 20.6583 16.9645 20.8536L20.1464 24.0356ZM0.5 3.68201V4.18201H6.5V3.68201V3.18201H0.5V3.68201ZM20.5 17.682H20V23.682H20.5H21V17.682H20.5ZM6.5 3.68201V4.18201C13.9558 4.18201 20 10.2262 20 17.682H20.5H21C21 9.67388 14.5081 3.18201 6.5 3.18201V3.68201Z";
+
+      function makeRotateCursor(deg) {
+        const svg = `<svg width='16' height='16' viewBox='0 0 25 25' fill='none' xmlns='http://www.w3.org/2000/svg'><g transform='rotate(${deg},12.5,12.5)'><path d='${ROTATE_CURSOR_PATH}' fill='white' stroke='white' stroke-width='3' stroke-linejoin='round' stroke-linecap='round'/><path d='${ROTATE_CURSOR_PATH}' fill='black'/></g></svg>`;
+        return `url("data:image/svg+xml,${encodeURIComponent(svg)}") 8 8, alias`;
+      }
+
+      function updateRotateZoneCursors() {
+        const extraDeg = state.lassoSelection
+          ? getSelectionRotation(state.lassoSelection) * (180 / Math.PI)
+          : 0;
+        lassoRotateZoneNE.style.cursor = makeRotateCursor(0 + extraDeg);
+        lassoRotateZoneNW.style.cursor = makeRotateCursor(270 + extraDeg);
+        lassoRotateZoneSW.style.cursor = makeRotateCursor(180 + extraDeg);
+        lassoRotateZoneSE.style.cursor = makeRotateCursor(90 + extraDeg);
+      }
+
+      // Apply default cursors at init (can't call updateRotateZoneCursors — state not defined yet).
+      lassoRotateZoneNE.style.cursor = makeRotateCursor(0);
+      lassoRotateZoneNW.style.cursor = makeRotateCursor(270);
+      lassoRotateZoneSW.style.cursor = makeRotateCursor(180);
+      lassoRotateZoneSE.style.cursor = makeRotateCursor(90);
 
       const referenceImageInput = document.getElementById("referenceImageInput");
       const imageControlRow = document.getElementById("imageControlRow");
@@ -87,7 +131,9 @@
       const backLayerButton = document.getElementById("backLayerButton");
       const paintModeButton = document.getElementById("paintModeButton");
       const eraseModeButton = document.getElementById("eraseModeButton");
+      const randomModeButton = document.getElementById("randomModeButton");
       const moveModeButton = document.getElementById("moveModeButton");
+      const lassoModeButton = document.getElementById("lassoModeButton");
       const zoomModeButton = document.getElementById("zoomModeButton");
       const zoomHundredButton = document.getElementById("zoomHundredButton");
       const zoomFitButton = document.getElementById("zoomFitButton");
@@ -97,6 +143,13 @@
       const overlayToggleButton = document.getElementById("overlayToggleButton");
       const brushSizeInput = document.getElementById("brushSizeInput");
       const brushHardnessInput = document.getElementById("brushStrengthInput");
+      const randomAmountInput = document.getElementById("randomAmountInput");
+      const randomBaseSizeInput = document.getElementById("randomBaseSizeInput");
+      const randomVariationInput = document.getElementById("randomVariationInput");
+      const randomStrengthInput = document.getElementById("randomStrengthInput");
+      const randomEraseMixInput = document.getElementById("randomEraseMixInput");
+      const randomGenerateButton = document.getElementById("randomGenerateButton");
+      const randomReplaceButton = document.getElementById("randomReplaceButton");
       const brushFlowInput = document.getElementById("brushFlowInput");
       const alignedGridButton = document.getElementById("alignedGridButton");
       const staggeredGridButton = document.getElementById("staggeredGridButton");
@@ -113,6 +166,11 @@
 
       const brushSizeValue = document.getElementById("brushSizeValue");
       const brushHardnessValue = document.getElementById("brushStrengthValue");
+      const randomAmountValue = document.getElementById("randomAmountValue");
+      const randomBaseSizeValue = document.getElementById("randomBaseSizeValue");
+      const randomVariationValue = document.getElementById("randomVariationValue");
+      const randomStrengthValue = document.getElementById("randomStrengthValue");
+      const randomEraseMixValue = document.getElementById("randomEraseMixValue");
       const brushFlowValue = document.getElementById("brushFlowValue");
       const spacingValue = document.getElementById("spacingValue");
       const minDotValue = document.getElementById("minDotValue");
@@ -166,6 +224,7 @@
       const imageLayerRow = imageControlRow;
       const imageAdjustmentsSection = document.getElementById("imageAdjustmentsSection");
       const zoomToolbarShell = document.querySelector(".zoom-toolbar-shell");
+      const randomToolbarShell = document.querySelector(".random-toolbar-shell");
       const floatingToolbarShell = document.querySelector(".floating-toolbar-shell");
       const floatingToolbar = document.querySelector(".floating-toolbar");
       const floatingControls = document.querySelector(".floating-controls");
@@ -269,6 +328,25 @@
         patternMoveDeltaX: 0,
         patternMoveDeltaY: 0,
         patternMoveSnapshots: null,
+        lassoSelecting: false,
+        lassoDragging: false,
+        lassoPoints: [],
+        lassoSelection: null,
+        lassoDragStartX: 0,
+        lassoDragStartY: 0,
+        lassoDragStartOffsetX: 0,
+        lassoDragStartOffsetY: 0,
+        lassoScaling: false,
+        lassoScaleHandle: "",
+        lassoScaleAnchorX: 0,
+        lassoScaleAnchorY: 0,
+        lassoScaleStartRect: null,
+        lassoScalePointerId: null,
+        lassoScaleTarget: null,
+        lassoRotating: false,
+        lassoRotateStartAngle: 0,
+        lassoRotatePointerId: null,
+        lassoRotateTarget: null,
         history: [],
         redoHistory: [],
         maxHistory: 40,
@@ -290,6 +368,9 @@
         imageDragInitialOffsetY: 0,
         imageScaling: null,
         imageTransformVisible: false,
+        randomGenerator: {
+          ...RANDOM_GENERATOR_DEFAULTS,
+        },
         patternSettingsByMode: {
           texture: { ...TEXTURE_PATTERN_DEFAULTS },
           image: { ...IMAGE_PATTERN_DEFAULTS },
@@ -316,6 +397,26 @@
 
       function clampBrushFlow(value) {
         return Math.max(0.01, Math.min(1, value));
+      }
+
+      function clampRandomAmount(value) {
+        return Math.max(10, Math.min(1500, Math.round(value)));
+      }
+
+      function clampRandomBaseSize(value) {
+        return Math.max(4, Math.min(120, value));
+      }
+
+      function clampRandomVariation(value) {
+        return Math.max(0, Math.min(1, value));
+      }
+
+      function clampRandomStrength(value) {
+        return Math.max(0.1, Math.min(1, value));
+      }
+
+      function clampRandomEraseMix(value) {
+        return Math.max(0, Math.min(1, value));
       }
 
       function clampFlowResponse(value) {
@@ -406,6 +507,10 @@
         state.flowResponse = settings.flowResponse;
       }
 
+      function isFloatingToolbarMode(mode) {
+        return mode === "move" || mode === "zoom" || mode === "random" || mode === "lasso";
+      }
+
       function setGeneratorMode(nextMode) {
         if (nextMode !== "texture" && nextMode !== "image") {
           return;
@@ -416,6 +521,10 @@
         }
         state.generatorMode = nextMode;
         applyPatternSettings(state.patternSettingsByMode[nextMode]);
+        clearLassoSelection();
+        if (nextMode === "image" && (state.mode === "random" || state.mode === "lasso")) {
+          state.mode = "move";
+        }
         document.body.dataset.generatorMode = nextMode;
         generatorModeSelect.value = nextMode;
         if (nextMode === "image") {
@@ -448,7 +557,14 @@
       }
 
       function switchMode(nextMode) {
-        if (nextMode !== "paint" && nextMode !== "erase" && nextMode !== "move" && nextMode !== "zoom") {
+        if (
+          nextMode !== "paint" &&
+          nextMode !== "erase" &&
+          nextMode !== "random" &&
+          nextMode !== "move" &&
+          nextMode !== "lasso" &&
+          nextMode !== "zoom"
+        ) {
           return;
         }
         const previousMode = state.mode;
@@ -456,16 +572,19 @@
         if (nextMode === "paint" || nextMode === "erase") {
           state.lastPaintEraseMode = nextMode;
         }
-        if (
-          (previousMode === "move" || previousMode === "zoom") !==
-          (nextMode === "move" || nextMode === "zoom")
-        ) {
-          setFloatingToolbarVisibility(nextMode === "move" || nextMode === "zoom");
+        if (previousMode === "lasso" && nextMode !== "lasso") {
+          clearLassoSelection();
+        }
+        if (isFloatingToolbarMode(previousMode) !== isFloatingToolbarMode(nextMode)) {
+          setFloatingToolbarVisibility(isFloatingToolbarMode(nextMode));
         }
         if (previousMode === "zoom" || nextMode === "zoom") {
           setZoomToolbarVisibility(nextMode !== "zoom");
         }
-        if (nextMode === "move" || nextMode === "zoom") {
+        if (previousMode === "random" || nextMode === "random") {
+          setRandomToolbarVisibility(nextMode !== "random");
+        }
+        if (isFloatingToolbarMode(nextMode)) {
           updateToggleButtons();
           updatePanCursor();
           hideCursorRing();
@@ -1023,6 +1142,25 @@
         zoomToolbarShell.classList.toggle("is-toolbar-hidden", hidden);
       }
 
+      function setRandomToolbarVisibility(hidden, immediate = false) {
+        const currentHidden = randomToolbarShell.classList.contains("is-toolbar-hidden");
+
+        if (!immediate && currentHidden === hidden) {
+          return;
+        }
+
+        if (immediate) {
+          const previousTransition = randomToolbarShell.style.transition;
+          randomToolbarShell.style.transition = "none";
+          randomToolbarShell.classList.toggle("is-toolbar-hidden", hidden);
+          void randomToolbarShell.offsetHeight;
+          randomToolbarShell.style.transition = previousTransition;
+          return;
+        }
+
+        randomToolbarShell.classList.toggle("is-toolbar-hidden", hidden);
+      }
+
       function pushHistoryEntries(entries) {
         state.history.push({ entries });
         state.redoHistory = [];
@@ -1061,6 +1199,7 @@
       }
 
       function undoLastAction() {
+        clearLassoSelection();
         const entry = state.history.pop();
         if (!entry) {
           return;
@@ -1096,6 +1235,7 @@
       }
 
       function redoLastAction() {
+        clearLassoSelection();
         const entry = state.redoHistory.pop();
         if (!entry) {
           return;
@@ -1143,6 +1283,7 @@
         state.redoHistory = [];
         state.viewOffsetX = 0;
         state.viewOffsetY = 0;
+        clearLassoSelection();
         layerCanvases.front.width = width;
         layerCanvases.front.height = height;
         layerCanvases.back.width = width;
@@ -1168,6 +1309,7 @@
         paintCanvas.height = height;
         paintCanvas.style.width = `${width}px`;
         paintCanvas.style.height = `${height}px`;
+        lassoOverlay.setAttribute("viewBox", `0 0 ${width} ${height}`);
         frontSvgPreview.style.width = `${width}px`;
         frontSvgPreview.style.height = `${height}px`;
         backSvgPreview.style.width = `${width}px`;
@@ -1195,6 +1337,7 @@
         state.redoHistory = [];
         state.viewOffsetX = 0;
         state.viewOffsetY = 0;
+        clearLassoSelection();
 
         const nextDocWidth = Math.max(width, layerCanvases.front.width);
         const nextDocHeight = Math.max(height, layerCanvases.front.height);
@@ -1466,8 +1609,11 @@
         downloadBothButton.classList.toggle("is-disabled", !bothHavePattern);
         paintModeButton.classList.toggle("active", state.mode === "paint");
         eraseModeButton.classList.toggle("active", state.mode === "erase");
+        randomModeButton.classList.toggle("active", state.mode === "random");
         moveModeButton.classList.toggle("active", state.mode === "move");
+        lassoModeButton.classList.toggle("active", state.mode === "lasso");
         zoomModeButton.classList.toggle("active", state.mode === "zoom");
+        lassoModeButton.hidden = !isTextureMode;
         overlayToggleVisibleButton.classList.toggle("active", state.showOverlay);
         overlayToggleVisibleButton.setAttribute("aria-label", state.showOverlay ? "Hide brush strokes" : "Show brush strokes");
         overlayToggleVisibleButton.setAttribute("data-tooltip", state.showOverlay ? "Hide brush strokes" : "Show brush strokes");
@@ -1486,6 +1632,25 @@
         overlayWrap.classList.toggle("panning", state.panning);
         overlayWrap.classList.toggle("move-ready", state.mode === "move" && !state.movingPattern);
         overlayWrap.classList.toggle("moving-pattern", state.movingPattern);
+        overlayWrap.classList.toggle(
+          "lasso-ready",
+          state.generatorMode === "texture" &&
+            state.mode === "lasso" &&
+            !state.lassoDragging &&
+            !state.lassoSelection
+        );
+        overlayWrap.classList.toggle(
+          "lasso-drag-ready",
+          state.generatorMode === "texture" &&
+            state.mode === "lasso" &&
+            Boolean(state.lassoSelection) &&
+            !state.lassoDragging &&
+            !state.lassoScaling &&
+            !state.lassoRotating
+        );
+        overlayWrap.classList.toggle("lasso-dragging", state.lassoDragging);
+        overlayWrap.classList.toggle("lasso-scaling", state.lassoScaling);
+        overlayWrap.classList.toggle("lasso-rotating", state.lassoRotating);
         overlayWrap.classList.toggle(
           "image-drag-ready",
           state.generatorMode === "image" && Boolean(state.referenceImageUrl) && !state.imageDragging && !state.imageScaling
@@ -1506,6 +1671,11 @@
       function updateLabels() {
         brushSizeInput.value = String(Math.round(state.brushSize));
         brushHardnessInput.value = String(Math.round(state.brushHardness * 100));
+        randomAmountInput.value = String(clampRandomAmount(state.randomGenerator.amount));
+        randomBaseSizeInput.value = String(Number(clampRandomBaseSize(state.randomGenerator.baseSize).toFixed(1)));
+        randomVariationInput.value = String(Math.round(clampRandomVariation(state.randomGenerator.variation) * 100));
+        randomStrengthInput.value = String(Math.round(clampRandomStrength(state.randomGenerator.strength) * 100));
+        randomEraseMixInput.value = String(Math.round(clampRandomEraseMix(state.randomGenerator.eraseMix) * 100));
         brushFlowInput.value = String(Math.round(state.brushFlow * 100));
         sizeCurveInput.value = String(Math.round(state.sizeCurve * 100));
         sizeCutoffInput.value = String(Math.round(state.sizeCutoff * 100));
@@ -1518,6 +1688,11 @@
         imageScaleInput.value = String(Math.round(state.imageGenerator.imageScale * 100));
         brushSizeValue.textContent = `${Math.round(state.brushSize)}`;
         brushHardnessValue.textContent = `${Math.round(state.brushHardness * 100)}%`;
+        randomAmountValue.textContent = `${clampRandomAmount(state.randomGenerator.amount)}`;
+        randomBaseSizeValue.textContent = `${Math.round(clampRandomBaseSize(state.randomGenerator.baseSize))}`;
+        randomVariationValue.textContent = `${Math.round(clampRandomVariation(state.randomGenerator.variation) * 100)}%`;
+        randomStrengthValue.textContent = `${Math.round(clampRandomStrength(state.randomGenerator.strength) * 100)}%`;
+        randomEraseMixValue.textContent = `${Math.round(clampRandomEraseMix(state.randomGenerator.eraseMix) * 100)}%`;
         brushFlowValue.textContent = `${Math.round(state.brushFlow * 100)}%`;
         spacingValue.textContent = `${Math.round(state.spacing)} px`;
         minDotValue.textContent = `${state.minDot.toFixed(1)} px`;
@@ -1619,6 +1794,671 @@
         scheduleRender();
       }
 
+      function createSelectionCanvas(width, height) {
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        return canvas;
+      }
+
+      function clearLassoPath() {
+        state.lassoSelecting = false;
+        state.lassoPoints = [];
+        lassoPath.setAttribute("d", "");
+        lassoPath.classList.add("is-hidden");
+      }
+
+      function clearLassoSelection() {
+        state.lassoDragging = false;
+        state.lassoScaling = false;
+        state.lassoScaleHandle = "";
+        state.lassoScaleStartRect = null;
+        state.lassoScalePointerId = null;
+        state.lassoScaleTarget = null;
+        state.lassoRotating = false;
+        state.lassoRotateStartAngle = 0;
+        state.lassoRotatePointerId = null;
+        state.lassoRotateTarget = null;
+        state.lassoSelection = null;
+        lassoBounds.classList.add("is-hidden");
+        lassoBounds.removeAttribute("x");
+        lassoBounds.removeAttribute("y");
+        lassoBounds.removeAttribute("width");
+        lassoBounds.removeAttribute("height");
+        lassoBounds.removeAttribute("transform");
+        for (const handle of [lassoHandleNW, lassoHandleNE, lassoHandleSE, lassoHandleSW, lassoRotateZoneNW, lassoRotateZoneNE, lassoRotateZoneSE, lassoRotateZoneSW]) {
+          handle.classList.add("is-hidden");
+          handle.removeAttribute("x");
+          handle.removeAttribute("y");
+          handle.removeAttribute("cx");
+          handle.removeAttribute("cy");
+        }
+        clearLassoPath();
+        updatePanCursor();
+      }
+
+      function getSelectionRotation(selection = state.lassoSelection) {
+        if (!selection) {
+          return 0;
+        }
+        return (selection.rotation || 0) + (selection.previewRotation || 0);
+      }
+
+      function getSelectionRenderRect(selection = state.lassoSelection) {
+        if (!selection) {
+          return null;
+        }
+        if (selection.previewRect) {
+          return selection.previewRect;
+        }
+        return {
+          x: selection.bounds.x + selection.offsetX,
+          y: selection.bounds.y + selection.offsetY,
+          width: selection.bounds.width,
+          height: selection.bounds.height,
+        };
+      }
+
+      function getRotatedRectBounds(rect, angle) {
+        if (!rect) {
+          return null;
+        }
+        if (!angle) {
+          return { ...rect };
+        }
+        const centerX = rect.x + rect.width * 0.5;
+        const centerY = rect.y + rect.height * 0.5;
+        const corners = [
+          [rect.x, rect.y],
+          [rect.x + rect.width, rect.y],
+          [rect.x + rect.width, rect.y + rect.height],
+          [rect.x, rect.y + rect.height],
+        ].map(([x, y]) => {
+          const dx = x - centerX;
+          const dy = y - centerY;
+          return {
+            x: centerX + dx * Math.cos(angle) - dy * Math.sin(angle),
+            y: centerY + dx * Math.sin(angle) + dy * Math.cos(angle),
+          };
+        });
+        const xs = corners.map((point) => point.x);
+        const ys = corners.map((point) => point.y);
+        const left = Math.min(...xs);
+        const top = Math.min(...ys);
+        const right = Math.max(...xs);
+        const bottom = Math.max(...ys);
+        return {
+          x: left,
+          y: top,
+          width: right - left,
+          height: bottom - top,
+        };
+      }
+
+      function drawSelectionCanvas(targetCtx, canvas, rect, angle = 0) {
+        if (!angle) {
+          targetCtx.drawImage(canvas, rect.x, rect.y, rect.width, rect.height);
+          return;
+        }
+        const centerX = rect.x + rect.width * 0.5;
+        const centerY = rect.y + rect.height * 0.5;
+        targetCtx.save();
+        targetCtx.translate(centerX, centerY);
+        targetCtx.rotate(angle);
+        targetCtx.drawImage(canvas, -rect.width * 0.5, -rect.height * 0.5, rect.width, rect.height);
+        targetCtx.restore();
+      }
+
+      function updateLassoPathPreview() {
+        if (!state.lassoPoints.length) {
+          lassoPath.setAttribute("d", "");
+          lassoPath.classList.add("is-hidden");
+          return;
+        }
+        const [firstPoint, ...restPoints] = state.lassoPoints;
+        const commands = [`M ${firstPoint.x.toFixed(2)} ${firstPoint.y.toFixed(2)}`];
+        for (const point of restPoints) {
+          commands.push(`L ${point.x.toFixed(2)} ${point.y.toFixed(2)}`);
+        }
+        lassoPath.setAttribute("d", commands.join(" "));
+        lassoPath.classList.remove("is-hidden");
+      }
+
+      function updateLassoBoundsPreview() {
+        const selection = state.lassoSelection;
+        if (!selection) {
+          lassoBounds.classList.add("is-hidden");
+          for (const el of [lassoHandleNW, lassoHandleNE, lassoHandleSE, lassoHandleSW, lassoRotateZoneNW, lassoRotateZoneNE, lassoRotateZoneSE, lassoRotateZoneSW]) {
+            el.classList.add("is-hidden");
+          }
+          return;
+        }
+        const rect = getSelectionRenderRect(selection);
+        const angle = getSelectionRotation(selection);
+        const cx = rect.x + rect.width * 0.5;
+        const cy = rect.y + rect.height * 0.5;
+
+        lassoBounds.setAttribute("x", `${rect.x}`);
+        lassoBounds.setAttribute("y", `${rect.y}`);
+        lassoBounds.setAttribute("width", `${rect.width}`);
+        lassoBounds.setAttribute("height", `${rect.height}`);
+        const angleDeg = angle * (180 / Math.PI);
+        lassoBounds.setAttribute("transform", `rotate(${angleDeg}, ${cx}, ${cy})`);
+        lassoBounds.classList.remove("is-hidden");
+
+        const rotatePoint = (x, y) => ({
+          x: cx + (x - cx) * Math.cos(angle) - (y - cy) * Math.sin(angle),
+          y: cy + (x - cx) * Math.sin(angle) + (y - cy) * Math.cos(angle),
+        });
+
+        const handleSize = 8;
+        const corners = [
+          [lassoHandleNW, lassoRotateZoneNW, rect.x, rect.y],
+          [lassoHandleNE, lassoRotateZoneNE, rect.x + rect.width, rect.y],
+          [lassoHandleSE, lassoRotateZoneSE, rect.x + rect.width, rect.y + rect.height],
+          [lassoHandleSW, lassoRotateZoneSW, rect.x, rect.y + rect.height],
+        ];
+        for (const [handle, rotZone, x, y] of corners) {
+          const rotated = rotatePoint(x, y);
+          handle.setAttribute("x", `${rotated.x - handleSize * 0.5}`);
+          handle.setAttribute("y", `${rotated.y - handleSize * 0.5}`);
+          handle.classList.remove("is-hidden");
+          rotZone.setAttribute("cx", `${rotated.x}`);
+          rotZone.setAttribute("cy", `${rotated.y}`);
+          rotZone.classList.remove("is-hidden");
+        }
+        updateRotateZoneCursors();
+      }
+
+      function isPointInsideLassoSelection(point) {
+        const selection = state.lassoSelection;
+        if (!selection) {
+          return false;
+        }
+        const rect = getSelectionRenderRect(selection);
+        const angle = getSelectionRotation(selection);
+        const cx = rect.x + rect.width * 0.5;
+        const cy = rect.y + rect.height * 0.5;
+        const dx = point.x - cx;
+        const dy = point.y - cy;
+        const localX = cx + dx * Math.cos(-angle) - dy * Math.sin(-angle);
+        const localY = cy + dx * Math.sin(-angle) + dy * Math.cos(-angle);
+        return (
+          localX >= rect.x &&
+          localX <= rect.x + rect.width &&
+          localY >= rect.y &&
+          localY <= rect.y + rect.height
+        );
+      }
+
+      function applyLassoSelectionComposite() {
+        const selection = state.lassoSelection;
+        if (!selection) {
+          return;
+        }
+        const layerCtx = layerContexts[selection.layer];
+        const rect = getSelectionRenderRect(selection);
+        const angle = getSelectionRotation(selection);
+        layerCtx.putImageData(selection.holeSnapshot, 0, 0);
+        drawSelectionCanvas(layerCtx, selection.sourceCanvas, rect, angle);
+        syncLayerContentState([selection.layer]);
+        redrawOverlay();
+        scheduleRender();
+      }
+
+      function beginLassoSelection(point) {
+        clearLassoSelection();
+        state.lassoSelecting = true;
+        state.lassoPoints = [point];
+        updateLassoPathPreview();
+      }
+
+      function extendLassoSelection(point) {
+        if (!state.lassoSelecting) {
+          return;
+        }
+        const previousPoint = state.lassoPoints[state.lassoPoints.length - 1];
+        if (!previousPoint || Math.hypot(point.x - previousPoint.x, point.y - previousPoint.y) >= 2) {
+          state.lassoPoints.push(point);
+          updateLassoPathPreview();
+        }
+      }
+
+      function finalizeLassoSelection() {
+        if (state.lassoPoints.length < 3) {
+          clearLassoPath();
+          return;
+        }
+        const selectionLayer = state.activeLayer;
+        const points = state.lassoPoints.map((point) => ({ x: point.x, y: point.y }));
+        const left = Math.max(0, Math.floor(Math.min(...points.map((point) => point.x))));
+        const top = Math.max(0, Math.floor(Math.min(...points.map((point) => point.y))));
+        const right = Math.min(paintCanvas.width, Math.ceil(Math.max(...points.map((point) => point.x))));
+        const bottom = Math.min(paintCanvas.height, Math.ceil(Math.max(...points.map((point) => point.y))));
+        const width = Math.max(0, right - left);
+        const height = Math.max(0, bottom - top);
+
+        if (!width || !height) {
+          clearLassoPath();
+          return;
+        }
+
+        const maskCanvas = createSelectionCanvas(width, height);
+        const maskCtx = maskCanvas.getContext("2d", { willReadFrequently: true });
+        maskCtx.fillStyle = "#ffffff";
+        maskCtx.beginPath();
+        maskCtx.moveTo(points[0].x - left, points[0].y - top);
+        for (let index = 1; index < points.length; index += 1) {
+          maskCtx.lineTo(points[index].x - left, points[index].y - top);
+        }
+        maskCtx.closePath();
+        maskCtx.fill();
+
+        const layerCtx = layerContexts[selectionLayer];
+        const sourcePatch = layerCtx.getImageData(left, top, width, height);
+        const maskPatch = maskCtx.getImageData(0, 0, width, height);
+
+        // First pass: find tight content bounds (pixels with actual ink inside the mask).
+        let minX = width, minY = height, maxX = -1, maxY = -1;
+        for (let y = 0; y < height; y++) {
+          for (let x = 0; x < width; x++) {
+            const i = (y * width + x) * 4;
+            if (maskPatch.data[i + 3] > 0 && sourcePatch.data[i] < 255) {
+              if (x < minX) minX = x;
+              if (x > maxX) maxX = x;
+              if (y < minY) minY = y;
+              if (y > maxY) maxY = y;
+            }
+          }
+        }
+
+        clearLassoPath();
+        if (maxX < 0) {
+          clearLassoSelection();
+          return;
+        }
+
+        // Add 1px padding so anti-aliased edges aren't clipped.
+        const pad = 1;
+        const cMinX = Math.max(0, minX - pad);
+        const cMinY = Math.max(0, minY - pad);
+        const cMaxX = Math.min(width - 1, maxX + pad);
+        const cMaxY = Math.min(height - 1, maxY + pad);
+        const cWidth = cMaxX - cMinX + 1;
+        const cHeight = cMaxY - cMinY + 1;
+        const contentLeft = left + cMinX;
+        const contentTop = top + cMinY;
+
+        // Build source/clear/mask canvases cropped to tight content bounds.
+        const sourceCanvas = createSelectionCanvas(cWidth, cHeight);
+        const sourceCtx = sourceCanvas.getContext("2d", { willReadFrequently: true });
+        const clearCanvas = createSelectionCanvas(cWidth, cHeight);
+        const clearCtx = clearCanvas.getContext("2d", { willReadFrequently: true });
+        const croppedMaskCanvas = createSelectionCanvas(cWidth, cHeight);
+        const croppedMaskCtx = croppedMaskCanvas.getContext("2d", { willReadFrequently: true });
+        const selectedPatch = sourceCtx.createImageData(cWidth, cHeight);
+        const clearPatch = clearCtx.createImageData(cWidth, cHeight);
+        const croppedMaskPatch = croppedMaskCtx.createImageData(cWidth, cHeight);
+
+        for (let y = 0; y < cHeight; y++) {
+          for (let x = 0; x < cWidth; x++) {
+            const src = ((cMinY + y) * width + (cMinX + x)) * 4;
+            const dst = (y * cWidth + x) * 4;
+            const inMask = maskPatch.data[src + 3] > 0;
+            const channel = sourcePatch.data[src];
+            selectedPatch.data[dst] = inMask ? channel : 255;
+            selectedPatch.data[dst + 1] = inMask ? channel : 255;
+            selectedPatch.data[dst + 2] = inMask ? channel : 255;
+            selectedPatch.data[dst + 3] = 255;
+            clearPatch.data[dst] = 255;
+            clearPatch.data[dst + 1] = 255;
+            clearPatch.data[dst + 2] = 255;
+            clearPatch.data[dst + 3] = inMask ? 255 : 0;
+            croppedMaskPatch.data[dst] = maskPatch.data[src];
+            croppedMaskPatch.data[dst + 1] = maskPatch.data[src + 1];
+            croppedMaskPatch.data[dst + 2] = maskPatch.data[src + 2];
+            croppedMaskPatch.data[dst + 3] = maskPatch.data[src + 3];
+          }
+        }
+
+        sourceCtx.putImageData(selectedPatch, 0, 0);
+        clearCtx.putImageData(clearPatch, 0, 0);
+        croppedMaskCtx.putImageData(croppedMaskPatch, 0, 0);
+
+        // holeSnapshot: the layer with the selection content permanently removed.
+        // This is always used as the clean base for compositing — never gets contaminated
+        // by drawing operations, so we never get ghost duplicates when moving/rotating.
+        const holeCanvas = document.createElement("canvas");
+        holeCanvas.width = layerCtx.canvas.width;
+        holeCanvas.height = layerCtx.canvas.height;
+        const holeCtx = holeCanvas.getContext("2d");
+        holeCtx.drawImage(layerCtx.canvas, 0, 0);
+        holeCtx.drawImage(clearCanvas, contentLeft, contentTop);
+        const holeSnapshot = holeCtx.getImageData(0, 0, holeCanvas.width, holeCanvas.height);
+
+        state.lassoSelection = {
+          layer: selectionLayer,
+          bounds: { x: contentLeft, y: contentTop, width: cWidth, height: cHeight },
+          sourceCanvas,
+          clearCanvas,
+          maskCanvas: croppedMaskCanvas,
+          holeSnapshot,
+          offsetX: 0,
+          offsetY: 0,
+          rotation: 0,
+          previewRect: null,
+          previewRotation: 0,
+        };
+        updateLassoBoundsPreview();
+        updatePanCursor();
+      }
+
+      function beginLassoDrag(point) {
+        const selection = state.lassoSelection;
+        if (!selection) {
+          return false;
+        }
+        pushHistoryEntry(selection.layer);
+        state.lassoDragging = true;
+        state.lassoDragStartX = point.x;
+        state.lassoDragStartY = point.y;
+        state.lassoDragStartOffsetX = selection.offsetX;
+        state.lassoDragStartOffsetY = selection.offsetY;
+        updatePanCursor();
+        return true;
+      }
+
+      function updateLassoDrag(point) {
+        const selection = state.lassoSelection;
+        if (!selection || !state.lassoDragging) {
+          return;
+        }
+        selection.offsetX = state.lassoDragStartOffsetX + Math.round(point.x - state.lassoDragStartX);
+        selection.offsetY = state.lassoDragStartOffsetY + Math.round(point.y - state.lassoDragStartY);
+        applyLassoSelectionComposite();
+        updateLassoBoundsPreview();
+      }
+
+      function endLassoDrag() {
+        const selection = state.lassoSelection;
+        if (!selection) {
+          state.lassoDragging = false;
+          return;
+        }
+        const moved = selection.offsetX !== 0 || selection.offsetY !== 0;
+        state.lassoDragging = false;
+        if (!moved) {
+          state.history.pop();
+          state.redoHistory = [];
+          updateToggleButtons();
+          updatePanCursor();
+          return;
+        }
+
+        selection.bounds.x += selection.offsetX;
+        selection.bounds.y += selection.offsetY;
+        selection.offsetX = 0;
+        selection.offsetY = 0;
+        selection.previewRect = null;
+        selection.previewRotation = 0;
+        updateLassoBoundsPreview();
+        updateToggleButtons();
+        updatePanCursor();
+      }
+
+      function beginLassoScale(handle, event) {
+        const selection = state.lassoSelection;
+        if (!selection) {
+          return;
+        }
+        event.preventDefault();
+        event.stopPropagation();
+        const rect = getSelectionRenderRect(selection);
+        pushHistoryEntry(selection.layer);
+        state.lassoScaling = true;
+        state.lassoScaleHandle = handle;
+        state.lassoScaleStartRect = { ...rect };
+        state.lassoScalePointerId = typeof event.pointerId === "number" ? event.pointerId : null;
+        state.lassoScaleTarget = event.currentTarget instanceof Element ? event.currentTarget : null;
+        selection.previewRect = null;
+        selection.previewRotation = 0;
+        if (handle === "nw") {
+          state.lassoScaleAnchorX = rect.x + rect.width;
+          state.lassoScaleAnchorY = rect.y + rect.height;
+        } else if (handle === "ne") {
+          state.lassoScaleAnchorX = rect.x;
+          state.lassoScaleAnchorY = rect.y + rect.height;
+        } else if (handle === "se") {
+          state.lassoScaleAnchorX = rect.x;
+          state.lassoScaleAnchorY = rect.y;
+        } else {
+          state.lassoScaleAnchorX = rect.x + rect.width;
+          state.lassoScaleAnchorY = rect.y;
+        }
+        if (state.lassoScaleTarget && state.lassoScalePointerId !== null && state.lassoScaleTarget.setPointerCapture) {
+          state.lassoScaleTarget.setPointerCapture(state.lassoScalePointerId);
+        }
+        updatePanCursor();
+        hideCursorRing();
+      }
+
+      function updateLassoScale(event) {
+        const selection = state.lassoSelection;
+        if (!selection || !state.lassoScaling) {
+          return;
+        }
+        const point = getCanvasPoint(event);
+        const minSize = 4;
+        const anchorX = state.lassoScaleAnchorX;
+        const anchorY = state.lassoScaleAnchorY;
+        let width = Math.max(minSize, Math.abs(point.x - anchorX));
+        let height = Math.max(minSize, Math.abs(point.y - anchorY));
+        const startRect = state.lassoScaleStartRect || selection.bounds;
+        const aspectRatio = Math.max(0.0001, startRect.width / Math.max(0.0001, startRect.height));
+
+        if (event.shiftKey) {
+          const deltaX = Math.abs(point.x - anchorX);
+          const deltaY = Math.abs(point.y - anchorY);
+          if (deltaX / Math.max(0.0001, deltaY) > aspectRatio) {
+            height = Math.max(minSize, width / aspectRatio);
+          } else {
+            width = Math.max(minSize, height * aspectRatio);
+          }
+        }
+
+        const x = point.x <= anchorX ? anchorX - width : anchorX;
+        const y = point.y <= anchorY ? anchorY - height : anchorY;
+        const rect = {
+          x: Math.round(x),
+          y: Math.round(y),
+          width: Math.round(width),
+          height: Math.round(height),
+        };
+        selection.previewRect = rect;
+        applyLassoSelectionComposite();
+        updateLassoBoundsPreview();
+      }
+
+      function endLassoScale() {
+        const selection = state.lassoSelection;
+        if (!selection) {
+          state.lassoScaling = false;
+          state.lassoScaleHandle = "";
+          state.lassoScaleStartRect = null;
+          state.lassoScalePointerId = null;
+          state.lassoScaleTarget = null;
+          return;
+        }
+        if (!state.lassoScaling) {
+          return;
+        }
+        const rect = getSelectionRenderRect(selection);
+        const changed =
+          rect &&
+          (Math.round(rect.x) !== selection.bounds.x ||
+            Math.round(rect.y) !== selection.bounds.y ||
+            Math.round(rect.width) !== selection.bounds.width ||
+            Math.round(rect.height) !== selection.bounds.height);
+        state.lassoScaling = false;
+        state.lassoScaleHandle = "";
+        if (
+          state.lassoScaleTarget &&
+          state.lassoScalePointerId !== null &&
+          state.lassoScaleTarget.releasePointerCapture &&
+          state.lassoScaleTarget.hasPointerCapture?.(state.lassoScalePointerId)
+        ) {
+          state.lassoScaleTarget.releasePointerCapture(state.lassoScalePointerId);
+        }
+        state.lassoScaleStartRect = null;
+        state.lassoScalePointerId = null;
+        state.lassoScaleTarget = null;
+        if (!changed) {
+          selection.previewRect = null;
+          state.history.pop();
+          state.redoHistory = [];
+          updateToggleButtons();
+          updatePanCursor();
+          return;
+        }
+
+        const nextWidth = Math.max(1, Math.round(rect.width));
+        const nextHeight = Math.max(1, Math.round(rect.height));
+        const nextSourceCanvas = createSelectionCanvas(nextWidth, nextHeight);
+        nextSourceCanvas.getContext("2d", { willReadFrequently: true }).drawImage(
+          selection.sourceCanvas,
+          0,
+          0,
+          nextWidth,
+          nextHeight
+        );
+        const nextClearCanvas = createSelectionCanvas(nextWidth, nextHeight);
+        nextClearCanvas.getContext("2d", { willReadFrequently: true }).drawImage(
+          selection.clearCanvas,
+          0,
+          0,
+          nextWidth,
+          nextHeight
+        );
+        const nextMaskCanvas = createSelectionCanvas(nextWidth, nextHeight);
+        nextMaskCanvas.getContext("2d", { willReadFrequently: true }).drawImage(
+          selection.maskCanvas,
+          0,
+          0,
+          nextWidth,
+          nextHeight
+        );
+
+        selection.bounds = {
+          x: Math.round(rect.x),
+          y: Math.round(rect.y),
+          width: nextWidth,
+          height: nextHeight,
+        };
+        selection.sourceCanvas = nextSourceCanvas;
+        selection.clearCanvas = nextClearCanvas;
+        selection.maskCanvas = nextMaskCanvas;
+        selection.offsetX = 0;
+        selection.offsetY = 0;
+        selection.previewRect = null;
+        selection.previewRotation = 0;
+        updateLassoBoundsPreview();
+        updateToggleButtons();
+        updatePanCursor();
+      }
+
+      function beginLassoRotate(event) {
+        const selection = state.lassoSelection;
+        if (!selection) {
+          return;
+        }
+        event.preventDefault();
+        event.stopPropagation();
+        const rect = getSelectionRenderRect(selection);
+        const centerX = rect.x + rect.width * 0.5;
+        const centerY = rect.y + rect.height * 0.5;
+        pushHistoryEntry(selection.layer);
+        state.lassoRotating = true;
+        state.lassoRotatePointerId = typeof event.pointerId === "number" ? event.pointerId : null;
+        state.lassoRotateTarget = event.currentTarget instanceof Element ? event.currentTarget : null;
+        state.lassoRotateStartAngle = Math.atan2(eventPointY(event) - centerY, eventPointX(event) - centerX);
+        selection.previewRect = null;
+        selection.previewRotation = 0;
+        if (state.lassoRotateTarget && state.lassoRotatePointerId !== null && state.lassoRotateTarget.setPointerCapture) {
+          state.lassoRotateTarget.setPointerCapture(state.lassoRotatePointerId);
+        }
+        updatePanCursor();
+        hideCursorRing();
+      }
+
+      function eventPointX(event) {
+        return getCanvasPoint(event, false).x;
+      }
+
+      function eventPointY(event) {
+        return getCanvasPoint(event, false).y;
+      }
+
+      function updateLassoRotate(event) {
+        const selection = state.lassoSelection;
+        if (!selection || !state.lassoRotating) {
+          return;
+        }
+        const rect = getSelectionRenderRect(selection);
+        const centerX = rect.x + rect.width * 0.5;
+        const centerY = rect.y + rect.height * 0.5;
+        const currentAngle = Math.atan2(eventPointY(event) - centerY, eventPointX(event) - centerX);
+        let rotation = currentAngle - state.lassoRotateStartAngle;
+        if (event.shiftKey) {
+          const snapStep = Math.PI / 12;
+          rotation = Math.round(rotation / snapStep) * snapStep;
+        }
+        selection.previewRotation = rotation;
+        applyLassoSelectionComposite();
+        updateLassoBoundsPreview();
+      }
+
+      function endLassoRotate() {
+        const selection = state.lassoSelection;
+        if (!selection) {
+          state.lassoRotating = false;
+          state.lassoRotateStartAngle = 0;
+          state.lassoRotatePointerId = null;
+          state.lassoRotateTarget = null;
+          return;
+        }
+        if (!state.lassoRotating) {
+          return;
+        }
+        const angle = selection.previewRotation || 0;
+        state.lassoRotating = false;
+        if (
+          state.lassoRotateTarget &&
+          state.lassoRotatePointerId !== null &&
+          state.lassoRotateTarget.releasePointerCapture &&
+          state.lassoRotateTarget.hasPointerCapture?.(state.lassoRotatePointerId)
+        ) {
+          state.lassoRotateTarget.releasePointerCapture(state.lassoRotatePointerId);
+        }
+        state.lassoRotateStartAngle = 0;
+        state.lassoRotatePointerId = null;
+        state.lassoRotateTarget = null;
+        if (Math.abs(angle) < 0.0005) {
+          selection.previewRotation = 0;
+          state.history.pop();
+          state.redoHistory = [];
+          updateToggleButtons();
+          updatePanCursor();
+          return;
+        }
+
+        selection.rotation = (selection.rotation || 0) + angle;
+        selection.previewRotation = 0;
+        applyLassoSelectionComposite();
+        updateLassoBoundsPreview();
+        updateToggleButtons();
+        updatePanCursor();
+      }
+
       function getEffectiveBrushFlow(hardness = state.brushHardness) {
         const normalizedHardness = Math.max(0, Math.min(1, hardness));
         const hardnessBoost = Math.pow(normalizedHardness, state.flowResponse);
@@ -1647,9 +2487,7 @@
         redrawOverlay();
       }
 
-      function stampBrush(ctx, x, y, radius) {
-        const hardness = state.brushHardness;
-        const effectiveFlow = getEffectiveBrushFlow(hardness);
+      function stampBlob(ctx, x, y, radius, hardness, flow, erase = false) {
         const eraseInkSnapThreshold = 0.004;
         const eraseSnapInfluenceFloor = 0.004;
         const left = Math.max(0, Math.floor(x - radius));
@@ -1667,7 +2505,7 @@
         const data = imageData.data;
         const hardCore = 0.015 + Math.pow(hardness, 1.8) * 0.62;
         const falloffExponent = 2.4 + (1 - hardness) * 4.2;
-        const centerFlow = (0.22 + Math.pow(hardness, 0.55) * 0.78) * effectiveFlow;
+        const centerFlow = (0.22 + Math.pow(hardness, 0.55) * 0.78) * flow;
 
         for (let yy = 0; yy < height; yy += 1) {
           for (let xx = 0; xx < width; xx += 1) {
@@ -1703,7 +2541,7 @@
             const currentInk = 1 - current / 255;
 
             let nextInk = currentInk;
-            if (state.mode === "paint") {
+            if (!erase) {
               nextInk = currentInk + (1 - currentInk) * influence;
             } else {
               nextInk = currentInk * (1 - influence);
@@ -1722,6 +2560,81 @@
         }
 
         ctx.putImageData(imageData, left, top);
+      }
+
+      function stampBrush(ctx, x, y, radius) {
+        const hardness = state.brushHardness;
+        const effectiveFlow = getEffectiveBrushFlow(hardness);
+        stampBlob(ctx, x, y, radius, hardness, effectiveFlow, state.mode === "erase");
+      }
+
+      function generateRandomPattern({ replace = false } = {}) {
+        if (state.generatorMode !== "texture") {
+          return;
+        }
+        const activeCtx = getActiveLayerContext();
+        const amount = clampRandomAmount(state.randomGenerator.amount);
+        const baseSize = clampRandomBaseSize(state.randomGenerator.baseSize);
+        const variation = clampRandomVariation(state.randomGenerator.variation);
+        const strength = clampRandomStrength(state.randomGenerator.strength);
+        const eraseMix = clampRandomEraseMix(state.randomGenerator.eraseMix);
+        const width = paintCanvas.width;
+        const height = paintCanvas.height;
+
+        pushHistoryEntry(state.activeLayer);
+
+        if (replace) {
+          activeCtx.fillStyle = "#ffffff";
+          activeCtx.fillRect(0, 0, activeCtx.canvas.width, activeCtx.canvas.height);
+        }
+
+        const clusterCount = Math.max(3, Math.round(Math.sqrt(amount) * 0.35));
+        const clusters = Array.from({ length: clusterCount }, () => ({
+          x: Math.random() * width,
+          y: Math.random() * height,
+          spread: baseSize * (2.25 + Math.random() * 3.25),
+        }));
+
+        const eraseCount = Math.round(amount * eraseMix);
+        const paintCount = Math.max(0, amount - eraseCount);
+
+        const samplePoint = () => {
+          let x = Math.random() * width;
+          let y = Math.random() * height;
+
+          if (Math.random() < 0.72) {
+            const cluster = clusters[Math.floor(Math.random() * clusters.length)];
+            const angle = Math.random() * Math.PI * 2;
+            const distance = Math.pow(Math.random(), 0.82) * cluster.spread;
+            x = Math.max(0, Math.min(width - 1, cluster.x + Math.cos(angle) * distance));
+            y = Math.max(0, Math.min(height - 1, cluster.y + Math.sin(angle) * distance));
+          }
+
+          return { x, y };
+        };
+
+        for (let index = 0; index < paintCount; index += 1) {
+          const { x, y } = samplePoint();
+          const radiusScale = 1 + (Math.random() * 2 - 1) * variation;
+          const radius = Math.max(1, baseSize * radiusScale);
+          const hardness = Math.max(0.14, Math.min(0.95, 0.52 + Math.random() * 0.28));
+          const flow = Math.max(0.08, Math.min(1, strength * (0.55 + Math.random() * 0.65)));
+          stampBlob(activeCtx, x, y, radius, hardness, flow, false);
+        }
+
+        for (let index = 0; index < eraseCount; index += 1) {
+          const { x, y } = samplePoint();
+          const radiusScale = 1 + (Math.random() * 2 - 1) * variation;
+          const radius = Math.max(1, baseSize * radiusScale * (0.7 + eraseMix * 0.6));
+          const hardness = Math.max(0.08, Math.min(0.82, 0.26 + Math.random() * 0.26));
+          const flow = Math.max(0.05, Math.min(0.92, strength * eraseMix * (0.38 + Math.random() * 0.44)));
+          stampBlob(activeCtx, x, y, radius, hardness, flow, true);
+        }
+
+        syncLayerContentState([state.activeLayer]);
+        redrawOverlay();
+        updateToggleButtons();
+        scheduleRender();
       }
 
       function pointerDown(event) {
@@ -1785,6 +2698,21 @@
           paintCanvas.setPointerCapture(event.pointerId);
           return;
         }
+        if (state.mode === "lasso") {
+          const point = getCanvasPoint(event);
+          if (state.lassoSelection && isPointInsideLassoSelection(point)) {
+            beginLassoDrag(point);
+          } else {
+            beginLassoSelection(point);
+          }
+          hideCursorRing();
+          paintCanvas.setPointerCapture(event.pointerId);
+          return;
+        }
+        if (state.mode === "random" || state.mode === "zoom") {
+          hideCursorRing();
+          return;
+        }
         state.drawing = true;
         pushHistoryEntry(state.activeLayer);
         showCursorRing(event);
@@ -1839,12 +2767,27 @@
           setBrushHardness(state.brushAdjustInitialHardness + hardnessDelta);
           return;
         }
+        if (state.lassoScaling) {
+          event.preventDefault();
+          updateLassoScale(event);
+          return;
+        }
         if (state.movingPattern) {
           event.preventDefault();
           const point = getCanvasPoint(event, false);
           state.patternMoveDeltaX = Math.round(point.x - state.patternMoveStartX);
           state.patternMoveDeltaY = Math.round(point.y - state.patternMoveStartY);
           restorePatternMoveSnapshots();
+          return;
+        }
+        if (state.lassoDragging) {
+          event.preventDefault();
+          updateLassoDrag(getCanvasPoint(event));
+          return;
+        }
+        if (state.lassoSelecting) {
+          event.preventDefault();
+          extendLassoSelection(getCanvasPoint(event));
           return;
         }
         if (!state.drawing) {
@@ -1890,6 +2833,10 @@
           }
           return;
         }
+        if (state.lassoScaling) {
+          endLassoScale();
+          return;
+        }
         if (state.movingPattern) {
           const hadMovement = state.patternMoveDeltaX !== 0 || state.patternMoveDeltaY !== 0;
           state.movingPattern = false;
@@ -1906,6 +2853,20 @@
             paintCanvas.releasePointerCapture(event.pointerId);
           }
           updatePanCursor();
+          return;
+        }
+        if (state.lassoDragging) {
+          endLassoDrag();
+          if (typeof event.pointerId === "number") {
+            paintCanvas.releasePointerCapture(event.pointerId);
+          }
+          return;
+        }
+        if (state.lassoSelecting) {
+          finalizeLassoSelection();
+          if (typeof event.pointerId === "number") {
+            paintCanvas.releasePointerCapture(event.pointerId);
+          }
           return;
         }
         if (!state.drawing) {
@@ -1942,9 +2903,12 @@
         if (
           !state.pointerInsideCanvas ||
           state.generatorMode === "image" ||
+          state.mode === "random" ||
           state.mode === "move" ||
+          state.mode === "lasso" ||
           state.mode === "zoom" ||
-          state.movingPattern
+          state.movingPattern ||
+          state.lassoScaling
         ) {
           return "0";
         }
@@ -1968,9 +2932,12 @@
       function showCursorRing(event) {
         if (
           state.generatorMode === "image" ||
+          state.mode === "random" ||
           state.mode === "move" ||
+          state.mode === "lasso" ||
           state.mode === "zoom" ||
-          state.movingPattern
+          state.movingPattern ||
+          state.lassoScaling
         ) {
           return;
         }
@@ -1983,7 +2950,15 @@
       }
 
       function hideCursorRing() {
-        if (state.adjustingBrush || state.drawing || state.panning || state.movingPattern) {
+        if (
+          state.adjustingBrush ||
+          state.drawing ||
+          state.panning ||
+          state.movingPattern ||
+          state.lassoSelecting ||
+          state.lassoDragging ||
+          state.lassoScaling
+        ) {
           return;
         }
         cursorRing.style.opacity = "0";
@@ -2006,6 +2981,9 @@
           state.adjustingBrush ||
           state.panning ||
           state.movingPattern ||
+          state.lassoSelecting ||
+          state.lassoDragging ||
+          state.lassoScaling ||
           state.imageDragging
         ) {
           pointerUp(event);
@@ -2524,6 +3502,7 @@
       }
 
       function clearLayer(layerName) {
+        clearLassoSelection();
         pushHistoryEntry(layerName);
         const layerCtx = layerContexts[layerName];
         layerCtx.fillStyle = "#ffffff";
@@ -2535,6 +3514,7 @@
       }
 
       function clearAllLayers() {
+        clearLassoSelection();
         pushHistoryForLayers(["front", "back"]);
         for (const [layerName, layerCtx] of Object.entries(layerContexts)) {
           layerCtx.fillStyle = "#ffffff";
@@ -2632,6 +3612,7 @@
             dotColor: state.dotColor,
             zoom: state.zoom,
             referenceImageOpacity: state.referenceImageOpacity,
+            randomGenerator: { ...state.randomGenerator },
             toolSettings: {
               paint: { ...state.toolSettings.paint },
               erase: { ...state.toolSettings.erase },
@@ -2829,6 +3810,13 @@
           offsetX: readNumber(settings.imageGenerator?.offsetX, state.imageGenerator.offsetX),
           offsetY: readNumber(settings.imageGenerator?.offsetY, state.imageGenerator.offsetY),
         };
+        state.randomGenerator = {
+          amount: clampRandomAmount(readNumber(settings.randomGenerator?.amount, state.randomGenerator.amount)),
+          baseSize: clampRandomBaseSize(readNumber(settings.randomGenerator?.baseSize, state.randomGenerator.baseSize)),
+          variation: clampRandomVariation(readNumber(settings.randomGenerator?.variation, state.randomGenerator.variation)),
+          strength: clampRandomStrength(readNumber(settings.randomGenerator?.strength, state.randomGenerator.strength)),
+          eraseMix: clampRandomEraseMix(readNumber(settings.randomGenerator?.eraseMix, state.randomGenerator.eraseMix)),
+        };
         state.patternSettingsByMode = {
           texture: {
             ...TEXTURE_PATTERN_DEFAULTS,
@@ -2889,14 +3877,19 @@
         switchMode(
           settings.mode === "erase"
             ? "erase"
+            : settings.mode === "random"
+              ? "random"
             : settings.mode === "move"
               ? "move"
+              : settings.mode === "lasso"
+                ? "lasso"
               : settings.mode === "zoom"
                 ? "zoom"
               : "paint"
         );
-        setFloatingToolbarVisibility(state.mode === "move" || state.mode === "zoom", true);
+        setFloatingToolbarVisibility(isFloatingToolbarMode(state.mode), true);
         setZoomToolbarVisibility(state.mode !== "zoom", true);
+        setRandomToolbarVisibility(state.mode !== "random", true);
         setGeneratorMode(state.generatorMode);
         updateToggleButtons();
         updateLabels();
@@ -3005,6 +3998,7 @@
         if (layerName !== "front" && layerName !== "back") {
           return;
         }
+        clearLassoSelection();
         state.activeLayer = layerName;
         updateToggleButtons();
         redrawOverlay();
@@ -3085,8 +4079,16 @@
         switchMode("erase");
       });
 
+      randomModeButton.addEventListener("click", () => {
+        switchMode("random");
+      });
+
       moveModeButton.addEventListener("click", () => {
         switchMode("move");
+      });
+
+      lassoModeButton.addEventListener("click", () => {
+        switchMode("lasso");
       });
 
       zoomModeButton.addEventListener("click", () => {
@@ -3125,6 +4127,39 @@
 
       brushHardnessInput.addEventListener("input", () => {
         setBrushHardness(Number(brushHardnessInput.value) / 100);
+      });
+
+      randomAmountInput.addEventListener("input", () => {
+        state.randomGenerator.amount = clampRandomAmount(Number(randomAmountInput.value));
+        updateLabels();
+      });
+
+      randomBaseSizeInput.addEventListener("input", () => {
+        state.randomGenerator.baseSize = clampRandomBaseSize(Number(randomBaseSizeInput.value));
+        updateLabels();
+      });
+
+      randomVariationInput.addEventListener("input", () => {
+        state.randomGenerator.variation = clampRandomVariation(Number(randomVariationInput.value) / 100);
+        updateLabels();
+      });
+
+      randomStrengthInput.addEventListener("input", () => {
+        state.randomGenerator.strength = clampRandomStrength(Number(randomStrengthInput.value) / 100);
+        updateLabels();
+      });
+
+      randomEraseMixInput.addEventListener("input", () => {
+        state.randomGenerator.eraseMix = clampRandomEraseMix(Number(randomEraseMixInput.value) / 100);
+        updateLabels();
+      });
+
+      randomGenerateButton.addEventListener("click", () => {
+        generateRandomPattern();
+      });
+
+      randomReplaceButton.addEventListener("click", () => {
+        generateRandomPattern({ replace: true });
       });
 
       spacingInput.addEventListener("input", () => {
@@ -3322,6 +4357,23 @@
       imageHandleW.addEventListener("pointerdown", (event) => {
         beginImageScale("w", event);
       });
+      lassoHandleNW.addEventListener("pointerdown", (event) => {
+        beginLassoScale("nw", event);
+      });
+      lassoHandleNE.addEventListener("pointerdown", (event) => {
+        beginLassoScale("ne", event);
+      });
+      lassoHandleSE.addEventListener("pointerdown", (event) => {
+        beginLassoScale("se", event);
+      });
+      lassoHandleSW.addEventListener("pointerdown", (event) => {
+        beginLassoScale("sw", event);
+      });
+      for (const zone of [lassoRotateZoneNW, lassoRotateZoneNE, lassoRotateZoneSE, lassoRotateZoneSW]) {
+        zone.addEventListener("pointerdown", (event) => {
+          beginLassoRotate(event);
+        });
+      }
       widthInput.addEventListener("input", cancelScheduledCanvasSizeApply);
       heightInput.addEventListener("input", cancelScheduledCanvasSizeApply);
       widthInput.addEventListener("keydown", (event) => {
@@ -3525,16 +4577,22 @@
 
       window.addEventListener("pointermove", (event) => {
         updateImageScale(event);
+        updateLassoScale(event);
+        updateLassoRotate(event);
         updateCanvasSizeScrub(event);
       });
 
       window.addEventListener("pointerup", () => {
         endImageScale();
+        endLassoScale();
+        endLassoRotate();
         endCanvasSizeScrub();
       });
 
       window.addEventListener("pointercancel", () => {
         endImageScale();
+        endLassoScale();
+        endLassoRotate();
         endCanvasSizeScrub();
       });
 
@@ -3653,11 +4711,28 @@
             switchMode("move");
             return;
           }
+          if (lowerKey === "l") {
+            event.preventDefault();
+            switchMode("lasso");
+            return;
+          }
           if (lowerKey === "z" && !event.shiftKey) {
             event.preventDefault();
             switchMode("zoom");
             return;
           }
+        }
+        if (event.shiftKey && !event.metaKey && !event.ctrlKey && !event.altKey && event.key.toLowerCase() === "r") {
+          event.preventDefault();
+          const isRevealed = randomModeButton.style.display !== "none";
+          if (isRevealed) {
+            randomModeButton.style.display = "none";
+            if (state.mode === "random") switchMode("paint");
+          } else {
+            randomModeButton.style.display = "";
+            switchMode("random");
+          }
+          return;
         }
         if (event.key.toLowerCase() === "x") {
           event.preventDefault();
@@ -3692,8 +4767,9 @@
       updateLabels();
       setGeneratorMode(state.generatorMode);
       updateToggleButtons();
-      setFloatingToolbarVisibility(state.mode === "move" || state.mode === "zoom", true);
+      setFloatingToolbarVisibility(isFloatingToolbarMode(state.mode), true);
       setZoomToolbarVisibility(state.mode !== "zoom", true);
+      setRandomToolbarVisibility(state.mode !== "random", true);
       updatePanCursor();
       resetCanvas(paintCanvas.width, paintCanvas.height);
       window.requestAnimationFrame(centerViewport);
