@@ -225,6 +225,8 @@
       const imageAdjustmentsSection = document.getElementById("imageAdjustmentsSection");
       const zoomToolbarShell = document.querySelector(".zoom-toolbar-shell");
       const randomToolbarShell = document.querySelector(".random-toolbar-shell");
+      const lassoToolbarShell = document.querySelector(".lasso-toolbar-shell");
+      const lassoMultiplyButton = document.getElementById("lassoMultiplyButton");
       const floatingToolbarShell = document.querySelector(".floating-toolbar-shell");
       const floatingToolbar = document.querySelector(".floating-toolbar");
       const floatingControls = document.querySelector(".floating-controls");
@@ -332,6 +334,7 @@
         lassoDragging: false,
         lassoPoints: [],
         lassoSelection: null,
+        lassoMultiply: false,
         lassoDragStartX: 0,
         lassoDragStartY: 0,
         lassoDragStartOffsetX: 0,
@@ -583,6 +586,9 @@
         }
         if (previousMode === "random" || nextMode === "random") {
           setRandomToolbarVisibility(nextMode !== "random");
+        }
+        if (previousMode === "lasso" || nextMode === "lasso") {
+          setLassoToolbarVisibility(nextMode !== "lasso");
         }
         if (isFloatingToolbarMode(nextMode)) {
           updateToggleButtons();
@@ -1159,6 +1165,20 @@
         }
 
         randomToolbarShell.classList.toggle("is-toolbar-hidden", hidden);
+      }
+
+      function setLassoToolbarVisibility(hidden, immediate = false) {
+        const currentHidden = lassoToolbarShell.classList.contains("is-toolbar-hidden");
+        if (!immediate && currentHidden === hidden) return;
+        if (immediate) {
+          const prev = lassoToolbarShell.style.transition;
+          lassoToolbarShell.style.transition = "none";
+          lassoToolbarShell.classList.toggle("is-toolbar-hidden", hidden);
+          void lassoToolbarShell.offsetHeight;
+          lassoToolbarShell.style.transition = prev;
+          return;
+        }
+        lassoToolbarShell.classList.toggle("is-toolbar-hidden", hidden);
       }
 
       function pushHistoryEntries(entries) {
@@ -2000,7 +2020,11 @@
         const rect = getSelectionRenderRect(selection);
         const angle = getSelectionRotation(selection);
         layerCtx.putImageData(selection.holeSnapshot, 0, 0);
+        if (state.lassoMultiply) {
+          layerCtx.globalCompositeOperation = "multiply";
+        }
         drawSelectionCanvas(layerCtx, selection.sourceCanvas, rect, angle);
+        layerCtx.globalCompositeOperation = "source-over";
         syncLayerContentState([selection.layer]);
         redrawOverlay();
         scheduleRender();
@@ -3890,6 +3914,7 @@
         setFloatingToolbarVisibility(isFloatingToolbarMode(state.mode), true);
         setZoomToolbarVisibility(state.mode !== "zoom", true);
         setRandomToolbarVisibility(state.mode !== "random", true);
+        setLassoToolbarVisibility(state.mode !== "lasso", true);
         setGeneratorMode(state.generatorMode);
         updateToggleButtons();
         updateLabels();
@@ -4089,6 +4114,12 @@
 
       lassoModeButton.addEventListener("click", () => {
         switchMode("lasso");
+      });
+
+      lassoMultiplyButton.addEventListener("click", () => {
+        state.lassoMultiply = !state.lassoMultiply;
+        lassoMultiplyButton.setAttribute("aria-pressed", String(state.lassoMultiply));
+        applyLassoSelectionComposite();
       });
 
       zoomModeButton.addEventListener("click", () => {
